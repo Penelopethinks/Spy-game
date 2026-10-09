@@ -440,5 +440,70 @@ setRoom=function(){oldSetRoom();updateCleanPlan()};
 const oldInteraction=interact;
 interact=function(){oldInteraction();updateCleanPlan()};
 updateCleanPlan();
+
+ 
+// One clear interface: keep the main instruction card and remove duplicate map/guide content.
+const clarityPatch=document.createElement('style');
+clarityPatch.textContent=`
+ .field-guide{display:none!important}
+ .scene-sign{top:15%;opacity:.82}
+ #fullMapPanel .room-list,#fullMapPanel .facility-layout{display:none!important}
+ #fullMapPanel .upgrade-copy{max-width:620px}
+ #fullMapPanel .clean-plan{grid-template-columns:repeat(2,minmax(0,1fr));max-width:760px}
+ #fullMapPanel .clean-room{box-shadow:none}
+ .hudleft{max-width:calc(100vw - 28px)}
+ .hudleft .objectives{border-top:1px solid rgba(115,244,231,.18)}
+ .hudright .mapbox{box-shadow:0 8px 24px #0003}
+ @media(max-width:700px){.scene-sign{top:19%;font-size:7px}#fullMapPanel .clean-plan{grid-template-columns:1fr}#fullMapPanel .clean-room p{font-size:10px}}
+`;
+document.head.append(clarityPatch);
+
+// Save field position, mission objectives, and selected operation automatically.
+const SAVE_KEY='northstar-operation-anywhere-save-v1';
+function saveMissionProgress(){
+ try{
+  localStorage.setItem(SAVE_KEY,JSON.stringify({
+   version:1,savedAt:Date.now(),started,px,py,pa,frags,terminal,caseFound,
+   kit:Array.isArray(kit)?kit:[],agent,activeMissionId:activeMission?.id||1,
+   completedMissions:[...completedMissions]
+  }));
+  return true;
+ }catch(err){return false}
+}
+function restoreMissionProgress(){
+ try{
+  const rawSave=localStorage.getItem(SAVE_KEY);if(!rawSave)return false;
+  const data=JSON.parse(rawSave);if(!data||data.version!==1)return false;
+  if(Number.isFinite(data.px)&&Number.isFinite(data.py)&&!wall(data.px,data.py)){px=data.px;py=data.py}
+  if(Number.isFinite(data.pa))pa=data.pa;
+  frags=Math.max(0,Math.min(3,Number(data.frags)||0));terminal=!!data.terminal;caseFound=!!data.caseFound;
+  kit=Array.isArray(data.kit)?data.kit.filter(v=>typeof v==='string'):[];
+  if(typeof data.agent==='string')agent=data.agent;
+  if(Array.isArray(data.completedMissions))completedMissions=new Set(data.completedMissions.filter(Number.isInteger));
+  if(Number.isInteger(data.activeMissionId)&&missions[data.activeMissionId-1]){activeMission=missions[data.activeMissionId-1];selectedMission=activeMission}
+  started=!!data.started;if(started)document.getElementById('briefing').classList.add('hidden');
+  document.getElementById('status').textContent=caseFound?'COMPLETE':started?'ACTIVE':'READY';
+  document.getElementById('agentName').textContent=agent;
+  setRoom();
+  if(activeMission.id===1){updateObjectives();updateKit()}
+  else{
+   document.getElementById('roomName').textContent=activeMission.code;
+   document.getElementById('roomDesc').textContent=activeMission.goal;
+   document.querySelector('.objectives').innerHTML='<div class="eyebrow">'+activeMission.code+' / OBJECTIVES</div><div class="obj"><i class="dot"></i><span>Explore '+activeMission.place+'</span></div><div class="obj"><i class="dot"></i><span>Review the clue: '+activeMission.clue+'</span></div><div class="obj"><i class="dot"></i><span>Find and speak with '+activeMission.contact+'</span></div>';
+  }
+  drawMap();refreshFullMap();updateFieldGuide();updateCleanPlan();return true;
+ }catch(err){return false}
+}
+const restoredSave=restoreMissionProgress();
+const saveStatusStyle=document.createElement('style');
+saveStatusStyle.textContent='.save-status{position:absolute;left:50%;top:78px;transform:translateX(-50%);z-index:8;padding:8px 12px;border:1px solid #5ce8d7;background:#102a30;color:#cffff7;border-radius:7px;font-size:10px;font-weight:800;letter-spacing:.1em;box-shadow:0 5px 20px #0005;pointer-events:none}';
+document.head.append(saveStatusStyle);
+if(restoredSave&&started){const savedBadge=document.createElement('div');savedBadge.className='save-status';savedBadge.textContent='MISSION RESTORED';document.querySelector('.game').append(savedBadge);setTimeout(()=>savedBadge.remove(),2600)}
+document.getElementById('start').addEventListener('click',saveMissionProgress);
+window.addEventListener('beforeunload',saveMissionProgress);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveMissionProgress()});
+window.addEventListener('pagehide',saveMissionProgress);
+setInterval(saveMissionProgress,1200);
+
 })();
 </script></body></html>
