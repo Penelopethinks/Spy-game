@@ -1,5 +1,114 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>OPERATION: ANYWHERE</title><style>
 :root{--cyan:#61f5e4;--lime:#d9ff78;--ink:#081117;--panel:rgba(7,18,26,.86)}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071016;color:#e9f5f4;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button{font:inherit;cursor:pointer;color:inherit;border:1px solid #5ce8d744;background:#10232c;padding:10px 14px;letter-spacing:.08em;text-transform:uppercase;font-size:11px;border-radius:4px}button:hover{border-color:var(--cyan);background:#16343b}.game{position:fixed;inset:0;background:#081117}canvas{position:absolute;inset:0;width:100%;height:100%;display:block}.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,.48) 100%)}.scan{position:absolute;inset:0;pointer-events:none;opacity:.11;background:repeating-linear-gradient(0deg,transparent 0 3px,#9afff5 4px,transparent 5px)}.topbar{position:absolute;top:0;left:0;right:0;padding:20px 25px;display:flex;align-items:flex-start;justify-content:space-between;pointer-events:none;background:linear-gradient(#061018d9,transparent)}.brand{font-size:12px;letter-spacing:.28em;font-weight:800}.brand span{color:var(--cyan)}.sub{font-size:9px;letter-spacing:.2em;color:#a3b7bd;margin-top:5px}.status{display:flex;gap:20px;text-align:right;font-size:9px;letter-spacing:.15em;color:#a9c1c7}.status strong{display:block;color:var(--lime);font-size:12px;letter-spacing:.1em;margin-top:4px}.hudleft{position:absolute;left:24px;top:112px;width:220px;pointer-events:none}.eyebrow{font-size:9px;letter-spacing:.22em;color:var(--cyan);text-transform:uppercase}.missiontitle{font-size:22px;letter-spacing:.06em;font-weight:800;margin:7px 0 8px}.description{font-size:12px;line-height:1.6;color:#b3c6ca;max-width:205px}.objectives{margin-top:20px;border-left:1px solid #61f5e477;padding-left:12px}.obj{display:flex;gap:9px;align-items:center;font-size:11px;color:#a5b7bd;margin:10px 0}.obj .dot{width:7px;height:7px;border:1px solid #82949b;transform:rotate(45deg)}.obj.done{color:var(--lime)}.obj.done .dot{background:var(--lime);border-color:var(--lime)}.hudright{position:absolute;right:24px;top:112px;width:190px;pointer-events:none}.mapbox{border:1px solid #76eadd55;background:#07141ad9;padding:10px;border-radius:4px}.maphead{font-size:9px;letter-spacing:.2em;color:var(--cyan);display:flex;justify-content:space-between;margin-bottom:8px}.mapgrid{display:grid;grid-template-columns:repeat(9,1fr);gap:3px}.cell{aspect-ratio:1;background:#17252c;border:1px solid #1b343c}.cell.wall{background:#36505a}.cell.hall{background:#1c343c}.cell.goal{background:#cfff71;box-shadow:0 0 7px #cfff71}.cell.player{background:var(--cyan);box-shadow:0 0 9px var(--cyan);border-radius:50%}.maplegend{font-size:8px;letter-spacing:.13em;color:#839ba2;margin-top:9px}.readout{margin-top:10px;padding:12px;background:#07141ad9;border:1px solid #76eadd33;font-size:10px;letter-spacing:.13em;color:#8ba4aa}.readout strong{display:block;color:#eff9f8;font-size:12px;margin-top:5px}.bottom{position:absolute;bottom:0;left:0;right:0;padding:22px 25px 18px;display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none;background:linear-gradient(transparent,#061018ef)}.controls{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.key{display:inline-flex;align-items:center;justify-content:center;min-width:29px;height:27px;padding:0 7px;border:1px solid #b0d1d044;border-radius:4px;background:#0b1b22;color:#d8e9e9;font-size:10px}.hint{font-size:10px;color:#9db3b8;letter-spacing:.12em;margin-left:7px}.interact{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);display:none;align-items:center;gap:10px;background:#07151de8;border:1px solid #61f5e4;padding:11px 16px;box-shadow:0 0 22px #61f5e422;pointer-events:none}.interact.show{display:flex}.interact b{font-size:10px;letter-spacing:.15em;color:var(--cyan)}.interact span{font-size:12px}.crosshair{position:absolute;left:50%;top:50%;width:15px;height:15px;transform:translate(-50%,-50%);pointer-events:none;opacity:.75}.crosshair:before,.crosshair:after{content:'';position:absolute;background:#d6fff9}.crosshair:before{width:1px;height:15px;left:7px}.crosshair:after{height:1px;width:15px;top:7px}.toast{position:absolute;left:50%;top:18%;transform:translate(-50%,-8px);opacity:0;transition:.25s;background:#0a2026;border:1px solid #d9ff7880;padding:12px 18px;text-align:center;min-width:240px;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}.toast strong{display:block;font-size:10px;color:var(--lime);letter-spacing:.2em}.toast span{display:block;margin-top:5px;font-size:12px;color:#c4d7d7}.modal{position:absolute;inset:0;background:#03090edb;display:flex;align-items:center;justify-content:center;padding:20px;z-index:5}.modal.hidden{display:none}.brief{width:min(600px,100%);border:1px solid #5be5d477;background:linear-gradient(135deg,#0c2029,#071116);padding:clamp(22px,5vw,42px);box-shadow:0 20px 90px #0009;position:relative}.brief:before{content:'';position:absolute;left:0;top:0;width:100%;height:3px;background:linear-gradient(90deg,var(--cyan),transparent 75%)}.stamp{font-size:10px;letter-spacing:.3em;color:var(--cyan)}h1{font-size:clamp(34px,7vw,58px);line-height:.95;letter-spacing:-.04em;margin:17px 0 15px}h1 span{color:var(--cyan)}.brief p{color:#a9bec4;font-size:13px;line-height:1.8;max-width:440px}.briefgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:24px 0}.briefgrid div{padding:12px;border:1px solid #7ee6dc2b;background:#0a171d}.briefgrid small{display:block;font-size:8px;letter-spacing:.18em;color:#7f9aa2}.briefgrid b{display:block;font-size:11px;margin-top:7px}.start{background:var(--cyan);color:#061419;font-weight:900;border-color:var(--cyan);padding:14px 20px}.start:hover{background:#a7fff5;color:#061419}.mobilepad{display:none;position:absolute;left:18px;bottom:92px;pointer-events:auto;gap:5px}.mobilepad button{width:43px;height:43px;padding:0;background:#071820c9}.mobilepad .up{grid-column:2}.mobilepad .left{grid-column:1}.mobilepad .down{grid-column:2}.mobilepad .right{grid-column:3}.mobileact{display:none;position:absolute;right:18px;bottom:106px;pointer-events:auto}.mobileact button{width:68px;height:68px;border-radius:50%;border-color:var(--cyan);background:#0b2931d9}.help{position:absolute;bottom:73px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:.12em;color:#78939a;white-space:nowrap;pointer-events:none}@media(max-width:700px){.hudleft{top:90px;left:14px;width:160px}.missiontitle{font-size:17px}.description{font-size:10px}.objectives{margin-top:12px}.obj{font-size:9px;margin:8px 0}.hudright{right:12px;top:90px;width:125px}.topbar{padding:14px}.status{gap:9px}.bottom{padding:15px}.controls{display:none}.mobilepad{display:grid;grid-template-columns:43px 43px 43px}.mobileact{display:block}.help{display:none}.maplegend{font-size:7px}.readout{font-size:8px;padding:8px}.readout strong{font-size:10px}.interact{top:64%;white-space:nowrap}.briefgrid{grid-template-columns:1fr 1fr 1fr}.briefgrid b{font-size:9px}}
+
+/* ORGANIZED COMMAND HUD */
+:root{--cyan:#73f4e7;--lime:#d9ff78;--ink:#071117;--panel:rgba(5,16,23,.91);--line:rgba(115,244,231,.22)}
+html,body{background:#071117}
+button{border-radius:8px;letter-spacing:.06em;transition:background .18s,border-color .18s,transform .18s}
+button:hover{transform:translateY(-1px)}
+.topbar{padding:18px 24px;align-items:center;gap:20px;background:linear-gradient(180deg,rgba(4,13,19,.97),rgba(4,13,19,.58) 75%,transparent);min-height:78px}
+.brand{font-size:12px;letter-spacing:.22em}
+.sub{font-size:9px;letter-spacing:.15em}
+.status{gap:8px;align-items:stretch}
+.status>div{min-width:86px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:rgba(7,23,31,.84);font-size:8px;letter-spacing:.13em;text-align:left}
+.status strong{font-size:11px;margin-top:5px}
+.hudleft,.hudright{top:100px;pointer-events:auto}
+.hudleft{left:22px;width:250px;padding:18px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,rgba(7,23,31,.94),rgba(4,13,19,.88));box-shadow:0 12px 38px #0004;backdrop-filter:blur(8px)}
+.eyebrow{font-size:9px;letter-spacing:.16em;line-height:1.5}
+.missiontitle{font-size:20px;line-height:1.2;letter-spacing:.01em;margin:9px 0}
+.description{font-size:12px;line-height:1.55;max-width:none;color:#b8cbd0}
+.objectives{margin-top:17px;padding:13px 0 0 12px;border-top:1px solid var(--line);border-left:0}
+.obj{gap:9px;font-size:11px;line-height:1.4;margin:12px 0;color:#c0d0d3}
+.obj .dot{flex:0 0 7px}
+.obj span{display:flex;gap:5px;justify-content:space-between;align-items:center}
+.obj b{white-space:nowrap;color:var(--lime);font-size:10px}
+.hudright{right:22px;width:215px}
+.mapbox,.readout{border:1px solid var(--line);border-radius:10px;background:var(--panel);box-shadow:0 10px 28px #0003;backdrop-filter:blur(8px)}
+.mapbox{padding:13px}
+.maphead{font-size:9px;letter-spacing:.13em;margin-bottom:11px}
+.mapgrid{gap:4px}
+.cell{border-radius:2px}
+.maplegend{font-size:8px;letter-spacing:.07em;line-height:1.5}
+.readout{margin-top:9px;padding:11px 13px;font-size:9px;letter-spacing:.1em}
+.readout strong{font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.bottom{padding:16px 22px 17px;align-items:center;background:linear-gradient(0deg,rgba(4,13,19,.96),rgba(4,13,19,.6) 70%,transparent);gap:16px}
+.controls{gap:6px}
+.key{min-width:27px;height:27px;border-radius:6px}
+.hint{font-size:9px;letter-spacing:.08em;margin-left:1px;margin-right:6px}
+.bottom>.eyebrow{text-align:right;font-size:8px;color:#91aaaF}
+.help{bottom:67px;font-size:8px;letter-spacing:.08em}
+.interact{border-radius:9px;box-shadow:0 10px 30px #0007;backdrop-filter:blur(8px)}
+.toast{border-radius:9px;box-shadow:0 12px 30px #0006}
+.brief{border-radius:16px;border-color:var(--line);background:linear-gradient(145deg,rgba(12,32,41,.98),rgba(5,14,20,.98));padding:clamp(22px,4vw,38px)}
+.stamp{letter-spacing:.18em;font-size:9px}
+.brief p{line-height:1.65}
+.briefgrid{gap:9px;margin:20px 0}
+.briefgrid div{border-radius:8px;padding:12px}
+.briefgrid small{letter-spacing:.12em}
+.start{border-radius:8px}
+.mobilepad{z-index:2}
+.mobileact{z-index:2}
+@media(max-width:900px) and (min-width:701px){
+ .hudleft{left:14px;width:215px;padding:14px}
+ .hudright{right:14px;width:185px}
+ .topbar{padding:14px}
+ .status>div{min-width:72px;padding:8px}
+ .missiontitle{font-size:18px}
+ .description{font-size:11px}
+ .bottom{padding:14px}
+ .bottom>.eyebrow{display:none}
+}
+@media(max-width:700px){
+ .topbar{min-height:66px;padding:10px 12px;align-items:center}
+ .brand{font-size:10px;letter-spacing:.14em}
+ .sub{font-size:7px;letter-spacing:.08em;margin-top:4px}
+ .status{gap:4px}
+ .status>div{min-width:0;padding:6px 7px;font-size:7px;letter-spacing:.06em;border-radius:6px}
+ .status strong{font-size:9px;margin-top:3px}
+ .hudleft{top:78px;left:10px;width:min(56vw,230px);padding:11px;border-radius:9px}
+ .eyebrow{font-size:8px;letter-spacing:.1em}
+ .missiontitle{font-size:15px;margin:5px 0}
+ .description{font-size:10px;line-height:1.4}
+ .objectives{margin-top:9px;padding:8px 0 0 8px}
+ .obj{font-size:9px;gap:6px;margin:7px 0}
+ .obj b{font-size:9px}
+ .hudright{top:78px;right:10px;width:min(34vw,150px)}
+ .mapbox{padding:8px;border-radius:8px}
+ .maphead{font-size:7px;letter-spacing:.07em;margin-bottom:7px}
+ .mapgrid{gap:2px}
+ .maplegend{font-size:6px;margin-top:6px;letter-spacing:0}
+ .readout{padding:7px 8px;margin-top:6px;font-size:7px;letter-spacing:.04em;border-radius:7px}
+ .readout strong{font-size:9px;margin-top:3px}
+ .bottom{padding:10px 12px 12px;min-height:54px}
+ .controls{display:none}
+ .mobilepad{left:12px;bottom:76px;gap:4px}
+ .mobilepad button{width:39px;height:39px;padding:0;border-radius:8px}
+ .mobilepad .up{grid-column:2}.mobilepad .left{grid-column:1}.mobilepad .down{grid-column:2}.mobilepad .right{grid-column:3}
+ .mobileact{right:12px;bottom:88px}
+ .mobileact button{width:60px;height:60px;font-size:9px;border-radius:50%}
+ .help{display:none}
+ .interact{top:68%;padding:9px 12px;max-width:80vw}
+ .interact span{font-size:10px}
+ .toast{top:16%;min-width:0;width:max-content;max-width:85vw;padding:10px 13px}
+ .brief{max-height:92dvh;overflow:auto;padding:22px 18px;border-radius:12px}
+ h1{font-size:38px;margin:14px 0 10px}
+ .brief p{font-size:11px;line-height:1.55}
+ .briefgrid{gap:5px;margin:14px 0}
+ .briefgrid div{padding:8px 6px}
+ .briefgrid small{font-size:7px;letter-spacing:.06em}
+ .briefgrid b{font-size:8px;line-height:1.35}
+ .start{width:100%;padding:13px}
+}
+@media(max-width:390px){
+ .status>div{padding:5px;font-size:6px}
+ .status strong{font-size:8px}
+ .hudleft{width:54vw}
+ .hudright{width:35vw}
+ .missiontitle{font-size:13px}
+ .description{font-size:9px}
+ .obj{font-size:8px}
+}
+
 </style></head><body><div class="game"><canvas id="view"></canvas><div class="vignette"></div><div class="scan"></div><div class="topbar"><div><div class="brand">NORTHSTAR <span>◈</span> INTELLIGENCE</div><div class="sub">FIELD OPERATIONS SIMULATOR // 07</div></div><div class="status"><div>AGENT<strong id="agentName">NOVA-07</strong></div><div>CLEARANCE<strong id="clearance">LEVEL 01</strong></div><div>STATUS<strong id="status">ACTIVE</strong></div></div></div><aside class="hudleft"><div class="eyebrow">Current operation / 001</div><div class="missiontitle" id="roomName">NORTHSTAR HQ</div><div class="description" id="roomDesc">A quiet briefing floor. Something important has gone missing.</div><div class="objectives"><div class="eyebrow">Mission objectives</div><div class="obj" id="obj1"><i class="dot"></i><span>Locate the intel fragments <b id="fragCount">0/3</b></span></div><div class="obj" id="obj2"><i class="dot"></i><span>Access the secure terminal</span></div><div class="obj" id="obj3"><i class="dot"></i><span>Recover the missing briefcase</span></div></div></aside><aside class="hudright"><div class="mapbox"><div class="maphead"><span>FACILITY MAP</span><span>● LIVE</span></div><div class="mapgrid" id="mapgrid"></div><div class="maplegend">CYAN: YOU &nbsp; LIME: OBJECTIVE</div></div><div class="readout">PROXIMITY SCAN<strong id="scanText">No nearby signals</strong></div><div class="readout">FIELD KIT<strong id="kitText">Empty · 0 items</strong></div></aside><div class="crosshair"></div><div class="interact" id="interact"><b>[ E ]</b><span id="interactText">INTERACT</span></div><div class="toast" id="toast"><strong>INTEL ACQUIRED</strong><span>Data fragment recovered.</span></div><div class="bottom"><div class="controls"><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span><span class="hint">MOVE</span><span class="key">← →</span><span class="hint">LOOK</span><span class="key">E</span><span class="hint">INTERACT</span><span class="key">SHIFT</span><span class="hint">SPRINT</span></div><div class="eyebrow">NORTHSTAR HQ // SECURE CONNECTION</div></div><div class="mobilepad"><button class="up" data-move="forward">▲</button><button class="left" data-move="left">◀</button><button class="down" data-move="back">▼</button><button class="right" data-move="right">▶</button></div><div class="mobileact"><button id="mobileE">INTERACT<br><b>E</b></button></div><div class="help">CLICK GAME TO CAPTURE MOUSE · ESC TO RELEASE</div><div class="modal" id="briefing"><div class="brief"><div class="stamp">// CLASSIFIED BRIEFING · CLEARANCE REQUIRED</div><h1>OPERATION:<br><span>ANYWHERE</span></h1><p>A secure briefcase has vanished from Northstar HQ. Three intel fragments are scattered across the facility. Explore the rooms, investigate suspicious equipment, access the terminal, and recover the case.</p><div class="briefgrid"><div><small>MISSION</small><b>THE MISSING CASE</b></div><div><small>LOCATION</small><b>NORTHSTAR FACILITY</b></div><div><small>THREAT LEVEL</small><b style="color:var(--lime)">UNKNOWN</b></div></div><p><b style="color:#e6f8f6">CONTROLS</b> &nbsp; WASD to move · Mouse or ← → to look · E to interact · Shift to sprint. Walk through open doorways to reach every room.</p><button class="start" id="start">ACCEPT MISSION &nbsp; →</button></div></div></div>
 <script>
 (()=>{'use strict';const canvas=document.getElementById('view'),ctx=canvas.getContext('2d');let W=innerWidth,H=innerHeight;function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight}addEventListener('resize',resize);resize();
