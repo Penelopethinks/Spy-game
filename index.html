@@ -307,38 +307,138 @@ const baseInteract=interact;interact=function(){baseInteract();updateFieldGuide(
 const baseFrameForGuide=setRoom;setRoom=function(){baseFrameForGuide();updateFieldGuide()};
 // Put practical, plain-language controls first in the mission briefing.
 const controlCopy=document.querySelector('#dossierPanel .upgrade-copy');if(controlCopy)controlCopy.textContent='Quick start: move with W A S D or the on-screen arrows. Turn with the left/right buttons or arrow keys. Walk toward a glowing item and press E (or tap INTERACT). Use FULL FACILITY MAP to see the rooms, people, clues, and the suggested route to your next objective.';
-// Version 12: put room names directly on the floor plan and make the current location unmistakable.
-const layoutClarityStyle=document.createElement('style');layoutClarityStyle.textContent=`.facility-map{position:relative;overflow:hidden;min-height:240px}.floor-label{position:absolute;z-index:3;transform:translate(-50%,-50%);width:39%;text-align:center;pointer-events:none;color:#fff;font-size:clamp(8px,.95vw,13px);font-weight:900;line-height:1.25;letter-spacing:.04em;text-shadow:0 2px 4px #000,0 0 8px #000;background:#07131acc;border:1px solid #ffffff55;border-radius:5px;padding:6px 3px;box-shadow:0 2px 7px #0006}.floor-label small{display:block;font-size:clamp(6px,.65vw,9px);font-weight:600;letter-spacing:.02em;color:#e1edef;margin-top:3px}.facility-map .facility-tile.wall{background:#64737d!important;border-color:#a9b4ba}.facility-map .facility-tile:not(.wall){border-color:#ffffff20}.facility-map-key{font-size:12px!important}.current-room-banner{display:flex;align-items:center;gap:10px;padding:11px 13px;margin:12px 0;background:#10232c;border:1px solid #7de8dc66;border-radius:6px;color:#eaf8f7;font-size:12px;line-height:1.5}.current-room-banner b{display:block;color:#75f4e7;font-size:13px;margin-bottom:2px}.current-room-banner .room-number{display:grid;place-items:center;flex:0 0 34px;height:34px;border-radius:6px;background:#24434b;font-weight:900;font-size:16px}.facility-layout{align-items:start}.facility-map-key span{margin-right:4px}@media(max-width:700px){.floor-label{font-size:8px;padding:3px 1px;width:40%}.floor-label small{font-size:6px}.current-room-banner{font-size:11px}.facility-map{min-height:190px}}`;document.head.append(layoutClarityStyle);
-const floorMap=document.getElementById('facilityMapGrid');
-if(floorMap){
-  const labels=[['01','BRIEFING ROOM','START HERE',25,16],['02','TECH LAB','INTEL B',75,16],['03','EQUIPMENT BAY','FIELD KIT',25,49],['04','OPERATIONS','SECURE TERMINAL',75,49],['05','EVIDENCE STORAGE','MISSING CASE',25,82],['06','ROOFTOP ACCESS','INTEL C',75,82]];
-  labels.forEach(([n,name,sub,x,y])=>{const el=document.createElement('div');el.className='floor-label';el.style.left=x+'%';el.style.top=y+'%';el.innerHTML=`${n} · ${name}<small>${sub}</small>`;floorMap.append(el)});
-  const banner=document.createElement('div');banner.className='current-room-banner';banner.id='currentRoomBanner';banner.innerHTML='<span class="room-number">01</span><div><b>YOU ARE IN: BRIEFING ROOM</b>Start here. Search for Intel A, then use the doorway on the right to reach the Tech Lab.</div>';
-  floorMap.insertAdjacentElement('beforebegin',banner);
+// Clean layout pass: one map, one route, one clear next step.
+const finalLayoutStyle=document.createElement('style');
+finalLayoutStyle.textContent=`
+/* Keep the play view calm: consistent spacing, readable panels, fewer competing effects. */
+.hudleft{width:236px;top:98px;left:20px;padding:16px;background:rgba(5,16,23,.92);border:1px solid rgba(115,244,231,.25);border-radius:12px;box-shadow:0 12px 34px #0005;backdrop-filter:blur(10px)}
+.hudright{width:198px;top:98px;right:20px}
+.topbar{min-height:72px;padding:14px 20px}
+.status{gap:7px}
+.status>div{min-width:78px;padding:8px 10px;border-radius:7px}
+.missiontitle{font-size:19px;line-height:1.25}
+.description{font-size:11px;line-height:1.5}
+.objectives{margin-top:13px;padding-top:10px}
+.obj{margin:9px 0;font-size:10px}
+.mapbox,.readout{border-radius:9px}
+.bottom{padding:14px 20px 15px}
+.field-guide{bottom:76px;left:50%;width:min(400px,calc(100% - 460px));padding:10px 13px;border-radius:9px;background:rgba(5,16,23,.94);border:1px solid rgba(115,244,231,.28)}
+.field-guide strong{font-size:9px;letter-spacing:.14em}
+.field-guide span{font-size:11px;line-height:1.4}
+.field-guide small{font-size:9px;line-height:1.4}
+.help-button{top:100px;right:20px;padding:8px 10px;font-size:9px;border-radius:7px}
+.upgrade-panel{padding:clamp(12px,2.4vw,28px);background:rgba(2,8,12,.94)}
+.upgrade-wrap{max-width:1000px;margin:0 auto;padding:clamp(16px,2.8vw,30px);border-radius:14px;background:#0b171d;border:1px solid rgba(115,244,231,.18);box-shadow:0 18px 60px #0007}
+.upgrade-head{gap:16px;align-items:center}
+.upgrade-title{font-size:clamp(25px,3.8vw,38px);line-height:1.08}
+.upgrade-copy{max-width:680px;font-size:13px;line-height:1.6}
+#fullMapPanel .facility-layout{display:none!important}
+#fullMapPanel .clean-plan{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:20px 0}
+#fullMapPanel .clean-room{min-width:0;padding:13px;background:#f3f6f4;color:#1a2b2d;border:1px solid #c4cfcb;border-radius:9px}
+#fullMapPanel .clean-room.current{background:#e1f4ef;border:2px solid #168477;padding:12px}
+#fullMapPanel .clean-room.target{background:#fff7e6;border:2px solid #c28a2b;padding:12px}
+#fullMapPanel .clean-room.current.target{background:#e1f4ef;border-color:#168477}
+#fullMapPanel .clean-room .number{font-size:9px;font-weight:900;letter-spacing:.12em;color:#667a78}
+#fullMapPanel .clean-room h3{font-size:13px;margin:5px 0 7px;color:#1b3434;line-height:1.25}
+#fullMapPanel .clean-room p{font-size:11px;line-height:1.45;margin:0 0 7px;color:#4d6060}
+#fullMapPanel .clean-room .exits{padding-top:7px;border-top:1px solid #dce4e0;color:#236c63;font-weight:700}
+#fullMapPanel .clean-room .state{font-size:9px;font-weight:900;letter-spacing:.06em;color:#16786e}
+#fullMapPanel .clean-route{padding:14px 16px;margin:8px 0 14px;background:#10242b;border:1px solid rgba(115,244,231,.25);border-radius:9px}
+#fullMapPanel .clean-route b{display:block;color:#73f4e7;font-size:10px;letter-spacing:.12em;margin-bottom:6px}
+#fullMapPanel .clean-route p{margin:0;color:#e4eeee;font-size:12px;line-height:1.55}
+#fullMapPanel .clean-legend{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 12px;color:#b4c6c8;font-size:10px}
+#fullMapPanel .clean-legend span{display:flex;align-items:center;gap:6px}
+#fullMapPanel .clean-legend i{width:10px;height:10px;border-radius:3px;background:#e1f4ef;border:2px solid #168477;display:inline-block}
+#fullMapPanel .clean-legend .gold{background:#fff7e6;border-color:#c28a2b}
+#fullMapPanel .clean-legend .plain{background:#f3f6f4;border-color:#c4cfcb}
+@media(max-width:900px) and (min-width:701px){
+ .hudleft{left:12px;width:205px;padding:12px}.hudright{right:12px;width:175px}
+ .field-guide{width:min(340px,calc(100% - 410px));bottom:78px}
+ .topbar{padding:12px}.status>div{min-width:66px;padding:7px}
 }
-const updateRoomBanner=()=>{const banner=document.getElementById('currentRoomBanner');if(!banner)return;const r=roomAt(),items={'BRIEFING ROOM':['01','Start here. Find Intel A in this room. The Tech Lab is to the right.'],'TECH LAB':['02','Find Intel B. The Briefing Room is to the left; Operations is below.'],'EQUIPMENT BAY':['03','Check the field-kit locker. Evidence Storage is below; Briefing Room is above.'],'OPERATIONS':['04','Use the secure terminal after collecting all three intel fragments. Evidence Storage is to the left of Rooftop Access, below.'],'EVIDENCE STORAGE':['05','The missing briefcase is here. Operations is above and to the right.'],'ROOFTOP ACCESS':['06','Find Intel C here. Operations is above; Evidence Storage is to the left.']};const d=items[r]||items['BRIEFING ROOM'];banner.innerHTML=`<span class="room-number">${d[0]}</span><div><b>YOU ARE IN: ${r}</b>${d[1]}</div>`;};
-const priorSetRoomForBanner=setRoom;setRoom=function(){priorSetRoomForBanner();updateRoomBanner()};
-const refreshMapWithLabels=refreshFullMap;refreshFullMap=function(){refreshMapWithLabels();const grid=document.getElementById('facilityMapGrid');if(!grid)return;const labels=[['01','BRIEFING ROOM','START HERE',25,16],['02','TECH LAB','INTEL B',75,16],['03','EQUIPMENT BAY','FIELD KIT',25,49],['04','OPERATIONS','SECURE TERMINAL',75,49],['05','EVIDENCE STORAGE','MISSING CASE',25,82],['06','ROOFTOP ACCESS','INTEL C',75,82]];grid.querySelectorAll('.floor-label').forEach(n=>n.remove());labels.forEach(([n,name,sub,x,y])=>{const el=document.createElement('div');el.className='floor-label';el.style.left=x+'%';el.style.top=y+'%';el.innerHTML=`${n} · ${name}<small>${sub}</small>`;grid.append(el)});updateRoomBanner()};
-// Version 13: make room-to-room connections unmistakable on the overhead map.
-const routeClarityStyle=document.createElement('style');routeClarityStyle.textContent=`.facility-map{grid-template-columns:repeat(24,minmax(0,1fr));gap:2px;background:#e1e5e3;padding:10px;border:2px solid #8b999a;box-shadow:inset 0 0 0 4px #c2ccca}.facility-tile{border:1px solid #ffffff70}.facility-tile.wall{background:#687477!important;border:1px solid #495457!important}.facility-tile.door{background:#fff0b5!important;border:2px solid #b47a25!important;box-shadow:0 0 0 1px #fff inset;z-index:2}.facility-tile.door:after{content:'D';position:absolute;inset:0;display:grid;place-items:center;color:#60400e;font-size:clamp(6px,.8vw,10px);font-weight:1000}.floor-label{width:34%;padding:5px 2px;background:#101d22eF;border:1px solid #fff9;font-size:clamp(7px,.8vw,11px);line-height:1.25}.floor-label small{font-size:clamp(6px,.58vw,8px)}.current-room-banner{background:#f1f5f3;color:#172528;border:1px solid #9aa9a5}.current-room-banner b{color:#175f58}.current-room-banner .room-number{background:#175f58;color:#fff}.facility-map-key{background:#eaf0ed;color:#263739;border-color:#aab8b3}.facility-map-key span{margin:3px 8px 3px 0}.facility-map-key .route-key{display:inline-block;width:12px;height:12px;background:#e5f7a0}.map-direction-note{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;margin:12px 0;background:#f1f5f3;color:#273638;border:1px solid #aab8b3;border-radius:6px;font-size:12px;line-height:1.55}.map-direction-note b{color:#175f58}.door-key{display:inline-block;background:#fff0b5;border:2px solid #b47a25;color:#60400e;font-weight:900;padding:0 5px;margin-right:5px}.facility-map-key .door-key{line-height:1.3}.room-item{background:#f1f5f3;color:#263739;border-color:#c0cbc7}.room-item b{color:#175f58}.room-swatch{border:1px solid #ffffff}`;document.head.append(routeClarityStyle);
-const previousClearMap=refreshFullMap;refreshFullMap=function(){previousClearMap();const grid=document.getElementById('facilityMapGrid');if(!grid)return;const doors=[];for(const y of [6,12])for(const x of [5,6,16,17])doors.push([x,y]);for(const y of [3,9,15])doors.push([10,y]);for(const [x,y] of doors){const tile=grid.children[y*mw+x];if(tile&&!tile.classList.contains('wall')){tile.classList.add('door');tile.title='DOORWAY — use this opening to enter the connected room'}}};
-const directionNote=document.createElement('div');directionNote.className='map-direction-note';directionNote.innerHTML='<div style="font-size:22px;line-height:1">↑</div><div><b>HOW TO READ THIS FLOOR PLAN</b><br>Top is north. Each large labeled area is one room. Grey blocks are walls. Yellow <span class="door-key">D</span> tiles are doorways: walk through them to change rooms. Your position is the bright mint circle; the pale yellow route shows where to go next.</div>';const mapGridEl=document.getElementById('facilityMapGrid');const facilityLayout=document.querySelector('#fullMapPanel .facility-layout');if(mapGridEl&&facilityLayout)facilityLayout.insertAdjacentElement('beforebegin',directionNote);
-const oldMapBannerUpdate=updateRoomBanner;updateRoomBanner=function(){oldMapBannerUpdate();const banner=document.getElementById('currentRoomBanner');if(!banner)return;const r=roomAt();const direction={ 'BRIEFING ROOM':'To reach the Tech Lab, go through the doorway in the middle of the right wall.','TECH LAB':'To reach Operations, use the doorway in the middle of the bottom wall.','EQUIPMENT BAY':'Evidence Storage is through the doorway in the middle of the bottom wall. Operations is across the right-hand doorway.','OPERATIONS':'Evidence Storage is through the lower-left connection; Rooftop Access is through the lower-right connection.','EVIDENCE STORAGE':'Rooftop Access is to the right. Use the marked doorways in the upper wall to return north.','ROOFTOP ACCESS':'Operations is north of this room; Evidence Storage is to the left.'};const div=banner.querySelector('div');if(div)div.insertAdjacentHTML('beforeend','<div style="margin-top:5px;font-size:11px;color:#3b4d4e">'+(direction[r]||'Follow the marked doorways.')+'</div>')};
-px=3.4;py=3.2;pa=.03;drawWorld();drawMap();updateFieldGuide();updateRoomBanner();
-// Version 14: replace the confusing tile-heavy overview with a clear, live room-to-room plan.
-const clearPlanStyle=document.createElement('style');clearPlanStyle.textContent=`#fullMapPanel .facility-layout{display:none!important}#fullMapPanel .clear-plan{margin:22px 0 14px;background:#f1f4f2;color:#172426;border:1px solid #a8b5b1;border-radius:10px;padding:18px;box-shadow:0 8px 28px #0002}#fullMapPanel .plan-topline{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px;font-size:12px;color:#3c5051}#fullMapPanel .north-mark{font-weight:900;letter-spacing:.08em;background:#fff;border:1px solid #c3ceca;padding:7px 10px;border-radius:6px}#fullMapPanel .plan-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 14px;position:relative}#fullMapPanel .plan-room{position:relative;min-height:116px;border:2px solid #b7c2be;border-radius:9px;padding:13px;background:#fff;display:flex;flex-direction:column;gap:7px;box-shadow:0 2px 5px #182d2910}#fullMapPanel .plan-room.current{border:3px solid #16786e;background:#e4f5f0;box-shadow:0 0 0 3px #16786e20}#fullMapPanel .plan-room.target-room{border-color:#c38a2a;background:#fff8e8}#fullMapPanel .plan-room.current.target-room{border-color:#16786e;background:#e4f5f0}#fullMapPanel .plan-room h3{font-size:13px;line-height:1.25;margin:0;color:#203536}#fullMapPanel .plan-room p{font-size:11px;line-height:1.45;margin:0;color:#536465}#fullMapPanel .plan-room .room-exits{padding-top:6px;border-top:1px solid #e0e6e3;font-weight:700;color:#24685f}#fullMapPanel .plan-room .room-no{font-size:10px;font-weight:900;letter-spacing:.12em;color:#617373}#fullMapPanel .plan-room .room-state{margin-top:auto;font-size:10px;font-weight:900;letter-spacing:.06em;color:#16786e}#fullMapPanel .plan-room.target-room .room-state{color:#96631a}#fullMapPanel .plan-links{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:7px 0;text-align:center;color:#526563;font-size:10px;font-weight:800;letter-spacing:.04em}#fullMapPanel .plan-links span{background:#e0e7e3;border-radius:5px;padding:7px 4px}#fullMapPanel .plan-bottom{margin-top:14px;padding:14px;border-radius:8px;background:#fff;border:1px solid #c5cfcb;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start}#fullMapPanel .plan-bottom .arrow{font-size:28px;line-height:1;color:#16786e}#fullMapPanel .plan-bottom b{display:block;font-size:13px;color:#1c4c47;margin-bottom:4px}#fullMapPanel .plan-bottom p{margin:0;font-size:12px;line-height:1.55;color:#435656}#fullMapPanel .plan-key{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:10px;color:#516160}#fullMapPanel .plan-key span{display:flex;align-items:center;gap:5px}#fullMapPanel .plan-key i{display:inline-block;width:10px;height:10px;border-radius:3px;background:#e4f5f0;border:2px solid #16786e}#fullMapPanel .plan-key .gold{background:#fff8e8;border-color:#c38a2a}#fullMapPanel .plan-key .plain{background:#fff;border-color:#b7c2be}@media(max-width:560px){#fullMapPanel .clear-plan{padding:10px}#fullMapPanel .plan-grid{gap:8px}#fullMapPanel .plan-room{padding:9px;min-height:125px}#fullMapPanel .plan-room h3{font-size:11px}#fullMapPanel .plan-room p{font-size:10px}#fullMapPanel .plan-links{gap:8px;font-size:9px}}`;document.head.append(clearPlanStyle);
-const clearPlan=document.createElement('section');clearPlan.className='clear-plan';clearPlan.innerHTML=`<div class="plan-topline"><span><b>BUILDING 01</b> · ONE FLOOR · SIX ROOMS</span><span class="north-mark">↑ NORTH / TOP OF MAP</span></div><div class="plan-grid" id="clearPlanGrid"></div><div class="plan-links"><span>↕ DOORWAY CONNECTIONS</span><span>↕ DOORWAY CONNECTIONS</span></div><div class="plan-bottom"><div class="arrow">➜</div><div><b id="clearPlanNext">YOUR NEXT STEP</b><p id="clearPlanDirections">Follow the room marked YOU ARE HERE, then use the doorways to move between rooms.</p></div></div><div class="plan-key"><span><i></i> Your current room</span><span><i class="gold"></i> Next objective is here</span><span><i class="plain"></i> Other room</span></div>`;
-const mapHeader=document.querySelector('#fullMapPanel .upgrade-head');if(mapHeader){mapHeader.insertAdjacentElement('afterend',clearPlan);const copy=mapHeader.querySelector('.upgrade-copy');if(copy)copy.textContent='A simple overhead guide to the six rooms. Green shows where you are; gold shows where your next objective is. Read the door directions on each room card to find your way through the building.'}
-const roomPlan=[
- {id:'brief',no:'01',name:'BRIEFING ROOM',pos:'Top left',desc:'START HERE · Find Intel A by the briefing desk.',exits:'Door east → Tech Lab · Door south ↓ Equipment Bay',x:3.4,y:3.2},
- {id:'lab',no:'02',name:'TECH LAB',pos:'Top right',desc:'Workstations and Intel B.',exits:'Door west ← Briefing Room · Door south ↓ Operations',x:18.4,y:4.5},
- {id:'kit',no:'03',name:'EQUIPMENT BAY',pos:'Middle left',desc:'Field-kit locker and agent Mara.',exits:'Door north ↑ Briefing Room · Door east → Operations · Door south ↓ Evidence Storage',x:3.5,y:8.4},
- {id:'ops',no:'04',name:'OPERATIONS',pos:'Middle right',desc:'Secure terminal and agent Theo.',exits:'Door north ↑ Tech Lab · Door west ← Equipment Bay · Door south ↓ Rooftop Access',x:16.4,y:8.4},
- {id:'evidence',no:'05',name:'EVIDENCE STORAGE',pos:'Bottom left',desc:'Missing briefcase and agent Iris.',exits:'Door north ↑ Equipment Bay · Door east → Rooftop Access',x:5.3,y:16.5},
- {id:'roof',no:'06',name:'ROOFTOP ACCESS',pos:'Bottom right',desc:'Intel C is near the access cabinet.',exits:'Door north ↑ Operations · Door west ← Evidence Storage',x:18.3,y:14.4}
+@media(max-width:700px){
+ .topbar{min-height:60px;padding:9px 10px;gap:8px}
+ .brand{font-size:9px;letter-spacing:.1em}.sub{font-size:6px;letter-spacing:.05em}
+ .status{gap:3px}.status>div{min-width:0;padding:5px 6px;font-size:6px;letter-spacing:.04em}
+ .status strong{font-size:8px}
+ .hudleft{top:70px;left:8px;width:calc(55% - 12px);padding:9px;border-radius:8px}
+ .missiontitle{font-size:13px;margin:5px 0}.description{font-size:9px;line-height:1.35}
+ .objectives{margin-top:7px;padding-top:6px}.obj{font-size:8px;margin:6px 0;gap:5px}.obj b{font-size:8px}
+ .hudright{top:70px;right:8px;width:calc(45% - 12px)}
+ .mapbox{padding:7px}.maphead{font-size:6px;letter-spacing:.04em;margin-bottom:5px}.mapgrid{gap:2px}
+ .maplegend{font-size:6px;letter-spacing:0;line-height:1.4}.readout{padding:6px 7px;font-size:6px;margin-top:5px}
+ .readout strong{font-size:8px}.help-button{top:auto;right:10px;bottom:12px;padding:7px 8px;font-size:8px}
+ .field-guide{bottom:150px;width:calc(100% - 24px);padding:8px 10px}
+ .field-guide span{font-size:10px}.field-guide small{font-size:8px}
+ .bottom{padding:8px 10px 9px;min-height:45px}.bottom>.eyebrow{font-size:6px}
+ .mobilepad{left:10px;bottom:72px;gap:3px}.mobilepad button{width:36px;height:36px}
+ .mobileact{right:10px;bottom:80px}.mobileact button{width:55px;height:55px;font-size:8px}
+ #fullMapPanel .clean-plan{gap:7px;margin:14px 0}
+ #fullMapPanel .clean-room{padding:9px}#fullMapPanel .clean-room.current,#fullMapPanel .clean-room.target{padding:8px}
+ #fullMapPanel .clean-room h3{font-size:10px}#fullMapPanel .clean-room p{font-size:9px}
+ #fullMapPanel .clean-room .exits{font-size:9px}
+ #fullMapPanel .clean-route{padding:10px}#fullMapPanel .clean-route p{font-size:10px}
+}
+`;
+document.head.append(finalLayoutStyle);
+
+// Replace the layered map experiments with one simple room guide and one live route.
+const cleanPlan=document.createElement('section');
+cleanPlan.className='clean-plan';
+cleanPlan.id='cleanPlan';
+cleanPlan.innerHTML=`
+ <article class="clean-room" data-room="brief"><span class="number">ROOM 01 · START</span><h3>Briefing Room</h3><p>Find Intel A by the briefing desk.</p><p class="exits">East → Tech Lab · South → Equipment Bay</p><span class="state">CONNECTED ROOM</span></article>
+ <article class="clean-room" data-room="lab"><span class="number">ROOM 02</span><h3>Tech Lab</h3><p>Search the workstation area for Intel B.</p><p class="exits">West → Briefing Room · South → Operations</p><span class="state">CONNECTED ROOM</span></article>
+ <article class="clean-room" data-room="kit"><span class="number">ROOM 03</span><h3>Equipment Bay</h3><p>Check the field-kit locker and speak to Mara.</p><p class="exits">North → Briefing Room · East → Operations · South → Evidence Storage</p><span class="state">CONNECTED ROOM</span></article>
+ <article class="clean-room" data-room="ops"><span class="number">ROOM 04</span><h3>Operations</h3><p>Use the secure terminal after collecting all intel.</p><p class="exits">North → Tech Lab · West → Equipment Bay · South → Rooftop Access</p><span class="state">CONNECTED ROOM</span></article>
+ <article class="clean-room" data-room="evidence"><span class="number">ROOM 05</span><h3>Evidence Storage</h3><p>The missing briefcase is kept here.</p><p class="exits">North → Equipment Bay · East → Rooftop Access</p><span class="state">CONNECTED ROOM</span></article>
+ <article class="clean-room" data-room="roof"><span class="number">ROOM 06</span><h3>Rooftop Access</h3><p>Find Intel C near the access cabinet.</p><p class="exits">North → Operations · West → Evidence Storage</p><span class="state">CONNECTED ROOM</span></article>`;
+const fullMapHeader=document.querySelector('#fullMapPanel .upgrade-head');
+if(fullMapHeader){
+ const route=document.createElement('div');route.className='clean-route';route.innerHTML='<b id="cleanRouteTitle">YOUR NEXT STEP</b><p id="cleanRouteText">Follow the room cards to reach the next objective.</p>';
+ const legend=document.createElement('div');legend.className='clean-legend';legend.innerHTML='<span><i></i> You are here</span><span><i class="gold"></i> Next objective</span><span><i class="plain"></i> Other rooms</span>';
+ fullMapHeader.insertAdjacentElement('afterend',route);
+ route.insertAdjacentElement('afterend',legend);
+ legend.insertAdjacentElement('afterend',cleanPlan);
+}
+const planRooms=[
+ {id:'brief',name:'Briefing Room',neighbors:['lab','kit']},
+ {id:'lab',name:'Tech Lab',neighbors:['brief','ops']},
+ {id:'kit',name:'Equipment Bay',neighbors:['brief','ops','evidence']},
+ {id:'ops',name:'Operations',neighbors:['lab','kit','roof']},
+ {id:'evidence',name:'Evidence Storage',neighbors:['kit','roof']},
+ {id:'roof',name:'Rooftop Access',neighbors:['ops','evidence']}
 ];
-const clearPlanGrid=document.getElementById('clearPlanGrid');roomPlan.forEach(r=>{const card=document.createElement('article');card.className='plan-room';card.id='plan-room-'+r.id;card.innerHTML=`<span class="room-no">ROOM ${r.no} · ${r.pos.toUpperCase()}</span><h3>${r.name}</h3><p>${r.desc}</p><p class="room-exits">${r.exits}</p><span class="room-state">CONNECTED BY DOORWAY</span>`;clearPlanGrid.append(card)});
-const oldRefreshGuide=updateFieldGuide;updateFieldGuide=function(){oldRefreshGuide();const here=roomAt();const roomId=here==='BRIEFING ROOM'?'brief':here==='TECH LAB'?'lab':here==='EQUIPMENT BAY'?'kit':here==='OPERATIONS'?'ops':here==='EVIDENCE STORAGE'?'evidence':'roof';const task=getNextTask();const target=task.title.includes('FIND INTEL A')?'brief':task.title.includes('FIND INTEL B')?'lab':task.title.includes('FIND INTEL C')?'roof':task.title.includes('TERMINAL')?'ops':task.title.includes('BRIEFCASE')?'evidence':null;for(const r of roomPlan){const card=document.getElementById('plan-room-'+r.id);if(!card)continue;card.classList.toggle('current',r.id===roomId);card.classList.toggle('target-room',r.id===target);const state=card.querySelector('.room-state');state.textContent=r.id===roomId&&r.id===target?'YOU ARE HERE · NEXT OBJECTIVE':r.id===roomId?'YOU ARE HERE':r.id===target?'NEXT OBJECTIVE HERE':'CONNECTED BY DOORWAY'}let routeText='';if(target&&target!==roomId){const start=roomPlan.find(r=>r.id===roomId),goal=roomPlan.find(r=>r.id===target);const neighbors=id=>id==='brief'?['lab','kit']:id==='lab'?['brief','ops']:id==='kit'?['brief','ops','evidence']:id==='ops'?['lab','kit','roof']:id==='evidence'?['kit','roof']:['ops','evidence'];const q=[roomId],prev={};prev[roomId]=null;for(let i=0;i<q.length;i++){for(const n of neighbors(q[i]))if(!(n in prev)){prev[n]=q[i];q.push(n)}}const path=[];let cur=target;while(cur&&cur!==roomId){path.unshift(cur);cur=prev[cur]}const names={brief:'Briefing Room',lab:'Tech Lab',kit:'Equipment Bay',ops:'Operations',evidence:'Evidence Storage',roof:'Rooftop Access'};routeText=path.length?' Route: '+here+' → '+path.map(id=>names[id]).join(' → ')+'. Follow the doorway direction written on each room card.':''}else if(target===roomId)routeText=' You are already in the correct room. Look around for the glowing objective and press E when close.';const title=document.getElementById('clearPlanNext'),directions=document.getElementById('clearPlanDirections');if(title)title.textContent=task.title;if(directions)directions.textContent=task.body+routeText+' Your current room is '+here+'. The room highlighted green is where you are; the gold room is where the next objective is.';const guide=fieldGuide.querySelector('small');if(guide)guide.textContent=target===roomId?'You are in the right room · Find the glowing item · Press E to inspect':'Open FULL FACILITY MAP for the highlighted room and the step-by-step route · Press E to inspect'};
-const oldRefreshMapForPlan=refreshFullMap;refreshFullMap=function(){oldRefreshMapForPlan();updateFieldGuide()};const oldInteractForPlan=interact;interact=function(){oldInteractForPlan();updateFieldGuide()};
-updateFieldGuide();})();
+function updateCleanPlan(){
+ const here=roomAt();
+ const current=here==='BRIEFING ROOM'?'brief':here==='TECH LAB'?'lab':here==='EQUIPMENT BAY'?'kit':here==='OPERATIONS'?'ops':here==='EVIDENCE STORAGE'?'evidence':'roof';
+ const task=getNextTask();
+ const target=task.title.includes('FIND INTEL A')?'brief':task.title.includes('FIND INTEL B')?'lab':task.title.includes('FIND INTEL C')?'roof':task.title.includes('TERMINAL')?'ops':task.title.includes('BRIEFCASE')?'evidence':null;
+ for(const room of planRooms){
+  const card=cleanPlan.querySelector('[data-room="'+room.id+'"]');if(!card)continue;
+  card.classList.toggle('current',room.id===current);card.classList.toggle('target',room.id===target);
+  const state=card.querySelector('.state');
+  state.textContent=room.id===current&&room.id===target?'YOU ARE HERE · NEXT OBJECTIVE':room.id===current?'YOU ARE HERE':room.id===target?'NEXT OBJECTIVE IS HERE':'CONNECTED ROOM';
+ }
+ let routeText=task.body+' ';
+ if(target&&target!==current){
+  const queue=[current],prev={[current]:null};
+  for(let i=0;i<queue.length;i++)for(const n of planRooms.find(r=>r.id===queue[i]).neighbors)if(!(n in prev)){prev[n]=queue[i];queue.push(n)}
+  const path=[];let at=target;while(at&&at!==current){path.unshift(at);at=prev[at]}
+  routeText+='Route: '+planRooms.find(r=>r.id===current).name+' → '+path.map(id=>planRooms.find(r=>r.id===id).name).join(' → ')+'. Follow the doorway directions on the room cards.';
+ }else if(target===current){routeText+='You are already in the correct room. Find the glowing item and press E when close.'}
+ else{routeText+='The investigation is complete. You can keep exploring.'}
+ const title=document.getElementById('cleanRouteTitle'),copy=document.getElementById('cleanRouteText');
+ if(title)title.textContent=task.title;if(copy)copy.textContent=routeText+' Current room: '+here+'.';
+}
+const oldGuideUpdate=updateFieldGuide;
+updateFieldGuide=function(){oldGuideUpdate();updateCleanPlan()};
+const oldMapRefresh=refreshFullMap;
+refreshFullMap=function(){oldMapRefresh();updateCleanPlan()};
+const oldSetRoom=setRoom;
+setRoom=function(){oldSetRoom();updateCleanPlan()};
+const oldInteraction=interact;
+interact=function(){oldInteraction();updateCleanPlan()};
+updateCleanPlan();
+})();
 </script></body></html>
