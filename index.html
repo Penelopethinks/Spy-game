@@ -427,7 +427,7 @@ function getNextTask(){const place=activeMission?.place||'Northstar HQ';if(caseF
 function updateFieldGuide(){const task=getNextTask();fieldGuide.querySelector('strong').textContent=task.title;fieldGuide.querySelector('span').textContent=task.body;fieldGuide.querySelector('small').textContent=task.detail+' · Press E to inspect nearby items.'}
 const baseRefreshFullMap=refreshFullMap;refreshFullMap=function(){baseRefreshFullMap();const el=document.getElementById('facilityMapGrid');if(!el)return;const tiles=el.children;for(let y=0;y<mh;y++)for(let x=0;x<mw;x++){const tile=tiles[y*mw+x];if(!tile)continue;if(map[y][x]===2)tile.classList.add('door');}for(const o of objects){const tile=tiles[Math.floor(o.y)*mw+Math.floor(o.x)];if(!tile)continue;if(o.type===10){tile.classList.add('contact');tile.title=o.name+' — '+o.desc}else if(['a','b','c'].includes(o.id)&&!kit.includes('INTEL '+o.id.toUpperCase())){tile.classList.add('clue');tile.title=o.name+' — '+o.room}else if(o.id==='terminal'&&!terminal){tile.classList.add('terminal');tile.title='Secure terminal — Operations'}else if(o.id==='case'&&!caseFound){tile.classList.add('case');tile.title='Missing briefcase — Evidence Storage'}}
 // Find a walkable shortest path from the agent to the next required objective.
-const task=getNextTask(),wanted=task.title.includes('FIND INTEL')?objects.find(o=>o.id===task.title.slice(-1).toLowerCase()):task.title.includes('TERMINAL')?objects.find(o=>o.id==='terminal'):task.title.includes('BRIEFCASE')?objects.find(o=>o.id==='case'):null;if(wanted){const start={x:Math.floor(px),y:Math.floor(py)},goal={x:Math.floor(wanted.x),y:Math.floor(wanted.y)},q=[start],prev=new Map(),key=(p)=>p.x+','+p.y;prev.set(key(start),null);let found=false;for(let i=0;i<q.length&&i< mw*mh;i++){const p=q[i];if(p.x===goal.x&&p.y===goal.y){found=true;break}for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const n={x:p.x+dx,y:p.y+dy},k=key(n);if(n.x<0||n.y<0||n.x>=mw||n.y>=mh||wall(n.x+.5,n.y+.5)||prev.has(k))continue;prev.set(k,key(p));q.push(n)}}if(found){let k=key(goal);while(k&&k!==key(start)){const [x,y]=k.split(',').map(Number),tile=tiles[y*mw+x];if(tile&&!tile.classList.contains('target')&&!tile.classList.contains('contact'))tile.classList.add('route');k=prev.get(k)}}}
+const task=getNextTask(),wanted=task.title.includes('FIND INTEL')?objects.find(o=>o.id===task.title.slice(-1).toLowerCase()):task.title.includes('COLLECT EVIDENCE')?objects.find(o=>o.id===['a','b','c'].find(id=>!kit.includes('INTEL '+id.toUpperCase()))):task.title.includes('TERMINAL')?objects.find(o=>o.id==='terminal'):task.title.includes('BRIEFCASE')||task.title.includes('MISSING ITEM')?objects.find(o=>o.id==='case'):null;if(wanted){const start={x:Math.floor(px),y:Math.floor(py)},goal={x:Math.floor(wanted.x),y:Math.floor(wanted.y)},q=[start],prev=new Map(),key=(p)=>p.x+','+p.y;prev.set(key(start),null);let found=false;for(let i=0;i<q.length&&i< mw*mh;i++){const p=q[i];if(p.x===goal.x&&p.y===goal.y){found=true;break}for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const n={x:p.x+dx,y:p.y+dy},k=key(n);if(n.x<0||n.y<0||n.x>=mw||n.y>=mh||wall(n.x+.5,n.y+.5)||prev.has(k))continue;prev.set(k,key(p));q.push(n)}}if(found){let k=key(goal);while(k&&k!==key(start)){const [x,y]=k.split(',').map(Number),tile=tiles[y*mw+x];if(tile&&!tile.classList.contains('target')&&!tile.classList.contains('contact'))tile.classList.add('route');k=prev.get(k)}}}
 let keyEl=el.parentElement.querySelector('.facility-map-key');if(keyEl)keyEl.innerHTML='<span><i></i>You are here</span><span><i class="people"></i>People / contacts</span><span><i class="goals"></i>Clues / objectives</span><span><i class="route-key"></i>Suggested route</span><span><i style="background:#75f4ef;border-radius:2px"></i>Terminal</span>';};
 const baseDrawMap=drawMap;drawMap=function(){baseDrawMap();const el=document.getElementById('mapgrid');if(!el)return;for(const o of objects){if(o.type!==10)continue;const x=Math.floor(o.x/2),y=Math.floor(o.y/2),idx=y*Math.ceil(mw/2)+x;if(el.children[idx]&&!el.children[idx].classList.contains('player'))el.children[idx].classList.add('person')}};
 const baseInteract=interact;interact=function(){baseInteract();updateFieldGuide();if(fullMapPanel.classList.contains('open'))refreshFullMap()};
@@ -601,24 +601,18 @@ function restoreMissionProgress(){
  try{
   const rawSave=localStorage.getItem(SAVE_KEY);if(!rawSave)return false;
   const data=JSON.parse(rawSave);if(!data||data.version!==1)return false;
-  if(Number.isFinite(data.px)&&Number.isFinite(data.py)&&!wall(data.px,data.py)){px=data.px;py=data.py}
-  if(Number.isFinite(data.pa))pa=data.pa;
-  frags=Math.max(0,Math.min(3,Number(data.frags)||0));terminal=!!data.terminal;caseFound=!!data.caseFound;
-  kit=Array.isArray(data.kit)?data.kit.filter(v=>typeof v==='string'):[];
   if(typeof data.agent==='string')agent=data.agent;
   if(Array.isArray(data.completedMissions))completedMissions=new Set(data.completedMissions.filter(Number.isInteger));
   if(Number.isInteger(data.activeMissionId)&&missions[data.activeMissionId-1]){activeMission=missions[data.activeMissionId-1];selectedMission=activeMission}
+  activateMissionScene(activeMission);
+  if(Number.isFinite(data.px)&&Number.isFinite(data.py)&&!wall(data.px,data.py)){px=data.px;py=data.py}
+  if(Number.isFinite(data.pa))pa=data.pa;aimBase=pa;
+  frags=Math.max(0,Math.min(3,Number(data.frags)||0));terminal=!!data.terminal;caseFound=!!data.caseFound;
+  kit=Array.isArray(data.kit)?data.kit.filter(v=>typeof v==='string'):[];
   started=!!data.started;if(started)document.getElementById('briefing').classList.add('hidden');
   document.getElementById('status').textContent=caseFound?'COMPLETE':started?'ACTIVE':'READY';
   document.getElementById('agentName').textContent=agent;
-  setRoom();
-  if(activeMission.id===1){updateObjectives();updateKit()}
-  else{
-   document.getElementById('roomName').textContent=activeMission.code;
-   document.getElementById('roomDesc').textContent=activeMission.goal;
-   document.querySelector('.objectives').innerHTML='<div class="eyebrow">'+activeMission.code+' / OBJECTIVES</div><div class="obj"><i class="dot"></i><span>Explore '+activeMission.place+'</span></div><div class="obj"><i class="dot"></i><span>Review the clue: '+activeMission.clue+'</span></div><div class="obj"><i class="dot"></i><span>Find and speak with '+activeMission.contact+'</span></div>';
-  }
-  drawMap();refreshFullMap();updateFieldGuide();updateCleanPlan();return true;
+  setRoom();updateObjectives();updateKit();drawMap();refreshFullMap();updateFieldGuide();updateCleanPlan();return true;
  }catch(err){return false}
 }
 const restoredSave=restoreMissionProgress();
