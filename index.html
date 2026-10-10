@@ -216,7 +216,7 @@ const raw=[
 '100000000010000000000001',
 '111111111111111111111111'];
 // Six rooms arranged as a clear 2-by-3 floor plan, connected by marked doorways.
-const map=raw.map(r=>r.split('').map(Number));const mw=map[0].length,mh=map.length;let px=3.4,py=3.2,pa=.03,keys={},mouseLocked=false,started=false,last=performance.now(),toastTimer=0,frags=0,terminal=false,caseFound=false,kit=[],agent='NOVA-07';const objects=[
+const map=raw.map(r=>r.split('').map(Number));const mw=map[0].length,mh=map.length;let px=3.4,py=3.2,pa=.03,aimBase=pa,clickMoveUntil=0,keys={},mouseLocked=false,started=false,last=performance.now(),toastTimer=0,frags=0,terminal=false,caseFound=false,kit=[],agent='NOVA-07';const objects=[
 {x:6.5,y:4.5,type:4,name:'INTEL FRAGMENT A',desc:'A torn strip of encrypted paper tucked under the briefing desk.',id:'a',room:'BRIEFING ROOM'},
 {x:18.4,y:4.5,type:4,name:'INTEL FRAGMENT B',desc:'A tiny storage chip hidden in a maintenance alcove.',id:'b',room:'TECH LAB'},
 {x:5.3,y:16.5,type:6,name:'MISSING BRIEFCASE',desc:'A reinforced case bearing a Northstar seal. It is locked.',id:'case',room:'EVIDENCE STORAGE'},
@@ -666,7 +666,7 @@ setInterval(saveMissionProgress,1200);
 
 
 // Cursor aim + click-to-step: keep the pointer visible and move in the direction it points.
-let aimBase=pa,clickMoveUntil=0;
+/* aim state initialized with the player state above */
 document.querySelector('.game').addEventListener('pointerdown',e=>{
  if(!started||e.button!==0||e.target.closest('button,input,.modal,.upgrade-panel,.mission-panel,.hudleft,.hudright,.topbar,.bottom,.field-guide,.mobilepad,.mobileact,.help-button,.upgrade-button,.interact,.toast,#talkPanel'))return;
  clickMoveUntil=performance.now()+380;
