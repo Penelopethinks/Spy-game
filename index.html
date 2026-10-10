@@ -229,10 +229,63 @@ objects.push(
 // each row of rooms without forcing the player through furniture.
 [[6,5],[6,6],[6,16],[6,17],[12,5],[12,6],[12,16],[12,17],
  [3,10],[8,10],[9,10],[15,10]].forEach(([y,x])=>map[y][x]=0);
+const defaultMapTemplate=map.map(row=>row.slice());
+const defaultObjectTemplates=objects.map(o=>({...o,dialogue:Array.isArray(o.dialogue)?o.dialogue.slice():undefined}));
+function buildMissionMap(seed){
+ const g=Array.from({length:mh},()=>Array(mw).fill(0));
+ for(let x=0;x<mw;x++){g[0][x]=1;g[mh-1][x]=1}
+ for(let y=0;y<mh;y++){g[y][0]=1;g[y][mw-1]=1}
+ for(let y=1;y<mh-1;y++)g[y][10]=1;
+ for(const cut of [6,12])for(let x=1;x<mw-1;x++)g[cut][x]=1;
+ for(let row=0;row<3;row++){const lo=row*6+1,hi=Math.min(lo+4,mh-2),doorY=lo+((seed*(row*2+3))%Math.max(1,hi-lo+1));g[doorY][10]=0;if(doorY+1<=hi)g[doorY+1][10]=0;}
+ for(let row=0;row<2;row++){const cut=row===0?6:12;const leftDoor=2+((seed*(row+2)+row*3)%7),rightDoor=13+((seed*(row+4)+row*5)%8);g[cut][leftDoor]=0;g[cut][rightDoor]=0;if(leftDoor+1<10)g[cut][leftDoor+1]=0;if(rightDoor+1<22)g[cut][rightDoor+1]=0;}
+ return g;
+}
+function activateMissionScene(m){
+ activeMission=m;
+ const nextMap=m.id===1?defaultMapTemplate.map(row=>row.slice()):buildMissionMap(m.id);
+ map.splice(0,map.length,...nextMap);
+ const nextObjects=defaultObjectTemplates.map(o=>({...o,dialogue:Array.isArray(o.dialogue)?o.dialogue.slice():undefined}));
+ if(m.id>1){
+  for(let i=nextObjects.length-1;i>=0;i--)if(nextObjects[i].id==='npc-theo'||nextObjects[i].id==='npc-iris')nextObjects.splice(i,1);
+  const find=id=>nextObjects.find(o=>o.id===id);
+  const set=(id,slots)=>{const o=find(id);if(!o)return;for(let n=0;n<slots.length;n++){const p=slots[(m.id+n*3)%slots.length];if(map[Math.floor(p[1])]?.[Math.floor(p[0])]===0){o.x=p[0];o.y=p[1];return}}};
+  set('a',[[6.5,3.5],[7.4,4.4],[4.5,4.3],[8.3,2.4]]);
+  set('brief',[[8.3,2.4],[6.4,4.2],[7.4,3.3]]);
+  set('b',[[18.4,4.5],[15.4,3.4],[17.4,2.4],[19.4,4.3]]);
+  set('work',[[15.4,3.4],[19.4,4.3],[16.4,2.4]]);
+  set('terminal',[[16.4,8.4],[18.4,9.4],[15.4,10.3]]);
+  set('locker',[[3.5,8.4],[7.4,9.4],[5.3,10.3]]);
+  set('npc-mara',[[8.2,8.4],[6.4,9.4],[3.4,10.3]]);
+  set('c',[[18.3,14.4],[16.4,15.3],[20.4,16.3]]);
+  set('case',[[5.3,16.5],[7.4,15.4],[3.4,14.4]]);
+  set('note',[[8.4,15.4],[6.4,14.4],[4.4,16.3]]);
+  const clue=find('a'),clueB=find('b'),clueC=find('c'),terminalObj=find('terminal'),caseObj=find('case'),guide=find('brief'),work=find('work'),note=find('note'),contact=find('npc-mara');
+  for(const [o,letter] of [[clue,'A'],[clueB,'B'],[clueC,'C']])if(o){o.name='EVIDENCE FRAGMENT '+letter;o.desc='Part of the case clue: '+m.clue}
+  if(terminalObj){terminalObj.name='CASE FILE TERMINAL';terminalObj.desc='A location terminal holding the final record for '+m.code+'.'}
+  if(caseObj){caseObj.name='MISSING EVIDENCE';caseObj.desc='The missing item connected to '+m.title+'. It is secured until the terminal is accessed.'}
+  if(guide){guide.name='MISSION BRIEF';guide.desc=m.brief}
+  if(work){work.name='CLUE NOTES';work.desc=m.clue}
+  if(note){note.name='CONTACT NOTE';note.desc=m.contactNote}
+  if(contact){contact.name=m.contact;contact.desc=m.role;contact.dialogue=['I am the listed contact for '+m.code+'. '+m.contactNote,'The case clue reads: '+m.clue,'Search this location, collect all three evidence fragments, then check the terminal before recovering the missing item.']}
+ }
+ objects.splice(0,objects.length,...nextObjects);
+ px=3.4;py=3.2;pa=.03;aimBase=pa;keys={};frags=0;terminal=false;caseFound=false;kit=[];
+ document.getElementById('status').textContent=m.id===1?'READY':'ON MISSION';
+ document.getElementById('roomName').textContent='ENTRY HALL';
+ document.getElementById('roomDesc').textContent='You are at '+m.place+'. Follow the next step and inspect marked items.';
+ document.querySelector('.objectives').innerHTML='<div class="eyebrow">'+m.code+' / YOUR OBJECTIVES</div><div class="obj" id="obj1"><i class="dot"></i><span>Collect evidence fragments <b id="fragCount">0/3</b></span></div><div class="obj" id="obj2"><i class="dot"></i><span>Access the case file terminal</span></div><div class="obj" id="obj3"><i class="dot"></i><span>Recover the missing evidence</span></div>';
+ const kicker=document.querySelector('#fullMapPanel .upgrade-kicker');if(kicker)kicker.textContent=m.place.toUpperCase()+' / LOCATION MAP';
+ const intro=document.querySelector('#fullMapPanel .upgrade-copy');if(intro)intro.textContent='A simple map of this location. You are the mint marker; gold markers are evidence and the current objective. Doorways and routes change with each operation.';
+ const roomCards=[['Arrival Hall','Start here and check the mission briefing.'],['East Wing','Search the marked area for a clue.'],['Service Hall','Find your contact and useful equipment.'],['Control Room','Access the case file terminal after collecting evidence.'],['Evidence Room','Recover the missing evidence here.'],['Observation Wing','Look for the final clue.']];
+ const cards=document.querySelectorAll('#cleanPlan .clean-room');cards.forEach((card,i)=>{if(roomCards[i]){card.querySelector('h3').textContent=roomCards[i][0];const ps=card.querySelectorAll('p');if(ps[0])ps[0].textContent=roomCards[i][1];const exits=card.querySelector('.exits');if(exits)exits.textContent='Connected by marked doorways.'}});
+ updateObjectives();updateKit();setRoom();drawMap();refreshFullMap();updateFieldGuide();updateCleanPlan();
+}
+
 // Keep collision checks grounded on map.
 function wall(x,y){const a=Math.floor(x),b=Math.floor(y);return b<0||b>=mh||a<0||a>=mw||map[b][a]===1}
 function roomAt(){if(py<6)return px<11?'BRIEFING ROOM':'TECH LAB';if(py<12)return px<11?'EQUIPMENT BAY':'OPERATIONS';return px<11?'EVIDENCE STORAGE':'ROOFTOP ACCESS'}
-function setRoom(){let r=roomAt();const desc={'BRIEFING ROOM':'Your mission starts here. Search the briefing area for the first clue.','TECH LAB':'Workstations, prototypes, and a few things that do not belong.','EQUIPMENT BAY':'Check the lockers. Agents rarely leave without a backup plan.','OPERATIONS':'The facility terminal controls access to secured records.','EVIDENCE STORAGE':'Restricted storage. The missing case was last logged here.','ROOFTOP ACCESS':'A quiet access corridor with a view over the city.'};document.getElementById('roomName').textContent=r;document.getElementById('roomDesc').textContent=desc[r]||'Search the area for anything unusual.'}
+function setRoom(){let r=roomAt();const desc={'BRIEFING ROOM':'Your mission starts here. Search the briefing area for the first clue.','TECH LAB':'Workstations, prototypes, and a few things that do not belong.','EQUIPMENT BAY':'Check the lockers. Agents rarely leave without a backup plan.','OPERATIONS':'The facility terminal controls access to secured records.','EVIDENCE STORAGE':'Restricted storage. The missing case was last logged here.','ROOFTOP ACCESS':'A quiet access corridor with a view over the city.'};if(activeMission&&activeMission.id>1){const row=py<6?0:py<12?1:2,col=px<11?0:1,names=['ARRIVAL HALL','EAST WING','SERVICE HALL','CONTROL ROOM','EVIDENCE ROOM','OBSERVATION WING'];r=names[row*2+col];document.getElementById('roomName').textContent=r;document.getElementById('roomDesc').textContent='You are in '+r.toLowerCase()+' at '+activeMission.place+'. Follow the marked evidence and talk to '+activeMission.contact+'.';return}document.getElementById('roomName').textContent=r;document.getElementById('roomDesc').textContent=desc[r]||'Search the area for anything unusual.'}
 function cast(angle){let sin=Math.sin(angle),cos=Math.cos(angle),dist=0,hit=0,side=0;while(dist<24){dist+=.035;let x=px+cos*dist,y=py+sin*dist;if(wall(x,y)){hit=1;side=Math.abs((x-Math.floor(x))-0.5)>Math.abs((y-Math.floor(y))-0.5)?0:1;break}}return{dist,hit,side}}
 function drawWorld(){const palettes=[{wall:[73,76,65],sky:'#273238',mid:'#54616a',horizon:'#77776b',floor:'#51564f',floorMid:'#313834',light:'#c9b990',edge:'196,185,144'},{wall:[80,69,55],sky:'#302b25',mid:'#5c5144',horizon:'#817360',floor:'#625747',floorMid:'#39352e',light:'#d0b882',edge:'205,181,132'},{wall:[57,76,67],sky:'#1d312b',mid:'#405b4f',horizon:'#718574',floor:'#4d6255',floorMid:'#2d3e35',light:'#bdd1a1',edge:'173,202,154'},{wall:[65,72,83],sky:'#242b39',mid:'#4b566b',horizon:'#778397',floor:'#525e6d',floorMid:'#303a46',light:'#c4cfda',edge:'172,191,208'},{wall:[83,70,67],sky:'#332724',mid:'#654d46',horizon:'#8c6d5d',floor:'#6e5950',floorMid:'#3e3331',light:'#dfbb99',edge:'220,184,146'},{wall:[67,77,83],sky:'#242d32',mid:'#4e626b',horizon:'#788b8c',floor:'#596765',floorMid:'#323d3e',light:'#c4c8b4',edge:'185,197,177'},{wall:[83,80,65],sky:'#302f25',mid:'#5f5d48',horizon:'#87806a',floor:'#6a6654',floorMid:'#3b3a32',light:'#d4c897',edge:'211,199,147'},{wall:[71,70,78],sky:'#28272e',mid:'#514d5c',horizon:'#797382',floor:'#605c66',floorMid:'#393740',light:'#c6b8ce',edge:'194,178,209'},{wall:[69,80,74],sky:'#26322d',mid:'#50635a',horizon:'#7d8b7c',floor:'#5b685c',floorMid:'#343e38',light:'#c8c99d',edge:'196,202,155'},{wall:[81,67,53],sky:'#302820',mid:'#5d4c3a',horizon:'#88735a',floor:'#685844',floorMid:'#3b342a',light:'#d4b278',edge:'207,177,119'},{wall:[64,75,80],sky:'#232d32',mid:'#485d63',horizon:'#728485',floor:'#516263',floorMid:'#2e3b3d',light:'#cad0c0',edge:'190,205,194'},{wall:[79,73,59],sky:'#302c23',mid:'#5d5540',horizon:'#81745c',floor:'#655d49',floorMid:'#3b382e',light:'#d0c18f',edge:'204,190,140'},{wall:[70,75,69],sky:'#282f2a',mid:'#505b4d',horizon:'#798272',floor:'#5a6152',floorMid:'#343a32',light:'#c8c3a0',edge:'196,190,153'},{wall:[60,74,79],sky:'#202d32',mid:'#465d62',horizon:'#748886',floor:'#536562',floorMid:'#303c3b',light:'#b9cbbf',edge:'174,198,186'},{wall:[82,69,65],sky:'#312724',mid:'#604b44',horizon:'#866e62',floor:'#68574f',floorMid:'#3a3331',light:'#d0b89d',edge:'202,181,155'},{wall:[69,73,82],sky:'#252a34',mid:'#4e5667',horizon:'#788093',floor:'#565d6c',floorMid:'#323743',light:'#c3c5d1',edge:'186,190,208'},{wall:[77,72,58],sky:'#2f2b22',mid:'#5c503e',horizon:'#85735a',floor:'#675a45',floorMid:'#3a352b',light:'#d2ba88',edge:'207,186,132'},{wall:[67,79,67],sky:'#263126',mid:'#4d624a',horizon:'#7a8a69',floor:'#596a53',floorMid:'#343e32',light:'#c8d09b',edge:'194,207,150'},{wall:[77,73,69],sky:'#2e2a29',mid:'#5a504b',horizon:'#82746a',floor:'#625850',floorMid:'#383430',light:'#d0c0a5',edge:'204,190,164'},{wall:[62,75,84],sky:'#222d35',mid:'#475c69',horizon:'#758790',floor:'#526570',floorMid:'#2f3d44',light:'#c1d0cf',edge:'179,204,204'}];const palette=palettes[((activeMission?.id||1)-1)%palettes.length];const horizon=H*.49;let sky=ctx.createLinearGradient(0,0,0,horizon);sky.addColorStop(0,palette.sky);sky.addColorStop(.7,palette.mid);sky.addColorStop(1,palette.horizon);ctx.fillStyle=sky;ctx.fillRect(0,0,W,horizon);ctx.fillStyle=palette.light;ctx.globalAlpha=.035;ctx.beginPath();ctx.arc(W*.5,horizon*.6,Math.min(W,H)*.13,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;let floor=ctx.createLinearGradient(0,horizon,0,H);floor.addColorStop(0,palette.floor);floor.addColorStop(.55,palette.floorMid);floor.addColorStop(1,'#171b1a');ctx.fillStyle=floor;ctx.fillRect(0,horizon,W,H-horizon);
 // perspective floor grid
