@@ -278,7 +278,19 @@ function activateMissionScene(m){
   if(contact){contact.name=m.contact;contact.desc=m.role;contact.dialogue=['I am the listed contact for '+m.code+'. '+m.contactNote,'The case clue reads: '+m.clue,'Search this location, collect all three evidence fragments, then check the terminal before recovering the missing item.']}
  }
  objects.splice(0,objects.length,...nextObjects);
- px=3.4;py=3.2;pa=.03;aimBase=pa;keys={};frags=0;terminal=false;caseFound=false;contactBriefed=false;kit=[];
+ const spawnRooms=[
+  [[2.4,2.4],[7.4,2.4],[8.4,5.2],[2.4,5.2]],
+  [[12.4,2.4],[16.4,2.4],[20.4,5.2],[12.4,5.2]],
+  [[2.4,7.4],[7.4,7.4],[8.4,11.2],[2.4,11.2]],
+  [[12.4,7.4],[20.4,7.4],[20.4,11.2],[12.4,11.2]],
+  [[2.4,13.4],[8.4,13.4],[8.4,17.2],[2.4,17.2]],
+  [[12.4,13.4],[20.4,13.4],[20.4,17.2],[12.4,17.2]]
+ ];
+ const spawnRoom=(m.id-1)%spawnRooms.length,spawnSlots=spawnRooms[spawnRoom],spawnStart=(m.id*7)%spawnSlots.length;
+ let spawn=null;
+ for(let n=0;n<spawnSlots.length;n++){const candidate=spawnSlots[(spawnStart+n)%spawnSlots.length];if(!wall(candidate[0],candidate[1])&&nextObjects.every(o=>Math.hypot(o.x-candidate[0],o.y-candidate[1])>1.25)){spawn=candidate;break}}
+ if(!spawn)spawn=spawnSlots.find(p=>!wall(p[0],p[1]))||[3.4,3.2];
+ px=spawn[0];py=spawn[1];const firstClue=nextObjects.find(o=>o.id==='a');pa=firstClue?Math.atan2(firstClue.y-py,firstClue.x-px):0;aimBase=pa;keys={};frags=0;terminal=false;caseFound=false;contactBriefed=false;kit=[];
  document.getElementById('status').textContent=started?'ACTIVE':'READY';
  document.getElementById('roomName').textContent='ENTRY HALL';
  document.getElementById('roomDesc').textContent='You are at '+m.place+'. Follow the next step and inspect marked items.';
@@ -685,9 +697,36 @@ document.querySelector('.game').addEventListener('pointerdown',e=>{
  clickMoveUntil=performance.now()+380;
 });
 const missionHeaderUpdate=()=>{const label=document.querySelector('.hudleft .eyebrow');if(label)label.textContent='SETTING · '+activeMission.place;};
-const previousRoomUpdate=setRoom;setRoom=function(){previousRoomUpdate();missionHeaderUpdate();updateCleanPlan();};
+const previousRoomUpdate=setRoom;setRoom=function(){previousRoomUpdate();missionHeaderUpdate();updateCleanPlan();if(activeMission){const site=activeMission.place.split(' — ')[0],row=py<6?0:py<12?1:2,col=px<11?0:1,areas=['ENTRY HALL','EAST WING','SERVICE HALL','CONTROL ROOM','EVIDENCE ROOM','OBSERVATION WING'];document.getElementById('roomName').textContent=site.toUpperCase();document.getElementById('roomDesc').textContent=areas[row*2+col]+' · '+activeMission.place.split(' — ').slice(1).join(' — ')+' · Follow the next step below.';}};
 const missionControlCopy=document.querySelector('#dossierPanel .upgrade-copy');if(missionControlCopy)missionControlCopy.textContent='Read the next step at the bottom. Move the cursor to aim and click the scene to walk forward. You can also use W A S D or the on-screen arrows. Press E near a clue to collect it. Find three clues, ask your contact, then check the terminal and recover the missing item.';
 const objectiveCopy=document.querySelector('#briefing .brief p:nth-of-type(2)');if(objectiveCopy)objectiveCopy.innerHTML='<b style="color:#e6f8f6">HOW TO MOVE</b> &nbsp; Move your cursor left or right to aim, then click the scene to take a step forward. WASD and the on-screen arrows also work. Press E to inspect nearby items.';
 missionHeaderUpdate();
+
+// Expandable field kit keeps the play screen calm until a tool is needed.
+const gadgetStyle=document.createElement('style');
+gadgetStyle.textContent=`
+ .field-tools-toggle{align-self:flex-end;padding:6px 9px;font-size:8px;border-radius:6px}
+ .field-tools{display:none;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:6px}
+ .field-tools.open{display:grid}
+ .field-tools button{min-width:0;padding:8px 6px;font-size:8px;letter-spacing:.03em;text-align:left;text-transform:none;line-height:1.35;border-radius:7px}
+ .field-tools button b{display:block;font-size:9px;margin-bottom:3px}
+ .field-tools button small{display:block;font-size:7px;color:#aabbb4;line-height:1.35}
+ .field-notes{display:none;margin-top:7px;padding:9px 10px;border-radius:7px;background:#0b1517;border:1px solid rgba(178,194,184,.2);font-size:9px;line-height:1.45;color:#dce5df}
+ .field-notes.open{display:block}.field-notes b{color:#c9b78a}
+ @media(max-width:700px){.field-tools button{padding:6px 4px;font-size:7px}.field-tools button b{font-size:8px}.field-tools button small{font-size:6px}.field-notes{font-size:8px}}
+`;
+document.head.append(gadgetStyle);
+const gadgetToggle=document.createElement('button');gadgetToggle.className='field-tools-toggle';gadgetToggle.type='button';gadgetToggle.textContent='OPEN FIELD GADGETS ▾';
+const gadgetPanel=document.createElement('div');gadgetPanel.className='field-tools';gadgetPanel.innerHTML='<button id="scannerGadget" type="button"><b>⌖ SCANNER</b><small>Point to next step</small></button><button id="flashlightGadget" type="button" aria-pressed="false"><b>◉ FLASHLIGHT</b><small>Brighten the scene</small></button><button id="notesGadget" type="button"><b>▤ FIELD NOTES</b><small>Review your case</small></button>';
+const gadgetNotes=document.createElement('div');gadgetNotes.className='field-notes';gadgetNotes.setAttribute('aria-live','polite');
+fieldGuide.append(gadgetToggle,gadgetPanel,gadgetNotes);
+gadgetToggle.addEventListener('click',()=>{const open=gadgetPanel.classList.toggle('open');gadgetToggle.textContent=open?'CLOSE FIELD GADGETS ▴':'OPEN FIELD GADGETS ▾';if(!open)gadgetNotes.classList.remove('open')});
+function nextGadgetTarget(){const task=getNextTask();if(task.title.includes('COLLECT EVIDENCE'))return objects.find(o=>['a','b','c'].includes(o.id)&&!kit.includes('INTEL '+o.id.toUpperCase()));if(task.title.startsWith('TALK TO '))return objects.find(o=>o.type===10);if(task.title.includes('CASE FILE'))return objects.find(o=>o.id==='terminal');if(task.title.includes('MISSING ITEM'))return objects.find(o=>o.id==='case');return null}
+let scannerTarget=null,scannerUntil=0;
+document.getElementById('scannerGadget').addEventListener('click',()=>{scannerTarget=nextGadgetTarget();if(!scannerTarget){notify('SCANNER CLEAR','You have completed this mystery.');return}scannerUntil=performance.now()+6500;const dx=scannerTarget.x-px,dy=scannerTarget.y-py,distance=Math.hypot(dx,dy),angle=Math.atan2(dy,dx),directions=['E','SE','S','SW','W','NW','N','NE'],direction=directions[(Math.round(angle/(Math.PI/4))+8)%8];notify('SCANNER PING',scannerTarget.name+' · about '+Math.max(1,Math.round(distance))+' steps '+direction);updatePinpoints()});
+const baseUpdatePinpointsForScanner=updatePinpoints;
+updatePinpoints=function(){baseUpdatePinpointsForScanner();if(!scannerTarget||performance.now()>scannerUntil){scannerTarget=null;return}const dx=scannerTarget.x-px,dy=scannerTarget.y-py,d=Math.hypot(dx,dy),a=Math.atan2(dy,dx)-pa;while(a<-Math.PI)a+=Math.PI*2;while(a>Math.PI)a-=Math.PI*2;const x=Math.max(90,Math.min(W-90,W/2+Math.tan(Math.max(-1.25,Math.min(1.25,a)))/Math.tan(Math.PI/5.7)*(W/2))),beacon=document.createElement('div');beacon.style.cssText='position:absolute;left:'+x+'px;top:calc(22% + 34px);transform:translateX(-50%);padding:7px 10px;background:rgba(12,22,22,.95);border:1px solid #d8c28a;border-radius:7px;color:#f1dfb4;font-size:9px;font-weight:800;letter-spacing:.08em;text-align:center;box-shadow:0 0 18px #d8c28a55;white-space:nowrap';beacon.textContent='SCANNER  '+scannerTarget.name+'  ·  '+Math.round(d)+' STEPS';pinLayer.append(beacon)};
+document.getElementById('flashlightGadget').addEventListener('click',e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',String(on));e.currentTarget.querySelector('small').textContent=on?'On · click to switch off':'Brighten the scene';canvas.style.filter=on?'brightness(1.24) contrast(1.04) saturate(1.04)':'';notify(on?'FLASHLIGHT ON':'FLASHLIGHT OFF',on?'The scene is brighter.':'The scene returned to normal lighting.')});
+document.getElementById('notesGadget').addEventListener('click',()=>{const open=gadgetNotes.classList.toggle('open');if(open){gadgetNotes.innerHTML='';const title=document.createElement('b');title.textContent=activeMission.title+' · FIELD NOTES';const brief=document.createElement('p');brief.textContent=activeMission.brief;const clue=document.createElement('p');clue.textContent='Clue to look for: '+activeMission.clue;const contact=document.createElement('p');contact.textContent='Contact: '+activeMission.contact+' · '+activeMission.contactNote;gadgetNotes.append(title,brief,clue,contact)}});
 })();
 </script></body></html>
