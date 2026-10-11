@@ -1030,4 +1030,48 @@ dockTop.insertBefore(quickMapButton,dockPanelToggle);
 dockTop.insertBefore(quickGadgetsButton,dockPanelToggle);
 refreshFullMap();
 
+
+/* Three additional working tools, beyond the original scanner, flashlight, and notes. */
+const extraGadgetMarkup=
+ '<button id="traceGadget" type="button"><b>➤ TRACE ROUTE</b><small>Open your next destination</small></button>'+
+ '<button id="uvGadget" type="button" aria-pressed="false"><b>◉ UV LENS</b><small>Reveal clue locations</small></button>'+
+ '<button id="cipherGadget" type="button"><b>⌘ CODEBREAKER</b><small>Get a useful clue hint</small></button>';
+gadgetPanel.insertAdjacentHTML('beforeend',extraGadgetMarkup);
+document.getElementById('traceGadget').addEventListener('click',()=>{
+ const target=nextMissionTarget();
+ if(!target){notify('ROUTE CLEAR','All mission objectives are complete.');return}
+ const room=readableRoomFor(target);
+ const dx=target.x-px,dy=target.y-py;
+ const direction=['E','SE','S','SW','W','NW','N','NE'][(Math.round(Math.atan2(dy,dx)/(Math.PI/4))+8)%8];
+ const routeText=document.getElementById('cleanRouteText');
+ const routeTitle=document.getElementById('cleanRouteTitle');
+ if(routeTitle)routeTitle.textContent='TRACE ROUTE · NEXT OBJECTIVE';
+ if(routeText)routeText.textContent='Head '+direction+' toward '+target.name+' in '+room+'. Gold marks the objective; the mint marker is your position.';
+ openFullMap();
+ notify('TRACE ROUTE',target.name+' · '+room+' · head '+direction+'.');
+});
+let uvLensOn=false;
+document.getElementById('uvGadget').addEventListener('click',e=>{
+ uvLensOn=!uvLensOn;e.currentTarget.setAttribute('aria-pressed',String(uvLensOn));
+ const cssId='uvLensStyle';let style=document.getElementById(cssId);
+ if(!style){style=document.createElement('style');style.id=cssId;document.head.append(style)}
+ style.textContent=uvLensOn?`
+ #mapgrid .cell.goal,#fullMapPanel .facility-tile.target{outline:2px solid #c6a0ff!important;box-shadow:0 0 10px #b68cff!important;filter:brightness(1.3)}
+ #fullMapPanel .facility-tile.target{background:#b58bff!important}
+ `:'';
+ e.currentTarget.querySelector('small').textContent=uvLensOn?'Active · click to switch off':'Reveal clue locations';
+ notify(uvLensOn?'UV LENS ACTIVE':'UV LENS OFF',uvLensOn?'Uncollected clues and objectives glow on the map.':'Map markers returned to normal.');
+ if(fullMapPanel.classList.contains('open'))refreshFullMap();
+});
+document.getElementById('cipherGadget').addEventListener('click',()=>{
+ const target=nextMissionTarget();
+ if(!target){notify('CODEBREAKER','Case closed. You have every piece of evidence.');return}
+ let hint;
+ if(['a','b','c'].includes(target.id))hint='Look carefully around the '+readableRoomFor(target)+'. Face the gold objective and use SEARCH or COLLECT.';
+ else if(target.type===10)hint='Your evidence is ready to discuss. Find '+target.name+' and choose TALK; ask about each evidence fragment.';
+ else if(target.id==='terminal')hint='The terminal is locked until the three intel fragments are collected and your contact has been interviewed.';
+ else hint='The case item is the final objective. Follow the gold marker to '+readableRoomFor(target)+' and choose RECOVER.';
+ notify('CODEBREAKER HINT',hint);
+});
+
 </script></body></html>
