@@ -999,4 +999,35 @@ frame=function(now){
  }
 };
 
+
+/* CLARITY FIX: make the real floor map and field gadgets easy to find. */
+const clarityStyle=document.createElement('style');
+clarityStyle.textContent=`
+#fullMapPanel .facility-layout{display:grid!important;grid-template-columns:minmax(0,1.3fr) minmax(210px,.7fr)!important;gap:18px!important;align-items:start}
+#fullMapPanel .facility-map{display:grid!important;grid-template-columns:repeat(24,minmax(0,1fr))!important;gap:2px!important;width:100%;min-height:240px;padding:8px;background:#0a171d;border:1px solid #31464d;border-radius:10px}
+#fullMapPanel .facility-tile{min-width:0;aspect-ratio:1/1;border-radius:2px}
+#fullMapPanel .room-list{display:grid!important;grid-template-columns:1fr!important;gap:8px}
+#fullMapPanel .clean-plan{margin-top:14px!important}
+#fullMapPanel .clean-room.current{outline:2px solid #61f5e4;outline-offset:1px}
+#fullMapPanel .clean-room.target{outline:2px solid #e5c77d;outline-offset:1px}
+.quick-access-button{position:relative!important;inset:auto!important;z-index:9!important;flex:0 0 auto;padding:7px 9px!important;font-size:8px!important;white-space:nowrap;border-radius:7px!important}
+.clean-dock .topbar{flex-wrap:wrap!important}
+@media(max-width:800px){
+ #fullMapPanel .facility-layout{grid-template-columns:1fr!important}
+ #fullMapPanel .facility-map{min-height:180px}
+ .quick-access-button{padding:6px 7px!important;font-size:7px!important}
+}
+`;
+document.head.append(clarityStyle);
+/* The quick buttons remain visible even when the control dock is collapsed. */
+const quickMapButton=document.createElement('button');
+quickMapButton.type='button';quickMapButton.className='quick-access-button';quickMapButton.textContent='⌖ MAP';quickMapButton.setAttribute('aria-label','Open live facility map');
+quickMapButton.addEventListener('click',()=>{setDockExpanded(true);openFullMap()});
+const quickGadgetsButton=document.createElement('button');
+quickGadgetsButton.type='button';quickGadgetsButton.className='quick-access-button';quickGadgetsButton.textContent='⚙ GADGETS';quickGadgetsButton.setAttribute('aria-label','Open spy gadgets');
+quickGadgetsButton.addEventListener('click',()=>{setDockExpanded(true);gadgetPanel.classList.add('open');gadgetToggle.textContent='CLOSE FIELD GADGETS ▴';gadgetNotes.classList.add('open');gadgetNotes.innerHTML='<b>FIELD KIT READY</b><p>SCANNER — points toward your next mission target.</p><p>FLASHLIGHT — brightens the scene; click again to switch it off.</p><p>FIELD NOTES — reviews your mission brief and contact intel.</p>'});
+dockTop.insertBefore(quickMapButton,dockPanelToggle);
+dockTop.insertBefore(quickGadgetsButton,dockPanelToggle);
+refreshFullMap();
+
 </script></body></html>
