@@ -277,6 +277,28 @@ function activateMissionScene(m){
   if(note){note.name='CONTACT NOTE';note.desc=m.contactNote}
   if(contact){contact.name=m.contact;contact.desc=m.role;contact.dialogue=['I am the listed contact for '+m.code+'. '+m.contactNote,'The case clue reads: '+m.clue,'Search this location, collect all three evidence fragments, then check the terminal before recovering the missing item.']}
  }
+ // Every operation gets its own evidence story and a real, named contact — including operation 001.
+ const missionEvidence=nextObjects.filter(o=>['a','b','c'].includes(o.id));
+ const evidenceCopy={
+  a:'First lead: '+m.clue+' Check this against the other records before deciding what it means.',
+  b:'Second lead for '+m.title+': '+m.contactNote+' Compare this detail with the first fragment.',
+  c:'Final lead: '+m.goal+' Use all three fragments to decide what should be checked next.'
+ };
+ for(const o of missionEvidence){const letter=o.id.toUpperCase();o.name='EVIDENCE '+letter+' · '+m.kind.toUpperCase();o.desc=evidenceCopy[o.id]||m.clue}
+ const missionContact=nextObjects.find(o=>o.id==='npc-mara');
+ if(missionContact){
+  missionContact.name=m.contact;
+  missionContact.desc=m.role;
+  missionContact.dialogue=[
+   'I am '+m.contact+', the '+m.role.toLowerCase()+' for this case at '+m.place+'. '+m.contactNote,
+   'The key detail is: '+m.clue+' That is what I would compare with the evidence fragments.',
+   'Your assignment is to '+m.goal+' Check the case file terminal after collecting the evidence.'
+  ];
+ }
+ const missionTerminal=nextObjects.find(o=>o.id==='terminal');
+ if(missionTerminal){missionTerminal.name='CASE FILE · '+m.kind.toUpperCase();missionTerminal.desc='Review the final record for '+m.title+'. It summarizes the evidence you found at '+m.place+'.'}
+ const missionCase=nextObjects.find(o=>o.id==='case');
+ if(missionCase){missionCase.name='CASE ITEM · '+m.kind.toUpperCase();missionCase.desc='The unresolved item connected to '+m.title+'. Recover it after checking the case file.'}
  objects.splice(0,objects.length,...nextObjects);
  const spawnRooms=[
   [[2.4,2.4],[7.4,2.4],[8.4,5.2],[2.4,5.2]],
@@ -325,7 +347,30 @@ function updatePinpoints(){pinLayer.innerHTML='';const nextId=frags<3?['a','b','
 function openDialogue(o){talkingTo=o;talkIndex=0;document.getElementById('talkRole').textContent='NORTHSTAR CONTACT / '+o.desc.toUpperCase();document.getElementById('talkName').textContent=o.name;document.getElementById('talkLine').textContent=o.dialogue[0];talkPanel.style.display='block';notify('CONTACT ESTABLISHED',o.name+' is ready to talk.')}
 function nearby(){let best=null,bd=2.8;for(const o of objects){if((o.id==='a'&&kit.includes('INTEL A'))||(o.id==='b'&&kit.includes('INTEL B'))||(o.id==='c'&&kit.includes('INTEL C'))||(o.id==='locker'&&kit.includes('FIELD KIT'))||(o.id==='terminal'&&terminal)||(o.id==='case'&&caseFound))continue;let dx=o.x-px,dy=o.y-py,d=Math.hypot(dx,dy),ang=Math.atan2(dy,dx)-pa;while(ang<-Math.PI)ang+=Math.PI*2;while(ang>Math.PI)ang-=Math.PI*2;if(d<bd&&Math.abs(ang)<.78){best=o;bd=d}}return best}
 function interact(){let o=nearby();if(!o){notify('NO INTERACTABLE SIGNAL','Move closer and face a marked object.');return}if(o.type===10){openDialogue(o);return}if(o.id==='a'||o.id==='b'||o.id==='c'){kit.push('INTEL '+o.id.toUpperCase());frags++;notify('EVIDENCE FOUND',o.desc);updateObjectives()}else if(o.id==='locker'){kit.push('FIELD KIT');notify('FIELD KIT ACQUIRED','Flashlight and facility access badge added.')}else if(o.id==='terminal'){if(frags<3||!contactBriefed)notify('NEXT STEP',frags<3?`Collect all three evidence fragments first (${frags}/3).`:'Talk to '+activeMission.contact+' before opening the terminal.');else{terminal=true;kit.push('TERMINAL ACCESS');notify('FINAL RECORD FOUND','The terminal confirms the missing item is marked on your map.');updateObjectives()}}else if(o.id==='case'){if(!terminal)notify('ITEM STILL SECURED','Collect three evidence fragments and read the terminal first.');else{caseFound=true;completedMissions.add(activeMission.id);notify('MYSTERY SOLVED',activeMission.id===1?'You recovered the briefcase. Great detective work!':'You recovered the missing item at '+activeMission.place+'. Great detective work!');document.getElementById('status').textContent='COMPLETE';updateObjectives()}}else if(o.id==='brief')notify('MISSION BRIEF',activeMission.brief);else if(o.id==='work')notify('CLUE NOTE',activeMission.clue);else if(o.id==='note')notify('CONTACT NOTE',activeMission.contactNote);else notify(o.name,o.desc);updateKit()}
-function interact(){let o=nearby();if(!o){notify('NO INTERACTABLE SIGNAL','Move closer to an object and face it.');return}if(o.id==='a'||o.id==='b'||o.id==='c'){kit.push('INTEL '+o.id.toUpperCase());frags++;notify('EVIDENCE FOUND',o.desc);updateObjectives()}else if(o.id==='locker'){kit.push('FIELD KIT');notify('FIELD KIT ACQUIRED','Flashlight and facility access badge added.')}else if(o.id==='terminal'){if(frags<3||!contactBriefed){notify('NEXT STEP',frags<3?`Collect all three evidence fragments first (${frags}/3).`:'Talk to '+activeMission.contact+' before opening the terminal.')}else{terminal=true;kit.push('TERMINAL ACCESS');notify('FINAL RECORD FOUND','The terminal confirms the missing item is marked on your map.');updateObjectives()}}else if(o.id==='case'){if(!terminal){notify('ITEM STILL SECURED','Collect three evidence fragments and read the terminal first.')}else{caseFound=true;completedMissions.add(activeMission.id);notify('MYSTERY SOLVED',activeMission.id===1?'You recovered the briefcase. Great detective work!':'You recovered the missing item at '+activeMission.place+'. Great detective work!');document.getElementById('status').textContent='COMPLETE';updateObjectives()}}else if(o.id==='brief'){notify('MISSION RECORDING','“Trust the floor plan. The safest route is rarely the shortest.”')}else if(o.id==='work'){notify('SYSTEM LOGS','Last access: 02:14. Destination: Evidence Storage. Credentials: REDACTED.')}else if(o.id==='note'){notify('HANDWRITTEN NOTE','“The case code is hidden in the mission files.”')}else notify(o.name,o.desc);updateKit()}
+function interact(){
+ let o=nearby();
+ if(!o){notify('NOTHING IN REACH','Move closer to a marked person or object, then face it.');return}
+ if(o.type===10){openDialogue(o);return}
+ if(['a','b','c'].includes(o.id)){
+  const key='INTEL '+o.id.toUpperCase();
+  if(!kit.includes(key)){kit.push(key);frags=Math.min(3,frags+1);notify('EVIDENCE COLLECTED',o.name+' — '+o.desc)}
+  updateObjectives();
+ }else if(o.id==='locker'){
+  if(!kit.includes('FIELD KIT'))kit.push('FIELD KIT');
+  notify('FIELD KIT','Flashlight and access badge collected.');
+ }else if(o.id==='terminal'){
+  if(frags<3){notify('CASE FILE LOCKED','Collect the three evidence fragments first. Current progress: '+frags+'/3.')}
+  else if(!contactBriefed){notify('INTERVIEW REQUIRED','Talk to '+activeMission.contact+' and ask about all three details.')}
+  else{terminal=true;if(!kit.includes('TERMINAL ACCESS'))kit.push('TERMINAL ACCESS');notify('CASE FILE UNLOCKED','You reviewed the final record for '+activeMission.title+'. The missing item is now available.');updateObjectives()}
+ }else if(o.id==='case'){
+  if(!terminal){notify('ITEM STILL SECURED','First collect 3 evidence fragments, interview '+activeMission.contact+', and read the case file.')}
+  else if(!caseFound){caseFound=true;completedMissions.add(activeMission.id);notify('MYSTERY SOLVED',activeMission.title+' is complete. You recovered the case item at '+activeMission.place+'.');document.getElementById('status').textContent='COMPLETE';updateObjectives();updateFieldGuide()}
+ }else if(o.id==='brief'){notify('MISSION BRIEF',activeMission.brief)}
+ else if(o.id==='work'){notify('EVIDENCE NOTE',activeMission.clue)}
+ else if(o.id==='note'){notify('CONTACT NOTE',activeMission.contactNote)}
+ else{notify(o.name,o.desc)}
+ updateKit();
+}
 function updateObjectives(){const host=document.querySelector('.objectives');if(!host)return;if(!document.getElementById('obj4'))host.insertAdjacentHTML('beforeend','<div class="obj" id="obj4"><i class="dot"></i><span>Recover the missing item</span></div>');const fragment=document.getElementById('fragCount'),one=document.getElementById('obj1'),two=document.getElementById('obj2'),three=document.getElementById('obj3'),four=document.getElementById('obj4');if(!one||!two||!three||!four)return;if(fragment)fragment.textContent=frags+'/3';one.classList.toggle('done',frags>=3);two.classList.toggle('done',contactBriefed);three.classList.toggle('done',terminal);four.classList.toggle('done',caseFound);one.querySelector('span').innerHTML=frags>=3?'Evidence collected <b>3/3</b>':'Collect evidence fragments <b id="fragCount">'+frags+'/3</b>';two.querySelector('span').textContent=contactBriefed?'Contact interviewed':('Talk to '+(activeMission?.contact||'your contact'));three.querySelector('span').textContent=terminal?'Case file read':'Access the case file terminal';four.querySelector('span').textContent=caseFound?'Missing item recovered':'Recover the missing item'}function updateKit(){document.getElementById('kitText').textContent=kit.length?kit.join(' · '):'Empty · 0 items';document.getElementById('clearance').textContent=frags+'/3'}function notify(title,msg){let t=document.getElementById('toast');t.querySelector('strong').textContent=title;t.querySelector('span').textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3300)}
 function drawMap(){let el=document.getElementById('mapgrid');el.innerHTML='';for(let y=0;y<mh;y+=2){for(let x=0;x<mw;x+=2){let d=document.createElement('div');d.className='cell';if(map[y][x]===1)d.classList.add('wall');else d.classList.add('hall');if(Math.floor(py/2)===Math.floor(y/2)&&Math.floor(px/2)===Math.floor(x/2))d.className='cell player';if(objects.some(o=>(o.id==='case'&&!caseFound||['a','b','c'].includes(o.id)&&!kit.includes('INTEL '+o.id.toUpperCase())||o.id==='terminal'&&!terminal)&&Math.floor(o.x/2)===Math.floor(x/2)&&Math.floor(o.y/2)===Math.floor(y/2)))d.classList.add('goal');el.appendChild(d)}}}
 // Major upgrade: room-specific atmosphere, a full facility map, and a proper mission dossier before entry.
@@ -788,6 +833,23 @@ const fullscreenButton=document.createElement('button');fullscreenButton.type='b
 fullscreenButton.addEventListener('click',async()=>{try{if(document.fullscreenElement){await document.exitFullscreen()}else{await document.querySelector('.game').requestFullscreen()}}catch(e){notify('FULLSCREEN UNAVAILABLE','Your browser may not allow fullscreen in this window.')}});
 document.addEventListener('fullscreenchange',()=>{const on=!!document.fullscreenElement;fullscreenButton.textContent=on?'⤢':'⛶';fullscreenButton.setAttribute('aria-label',on?'Exit fullscreen':'Enter fullscreen');fullscreenButton.title=on?'Exit fullscreen':'Enter fullscreen'});
 dockTop.insertBefore(fullscreenButton,dockPanelToggle);dockTop.insertBefore(interactControl,fullscreenButton);
+const contextActions=document.createElement('div');contextActions.className='context-actions';contextActions.setAttribute('aria-label','Nearby actions');
+contextActions.innerHTML='<button type="button" id="talkAction" disabled title="Talk to the nearby contact">TALK</button><button type="button" id="searchAction" disabled title="Search or use the nearby object">SEARCH</button>';
+interactControl.append(contextActions);
+const talkAction=document.getElementById('talkAction'),searchAction=document.getElementById('searchAction');
+function syncContextActions(o){
+ const isContact=!!o&&o.type===10;
+ talkAction.disabled=!isContact;
+ talkAction.title=isContact?'Talk to '+o.name:'Move near a contact to talk';
+ searchAction.disabled=!o||isContact;
+ searchAction.textContent=!o?'SEARCH':isContact?'SEARCH':o.id==='terminal'?'ACCESS':o.id==='case'?'RECOVER':['brief','work','note'].includes(o.id)?'READ':(['a','b','c','locker'].includes(o.id)?'COLLECT':'SEARCH');
+ searchAction.title=o?(isContact?'Choose TALK to start a conversation':'Search or use '+o.name):'Move near an object to search';
+ document.getElementById('mobileE').disabled=!o;
+}
+const originalNearbyForActions=nearby;
+nearby=function(){const o=originalNearbyForActions();syncContextActions(o);return o};
+talkAction.addEventListener('click',()=>{const o=nearby();if(o&&o.type===10)openDialogue(o);else notify('NO CONTACT IN REACH','Move close to the contact and face them first.')});
+searchAction.addEventListener('click',()=>{const o=nearby();if(o&&o.type!==10)interact();else if(o)notify('TALK TO THE CONTACT','Use TALK to ask your contact about the case.');else notify('NOTHING TO SEARCH','Move close to a marked object first.')});
 function setDockExpanded(expanded){cleanDock.classList.toggle('is-collapsed',!expanded);dockPanelToggle.setAttribute('aria-expanded',String(expanded));dockPanelToggle.textContent=expanded?'HIDE INFO ▾':'SHOW INFO ▴';dockPanelToggle.setAttribute('aria-label',expanded?'Hide extra information':'Show extra information');try{localStorage.setItem('northstar-dock-expanded',expanded?'1':'0')}catch(e){}}
 dockPanelToggle.addEventListener('click',()=>setDockExpanded(cleanDock.classList.contains('is-collapsed')));
 try{if(localStorage.getItem('northstar-dock-expanded')==='1')setDockExpanded(true)}catch(e){}
@@ -798,6 +860,14 @@ setRoom();
 // Final compact phone-control layout: keep the game view open when info is collapsed.
 const phoneControlsStyle=document.createElement('style');
 phoneControlsStyle.textContent = `
+ .clean-dock .mobileact{display:flex!important;align-items:center;gap:5px}
+ .clean-dock .mobileact #mobileE{flex:0 0 auto}
+ .clean-dock .context-actions{display:flex;align-items:center;gap:4px}
+ .clean-dock .context-actions button{width:43px!important;min-width:43px!important;height:40px!important;padding:3px!important;border-radius:8px!important;font-size:7px!important;letter-spacing:.02em!important;line-height:1.1!important;background:#202a2a!important;border:1px solid rgba(178,194,184,.3)!important;color:#e6ece6!important}
+ .clean-dock .context-actions button:disabled{opacity:.42!important;filter:saturate(.45)}
+ .clean-dock .context-actions button:not(:disabled){border-color:#c9b78a!important;background:#373225!important;color:#f3e6c7!important}
+ @media(max-width:390px){.clean-dock .context-actions{gap:2px}.clean-dock .context-actions button{width:31px!important;min-width:31px!important;height:34px!important;font-size:6px!important;padding:2px!important}.clean-dock.is-collapsed .topbar .mobileact #mobileE{width:44px!important;height:44px!important}.clean-dock.is-collapsed .dock-quick-fullscreen{width:27px!important;min-width:27px!important;flex-basis:27px!important}.clean-dock.is-collapsed .dock-panel-toggle{padding:5px!important}}
+
  .clean-dock.is-collapsed{width:max-content!important;max-width:calc(100% - 12px)!important;max-height:none!important;bottom:8px!important;left:50%!important;transform:translateX(-50%)!important;padding:6px!important;gap:0!important;overflow:visible!important;border-radius:12px!important;background:rgba(10,16,17,.88)!important;backdrop-filter:blur(10px);box-shadow:0 8px 28px #0007!important}
  .clean-dock.is-collapsed .topbar{min-height:0!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;padding:0!important;background:none!important}
  .clean-dock.is-collapsed .topbar>div:first-child,.clean-dock.is-collapsed .status{display:none!important}
