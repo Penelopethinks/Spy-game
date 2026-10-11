@@ -893,4 +893,108 @@ phoneControlsStyle.textContent = `
 document.head.append(phoneControlsStyle);
 
 })();
+
+/* LIVE NAVIGATION: always show the agent, current room, and the next required destination. */
+const navStyle=document.createElement('style');
+navStyle.textContent=`
+#liveMapStatus{display:flex;flex-direction:column;gap:4px;margin-top:8px;padding:8px 9px;background:#0b2028;border:1px solid #61f5e455;border-radius:6px}
+#liveMapStatus strong{font-size:9px;letter-spacing:.12em;color:#61f5e4}
+#liveMapStatus span{font-size:10px;line-height:1.35;color:#edf8f5}
+#liveMapStatus small{font-size:9px;line-height:1.35;color:#b4c7c6}
+#mapgrid .cell.person{background:#e4a9ff!important;border-color:#f4d9ff!important;box-shadow:0 0 5px #e4a9ff}
+#mapgrid .cell.goal{outline:2px solid #e5c77d;outline-offset:0}
+#mapgrid .cell.player{position:relative;z-index:1;outline:2px solid #eaffff;outline-offset:1px}
+.maplegend{line-height:1.6}
+.field-guide{border-color:rgba(201,183,138,.65)!important}
+`;
+document.head.append(navStyle);
+const mapbox=document.querySelector('.hudright .mapbox');
+if(mapbox&&!document.getElementById('liveMapStatus')){
+ const live=document.createElement('div');live.id='liveMapStatus';
+ live.innerHTML='<strong>YOUR POSITION</strong><span id="liveRoom">Finding your room…</span><small id="liveTarget">Next destination: loading…</small>';
+ mapbox.append(live);
+ const legend=mapbox.querySelector('.maplegend');
+ if(legend)legend.textContent='CYAN: YOU · PURPLE: CONTACT · GOLD: CLUE / GOAL';
+}
+function nextMissionTarget(){
+ if(caseFound)return null;
+ if(frags<3){const id=['a','b','c'].find(k=>!kit.includes('INTEL '+k.toUpperCase()));return objects.find(o=>o.id===id)||null}
+ if(!contactBriefed)return objects.find(o=>o.type===10)||null;
+ if(!terminal)return objects.find(o=>o.id==='terminal')||null;
+ return objects.find(o=>o.id==='case')||null;
+}
+function readableRoomFor(o){
+ if(!o)return 'Mission complete';
+ const x=o.x,y=o.y;
+ if(activeMission&&activeMission.id>1){
+  const row=y<6?0:y<12?1:2,col=x<11?0:1;
+  return ['Arrival Hall','East Wing','Service Hall','Control Room','Evidence Room','Observation Wing'][row*2+col];
+ }
+ return o.room||({'a':'Briefing Room','b':'Tech Lab','c':'Rooftop Access','terminal':'Operations','case':'Evidence Storage'}[o.id]||'Facility');
+}
+function refreshLiveNavigation(){
+ const target=nextMissionTarget(),roomEl=document.getElementById('liveRoom'),targetEl=document.getElementById('liveTarget');
+ if(roomEl)roomEl.textContent=roomAt().replace(/\b\w/g,c=>c.toUpperCase())+' · GRID '+(Math.floor(px)+1)+','+(Math.floor(py)+1);
+ if(targetEl)targetEl.textContent=target?'NEXT: '+target.name+' · '+readableRoomFor(target):'All objectives complete — mystery solved!';
+ if(fullMapPanel?.classList.contains('open'))refreshFullMap();
+}
+const previousFieldGuideForNavigation=updateFieldGuide;
+updateFieldGuide=function(){
+ previousFieldGuideForNavigation();
+ const target=nextMissionTarget();
+ if(!target)return;
+ const room=readableRoomFor(target);
+ const taskTitle=fieldGuide.querySelector('strong');
+ const taskBody=fieldGuide.querySelector('span');
+ const taskDetail=fieldGuide.querySelector('small');
+ if(taskBody){
+  if(target.type===10)taskBody.textContent='Go to '+target.name+' in the '+room+'. They are your assigned contact. Face them and choose TALK.';
+  else if(['a','b','c'].includes(target.id))taskBody.textContent='Find '+target.name+' in the '+room+'. The map highlights the clue; move to its marker and choose COLLECT.';
+  else if(target.id==='terminal')taskBody.textContent='Go to the case-file terminal in the '+room+'. Choose ACCESS after collecting all three clues and interviewing your contact.';
+  else taskBody.textContent='Go to the missing case item in the '+room+'. Choose RECOVER to finish the mystery.';
+ }
+ if(taskDetail)taskDetail.textContent='Map: cyan = you · purple = contact · gold = objective. Open FULL FACILITY MAP for the route.';
+};
+const previousInteractForNavigation=interact;
+interact=function(){
+ const encountered=nearby();
+ previousInteractForNavigation();
+ if(encountered&&(['a','b','c','brief','work','note','locker'].includes(encountered.id)||encountered.type===10||encountered.id==='terminal'||encountered.id==='case')){
+  const target=nextMissionTarget();
+  if(target&&encountered!==target){
+   const room=readableRoomFor(target);
+   notify('WHERE TO NEXT',target.type===10?'Go to '+target.name+' in the '+room+'. Use TALK to finish the interview.':'Go to '+target.name+' in the '+room+'. Follow the gold marker on your map.');
+  }else if(target&&encountered===target){
+   notify('NEXT DESTINATION',target.type===10?'You found your contact. Use TALK and ask all three questions.':'You found the next objective. Use the highlighted action to continue.');
+  }
+ }
+ updateFieldGuide();
+ refreshLiveNavigation();
+ if(fullMapPanel?.classList.contains('open'))refreshFullMap();
+};
+const previousActivateForNavigation=activateMissionScene;
+activateMissionScene=function(m){
+ previousActivateForNavigation(m);
+ updateFieldGuide();
+ refreshLiveNavigation();
+ refreshFullMap();
+};
+const previousFrameForNavigation=frame;
+frame=function(now){
+ previousFrameForNavigation(now);
+ if(started){
+  refreshLiveNavigation();
+  const mini=document.getElementById('mapgrid');
+  if(mini){
+   const cells=mini.children;
+   for(let i=0;i<cells.length;i++)cells[i].classList.remove('person');
+   for(const o of objects){
+    if(o.type!==10)continue;
+    const x=Math.floor(o.x/2),y=Math.floor(o.y/2),idx=y*Math.ceil(mw/2)+x;
+    if(cells[idx]&&!cells[idx].classList.contains('player'))cells[idx].classList.add('person');
+   }
+  }
+ }
+};
+
 </script></body></html>
