@@ -932,11 +932,13 @@ function readableRoomFor(o){
  }
  return o.room||({'a':'Briefing Room','b':'Tech Lab','c':'Rooftop Access','terminal':'Operations','case':'Evidence Storage'}[o.id]||'Facility');
 }
+let lastFullMapCell='';
 function refreshLiveNavigation(){
  const target=nextMissionTarget(),roomEl=document.getElementById('liveRoom'),targetEl=document.getElementById('liveTarget');
  if(roomEl)roomEl.textContent=roomAt().replace(/\b\w/g,c=>c.toUpperCase())+' · GRID '+(Math.floor(px)+1)+','+(Math.floor(py)+1);
  if(targetEl)targetEl.textContent=target?'NEXT: '+target.name+' · '+readableRoomFor(target):'All objectives complete — mystery solved!';
- if(fullMapPanel?.classList.contains('open'))refreshFullMap();
+ const cell=Math.floor(px)+','+Math.floor(py);
+ if(fullMapPanel?.classList.contains('open')&&cell!==lastFullMapCell){lastFullMapCell=cell;refreshFullMap()}
 }
 const previousFieldGuideForNavigation=updateFieldGuide;
 updateFieldGuide=function(){
