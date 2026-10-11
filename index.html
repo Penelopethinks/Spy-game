@@ -1072,6 +1072,44 @@ document.getElementById('cipherGadget').addEventListener('click',()=>{
  notify('CODEBREAKER HINT',hint);
 });
 
+
+/* START FIX: choosing a mission must actually enter gameplay, not just change the backdrop. */
+missionPanel.addEventListener('click',function(e){
+ const button=e.target.closest('#mhStart');
+ if(!button)return;
+ e.preventDefault();
+ e.stopPropagation();
+ e.stopImmediatePropagation();
+ const mission=selectedMission||activeMission;
+ activateMissionScene(mission);
+ activeMission=mission;
+ selectedMission=mission;
+ started=true;
+ dossierReviewed=true;
+ missionPanel.classList.remove('open');
+ document.getElementById('briefing').classList.add('hidden');
+ dossierPanel.classList.remove('open');
+ document.getElementById('status').textContent='ACTIVE';
+ document.getElementById('agentName').textContent=agent;
+ setRoom();updateObjectives();updateKit();drawMap();refreshFullMap();updateFieldGuide();updateCleanPlan();refreshLiveNavigation();
+ saveMissionProgress();
+ notify('MISSION STARTED',mission.title+' · '+mission.place+' — you are now exploring.');
+},true);
+/* The briefing's ENTER FACILITY button also starts the game directly and reliably. */
+document.getElementById('enterFacility').addEventListener('click',function(e){
+ e.preventDefault();
+ e.stopPropagation();
+ e.stopImmediatePropagation();
+ dossierReviewed=true;
+ started=true;
+ document.getElementById('briefing').classList.add('hidden');
+ dossierPanel.classList.remove('open');
+ document.getElementById('status').textContent='ACTIVE';
+ setRoom();updateObjectives();updateKit();drawMap();refreshFullMap();updateFieldGuide();updateCleanPlan();refreshLiveNavigation();
+ saveMissionProgress();
+ notify('MISSION STARTED','You are inside the facility. Follow the next-step guide to begin.');
+},true);
+
 })();
 
 </script></body></html>
