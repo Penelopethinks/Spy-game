@@ -892,8 +892,6 @@ phoneControlsStyle.textContent = `
 `;
 document.head.append(phoneControlsStyle);
 
-})();
-
 /* LIVE NAVIGATION: always show the agent, current room, and the next required destination. */
 const navStyle=document.createElement('style');
 navStyle.textContent=`
@@ -1073,5 +1071,7 @@ document.getElementById('cipherGadget').addEventListener('click',()=>{
  else hint='The case item is the final objective. Follow the gold marker to '+readableRoomFor(target)+' and choose RECOVER.';
  notify('CODEBREAKER HINT',hint);
 });
+
+})();
 
 </script></body></html>
