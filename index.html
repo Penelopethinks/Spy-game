@@ -1567,6 +1567,154 @@ selectMission=function(m){
  renderMissionList(document.getElementById('mhSearch').value);
 };
 
+
+/* RESET THE OVERLAPPED HUD: one objective, two navigation actions, plenty of open play space. */
+const unclutteredGameStyle=document.createElement('style');
+unclutteredGameStyle.textContent=`
+:root{--cyan:#a5cfc4;--lime:#d6c18d}
+.topbar{height:64px;padding:15px 22px!important;align-items:center!important;background:linear-gradient(180deg,rgba(8,14,15,.9),rgba(8,14,15,.18))!important}
+.brand{font-size:11px!important;letter-spacing:.16em!important}
+.sub{font-size:8px!important;letter-spacing:.11em!important;opacity:.75}
+.status{gap:16px!important}
+.status>div{font-size:8px!important}
+.status strong{font-size:11px!important}
+.hudleft,.hudright,.scene-sign,.help{display:none!important}
+.field-guide{left:50%!important;bottom:70px!important;transform:translateX(-50%)!important;width:min(460px,calc(100% - 32px))!important;max-width:460px!important;padding:15px 18px!important;gap:6px!important;border-radius:12px!important;border:1px solid #52655f!important;background:rgba(13,20,20,.97)!important;box-shadow:0 8px 28px #0005!important;backdrop-filter:blur(8px)!important}
+.field-guide strong{font-size:9px!important;letter-spacing:.13em!important;color:#d6c18d!important}
+.field-guide span{font-size:13px!important;line-height:1.5!important;color:#f0f3ef!important}
+.field-guide small{font-size:10px!important;line-height:1.45!important;color:#aab8b1!important}
+.field-tools-toggle{align-self:flex-start!important;margin-top:4px!important;background:transparent!important;border:1px solid #354743!important;color:#aebeb7!important}
+.field-tools.open{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.help-button{display:none!important}
+.upgrade-button{top:76px!important;right:22px!important;bottom:auto!important;left:auto!important;transform:none!important;padding:9px 12px!important;border-radius:7px!important;background:#111c1c!important;border:1px solid #455851!important;color:#dce7e1!important;font-size:9px!important;box-shadow:none!important}
+#missionHub{top:76px!important;right:185px!important;bottom:auto!important;left:auto!important;padding:9px 12px!important;border-radius:7px!important;background:#c9dcd1!important;color:#14201c!important;font-size:9px!important;box-shadow:none!important}
+.bottom{min-height:36px!important;padding:7px 22px!important;background:linear-gradient(0deg,rgba(8,13,14,.82),transparent)!important}
+.bottom>.eyebrow{font-size:8px!important;letter-spacing:.08em!important;opacity:.65}
+.mobilepad{left:18px!important;bottom:18px!important;gap:5px!important}
+.mobilepad button{width:42px!important;height:42px!important;background:rgba(16,25,24,.94)!important;border:1px solid #687a70!important;border-radius:10px!important;font-size:13px!important}
+.mobileact{right:18px!important;bottom:22px!important}
+.mobileact button{width:60px!important;height:60px!important;background:#c9dcd1!important;color:#14201c!important;border:0!important;box-shadow:0 5px 18px #0004!important}
+#talkPanel{bottom:130px!important;width:min(470px,calc(100% - 30px))!important;background:rgba(14,22,22,.98)!important;border:1px solid #53675e!important;border-radius:12px!important;box-shadow:0 12px 38px #0008!important}
+#fullMapPanel{background:rgba(7,13,14,.98)!important}
+#fullMapPanel .upgrade-wrap{max-width:1100px!important}
+#fullMapPanel .upgrade-head{border-bottom:1px solid #2d3b38!important;padding-bottom:16px!important}
+#fullMapPanel .facility-layout{grid-template-columns:minmax(0,1fr) 190px!important;gap:18px!important}
+#fullMapPanel .room-list{background:transparent!important;border:0!important;padding:0!important}
+#fullMapPanel .room-item{padding:9px 0!important;border-bottom:1px solid #273632!important}
+#fullMapPanel .upgrade-actions{border-top:1px solid #273632!important}
+#dossierPanel{background:rgba(7,13,14,.98)!important}
+@media(max-width:700px){
+ .topbar{height:56px!important;padding:8px 10px!important}
+ .brand{font-size:9px!important;letter-spacing:.08em!important}
+ .sub{font-size:6px!important;letter-spacing:.04em!important}
+ .status{gap:2px!important}
+ .status>div{padding:3px!important;font-size:6px!important}
+ .status strong{font-size:8px!important}
+ #missionHub{top:64px!important;right:8px!important;bottom:auto!important;padding:7px 8px!important;font-size:7px!important}
+ .upgrade-button{top:64px!important;right:112px!important;bottom:auto!important;padding:7px 8px!important;font-size:7px!important}
+ .field-guide{bottom:108px!important;width:calc(100% - 20px)!important;padding:10px 12px!important}
+ .field-guide span{font-size:11px!important}
+ .field-guide small{font-size:8px!important}
+ .field-tools-toggle{font-size:7px!important;padding:5px 7px!important}
+ .bottom{display:none!important}
+ .mobilepad{left:10px!important;bottom:10px!important}
+ .mobilepad button{width:36px!important;height:36px!important}
+ .mobileact{right:10px!important;bottom:10px!important}
+ .mobileact button{width:52px!important;height:52px!important}
+ #fullMapPanel .facility-layout{grid-template-columns:1fr!important}
+ #fullMapPanel .room-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0 12px!important}
+}
+`;
+document.head.append(unclutteredGameStyle);
+
+/* Case archive: stop stacking boxes inside boxes. Every case uses one editorial page,
+   with four distinct header compositions and only the information needed to start. */
+const cleanCaseV2Style=document.createElement('style');
+cleanCaseV2Style.textContent=`
+#missionPanel{padding:clamp(14px,3vw,32px)!important;background:#080e10!important}
+.mh-wrap{max-width:1180px!important}
+.mh-head{padding-bottom:15px!important;border-bottom:1px solid #293734!important}
+.mh-stamp{font-size:9px!important;letter-spacing:.1em!important;color:#a7c8ba!important}
+.mh-title{font-size:clamp(22px,3vw,32px)!important;letter-spacing:-.04em!important}
+.mh-title span{color:#a7c8ba!important}
+.mh-sub{font-size:9px!important;letter-spacing:.06em!important;color:#8c9e97!important}
+.mh-grid{grid-template-columns:minmax(230px,.72fr) minmax(0,1.35fr)!important;gap:clamp(18px,3vw,34px)!important;margin-top:20px!important}
+.mh-list{max-height:calc(100dvh - 180px)!important;padding:0 12px 0 0!important;border:0!important;border-right:1px solid #273532!important;background:transparent!important}
+.mh-search{position:sticky!important;top:0!important;width:100%!important;margin:0 0 9px!important;padding:11px 12px!important;background:#111b1b!important;border:1px solid #354541!important;border-radius:7px!important}
+.mh-count{font-size:9px!important;letter-spacing:.04em!important;color:#8fa39a!important}
+.mh-card{display:block!important;width:100%!important;text-align:left!important;text-transform:none!important;letter-spacing:0!important;border:0!important;border-bottom:1px solid #24312e!important;border-radius:0!important;background:transparent!important;padding:12px 10px!important}
+.mh-card:hover{background:#101a19!important}
+.mh-card.active{background:#13211e!important;border-left:3px solid #a7c8ba!important;padding-left:12px!important}
+.mh-card b{font-size:11px!important;line-height:1.4!important;color:#e7ede8!important}
+.mh-card small{font-size:9px!important;color:#91a39a!important;margin-top:4px!important}
+.mh-detail{min-height:0!important;padding:0!important;border:0!important;background:transparent!important}
+.case-layout{--case-accent:#a7c8ba!important}
+.case-layout .case-kicker{font-size:9px!important;letter-spacing:.13em!important;color:var(--case-accent)!important}
+.case-layout .case-top{padding:16px 0 18px!important;border-bottom:1px solid #293734!important;background:none!important;border-left:0!important}
+.case-layout h2{font-size:clamp(27px,4vw,43px)!important;letter-spacing:-.045em!important;line-height:1.03!important;margin:10px 0 12px!important;color:#f0f3ef!important}
+.case-layout .case-top p{font-size:13px!important;line-height:1.7!important;max-width:680px!important;color:#aebcb5!important;margin:0!important}
+.case-layout .case-number{font-size:clamp(30px,5vw,55px)!important;color:var(--case-accent)!important;opacity:.8!important}
+.case-layout .case-meta{display:flex!important;gap:8px 18px!important;padding:12px 0!important;border:0!important;border-bottom:1px solid #293734!important;font-size:10px!important;color:#92a49b!important}
+.case-layout .case-meta b{color:#e0e8e2!important}
+.case-layout .case-section{margin:20px 0 0!important}
+.case-layout .case-section h3{font-size:9px!important;letter-spacing:.13em!important;color:var(--case-accent)!important;margin-bottom:7px!important}
+.case-layout .case-section p{font-size:13px!important;line-height:1.7!important;color:#d0dad3!important}
+.case-layout .case-callout{margin-top:18px!important;padding:12px 15px!important;background:#111b19!important;border:0!important;border-left:2px solid var(--case-accent)!important;border-radius:0 6px 6px 0!important}
+.case-layout .case-callout strong{font-size:11px!important;color:#e4ece5!important;margin-bottom:4px!important}
+.case-layout .case-callout p{font-size:12px!important;line-height:1.6!important;color:#aebdb4!important}
+.case-layout .case-contact{grid-template-columns:36px minmax(0,1fr)!important;gap:11px!important;margin-top:19px!important;padding:15px 0!important;border-top:0!important;border-bottom:1px solid #293734!important}
+.case-layout .case-avatar{width:34px!important;height:34px!important;border-radius:9px!important;font-size:15px!important}
+.case-layout .case-contact strong{font-size:12px!important;margin:3px 0!important}
+.case-layout .case-contact p{font-size:11px!important;line-height:1.55!important}
+.case-layout .case-contact button{font-size:8px!important;padding:7px 9px!important;margin-top:7px!important}
+.case-layout .case-steps{display:none!important}
+.case-layout .case-actions{display:flex!important;gap:9px!important;margin-top:20px!important}
+.case-layout .case-actions button{padding:12px 16px!important;border-radius:7px!important;font-size:9px!important}
+.case-layout .case-actions .start{background:#c9dcd1!important;color:#14201c!important}
+.case-layout .case-actions button:not(.start){background:transparent!important;border:1px solid #354540!important}
+.case-layout.layout-0 .case-top{display:grid!important;grid-template-columns:62px minmax(0,1fr)!important;gap:16px!important;align-items:start!important}
+.case-layout.layout-1 .case-top{padding-top:18px!important}
+.case-layout.layout-2 .case-top{display:grid!important;grid-template-columns:minmax(0,1fr) 55px!important;gap:15px!important;align-items:start!important}
+.case-layout.layout-3 .case-top{padding-left:0!important}
+@media(max-width:760px){
+ #missionPanel{padding:12px!important}
+ .mh-head{align-items:flex-start!important}
+ .mh-grid{grid-template-columns:1fr!important;gap:14px!important;margin-top:14px!important}
+ .mh-list{max-height:22dvh!important;border-right:0!important;border-bottom:1px solid #273532!important;padding:0 0 7px!important}
+ .mh-card{display:inline-block!important;vertical-align:top!important;width:min(220px,75%)!important;border:1px solid #263531!important;border-radius:7px!important;margin:0 6px 4px 0!important;padding:9px!important}
+ .mh-card.active{border:1px solid #a7c8ba!important;padding:9px!important}
+ .mh-detail h2{font-size:28px!important}
+ .case-layout .case-meta{gap:8px 12px!important}
+ .case-layout.layout-0 .case-top{grid-template-columns:40px minmax(0,1fr)!important;gap:10px!important}
+ .case-layout.layout-2 .case-top{grid-template-columns:minmax(0,1fr) 38px!important;gap:10px!important}
+ .case-layout .case-number{font-size:35px!important}
+ .case-layout .case-actions button{flex:1;padding:11px 8px!important}
+}
+`;
+document.head.append(cleanCaseV2Style);
+const previousCleanCaseSelect=selectMission;
+selectMission=function(m){
+ selectedMission=m;
+ const detail=document.getElementById('mhDetail');
+ const variant=(m.id-1)%4,accent=['#a7c8ba','#d8c18b','#a7bfe0','#c5a9d8'][variant];
+ const solved=completedMissions.has(m.id),goal=m.goal||'Complete the investigation and recover the missing item.',brief=m.brief||'Explore the location, gather evidence, and speak with your contact.',clue=m.clue||'Review the evidence notes for the next lead.',contactNote=m.contactNote||'Ask questions to learn what they know.',location=m.place||'Unspecified location',contact=m.contact||'Field contact',role=m.role||'CONTACT';
+ let top='';
+ if(variant===0)top='<div class="case-top"><div class="case-number">'+String(m.id).padStart(3,'0')+'</div><div><div class="case-kicker">CASE SUMMARY</div><h2>'+m.title+'</h2><p>'+brief+'</p></div></div>';
+ if(variant===1)top='<div class="case-top"><div class="case-kicker">FIELD REPORT / '+String(m.id).padStart(3,'0')+'</div><h2>'+m.title+'</h2><p>'+brief+'</p></div>';
+ if(variant===2)top='<div class="case-top"><div class="case-kicker">CONTACT DOSSIER</div><h2>'+m.title+'</h2><p>'+contactNote+'</p><div class="case-number" style="margin-top:13px">'+String(m.id).padStart(3,'0')+'</div></div>';
+ if(variant===3)top='<div class="case-top"><div class="case-kicker">LOCATION BRIEF</div><div class="case-location">'+location+'</div><h2>'+m.title+'</h2><p>'+brief+'</p></div>';
+ detail.innerHTML='<article class="case-layout layout-'+variant+'" style="--case-accent:'+accent+'">'+top+
+ '<div class="case-meta"><span>CASE TYPE <b>'+m.kind+'</b></span><span>LEVEL <b>'+m.level+'</b></span><span>STATUS <b>'+(solved?'SOLVED':'READY')+'</b></span></div>'+
+ '<section class="case-section"><h3>Objective</h3><p>'+goal+'</p></section>'+
+ '<div class="case-callout"><strong>Key lead</strong><p>'+clue+'</p></div>'+
+ '<section class="case-contact"><div class="case-avatar" aria-hidden="true">✦</div><div><div class="case-kicker">FIELD CONTACT · '+role.toUpperCase()+'</div><strong>'+contact+'</strong><p>'+contactNote+'</p><button id="mhContact" type="button">OPEN CONTACT FILE</button></div></section>'+
+ '<div class="case-actions"><button class="start" id="mhStart">'+(solved?'PLAY AGAIN':'START CASE')+'</button><button id="mhNext">NEXT CASE →</button></div></article>';
+ document.getElementById('mhContact').onclick=()=>{const box=detail.querySelector('.case-contact');if(box){box.querySelector('p').textContent='“'+contactNote+'” Talk with '+contact+' during the case and ask all three questions.';box.querySelector('button').remove();}};
+ document.getElementById('mhStart').onclick=()=>{activateMissionScene(m);missionPanel.classList.remove('open');notify('CASE STARTED',m.place+' is ready. Follow the next step below.')};
+ document.getElementById('mhNext').onclick=()=>selectMission(missions[m.id%missions.length]);
+ renderMissionList(document.getElementById('mhSearch').value);
+};
+
 })();
 
 </script></body></html>
