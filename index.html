@@ -561,7 +561,7 @@ const originalDrawWorld=drawWorld;drawWorld=function(){originalDrawWorld();const
 const dossierPanel=document.createElement('section');dossierPanel.className='upgrade-panel';dossierPanel.id='dossierPanel';dossierPanel.innerHTML=`<div class="upgrade-wrap"><div class="upgrade-head"><div><div class="upgrade-kicker">MYSTERY CLUB / DETECTIVE NOVA-07</div><div class="upgrade-title">Your mission, explained.</div><div class="upgrade-copy">This is a gentle detective game. Visit a new place, collect three clues, ask a friendly contact, and use the terminal to find a missing item. There are no timers or scary surprises. Take your time and solve the mystery your way.</div></div><button id="dossierClose">CLOSE ✕</button></div><div class="dossier-grid"><article class="dossier-card"><b>01 / WHERE AM I?</b><p>You are at Northstar HQ, a six-area intelligence facility. You begin in the Briefing Room. Doorways connect the rooms, and the full overhead floor plan shows where you are at all times.</p></article><article class="dossier-card"><b>02 / WHAT IS MY TARGET?</b><p>Your main target is the missing Northstar briefcase, last logged in Evidence Storage. It is locked, so you need to gather three intel fragments and use them to unlock the secure terminal first.</p></article><article class="dossier-card"><b>03 / WHAT AM I TRYING TO DO?</b><p>Investigate the facility, search for clues, talk to Mara Vale, Theo Chen, and Iris Brooks, recover intel A, B, and C, access the terminal, learn the case code, and retrieve the briefcase.</p></article></div><div class="upgrade-kicker">YOUR INVESTIGATION PLAN</div><div class="dossier-grid"><article class="dossier-card"><b>FIRST · PREPARE</b><p>Check the briefing console and equipment locker. The locker contains a field kit; the console has a short mission recording.</p></article><article class="dossier-card"><b>THEN · COLLECT EVIDENCE</b><p>Find the three fragments across the Briefing Room, Tech Lab, and Rooftop Access. The map and directional markers help you navigate.</p></article><article class="dossier-card"><b>FINALLY · SOLVE IT</b><p>Visit Operations to unlock the terminal after all fragments are collected. Use its case code, then head to Evidence Storage and recover the case.</p></article></div><div class="upgrade-copy"><b style="color:#f2fffd">Room guide:</b> Briefing Room = mission start · Tech Lab = workstation logs · Equipment Bay = field kit · Operations = secure terminal · Evidence Storage = missing case · Rooftop Access = final intel clue.</div><div class="upgrade-actions"><button id="dossierMap">OPEN THE WHOLE FACILITY MAP ↗</button><button id="enterFacility" class="primary">I UNDERSTAND — ENTER FACILITY →</button></div></div>`;document.querySelector('.game').append(dossierPanel);let dossierReviewed=false;const startButton=document.getElementById('start');document.getElementById('dossierClose').addEventListener('click',()=>dossierPanel.classList.remove('open'));document.getElementById('dossierMap').addEventListener('click',()=>{dossierPanel.classList.remove('open');openFullMap()});document.getElementById('enterFacility').addEventListener('click',()=>{dossierReviewed=true;dossierPanel.classList.remove('open');startButton.click()});
 // Make the opening screen's promise and tone match the actual friendly detective game.
 const briefParagraph=document.querySelector('#briefing .brief p');if(briefParagraph)briefParagraph.textContent='A Northstar briefcase has gone missing, and your job is to solve the mystery. Before entering, review your location, target, investigation plan, and the complete facility map. Explore at your own pace, interview friendly contacts, and follow the clues.';const threatLabel=document.querySelector('#briefing .briefgrid div:last-child b');if(threatLabel){threatLabel.textContent='MYSTERY';threatLabel.style.color='var(--lime)'}const startLabel=document.getElementById('start');if(startLabel)startLabel.innerHTML='START MISSION &nbsp; →';
-function frame(now){if(now-lastFrameDraw<33){requestAnimationFrame(frame);return}let dt=Math.min(.05,(now-last)/1000);last=now;lastFrameDraw=now;if(started){let speed=(keys.ShiftLeft||keys.ShiftRight)?2.65:1.65,move=0,strafe=0;if(keys.ArrowUp)move++;if(keys.ArrowDown)move--;if(keys.ArrowLeft)pa-=dt*1.8;if(keys.ArrowRight)pa+=dt*1.8;let vx=(Math.cos(pa)*move-Math.sin(pa)*strafe)*speed*dt,vy=(Math.sin(pa)*move+Math.cos(pa)*strafe)*speed*dt;if(!wall(px+vx*1.3,py))px+=vx;if(!wall(px,py+vy*1.3))py+=vy;let o=nearby();document.getElementById('interact').classList.toggle('show',!!o);const bottomInteract=document.getElementById('mobileE');if(bottomInteract){bottomInteract.disabled=!o;bottomInteract.classList.toggle('ready',!!o);bottomInteract.querySelector('small').textContent=o?'READY':'Find an item'}if(o)document.getElementById('interactText').textContent=o.name;document.getElementById('scanText').textContent=o?o.name:'No nearby signals';const roomKey=roomAt()+'|'+(activeMission?.id||1);if(roomKey!==lastHudRoom){lastHudRoom=roomKey;setRoom()}}safeRenderScene();requestAnimationFrame(frame)}requestAnimationFrame(frame);
+function frame(now){if(now-lastFrameDraw<33){requestAnimationFrame(frame);return}let dt=Math.min(.05,(now-last)/1000);last=now;lastFrameDraw=now;if(started){let speed=(keys.ShiftLeft||keys.ShiftRight)?2.65:1.65,move=0,strafe=0;if(keys.ArrowUp)move++;if(keys.ArrowDown)move--;if(keys.ArrowLeft)strafe--;if(keys.ArrowRight)strafe++;const magnitude=Math.hypot(move,strafe)||1;move/=magnitude;strafe/=magnitude;let vx=(Math.cos(pa)*move-Math.sin(pa)*strafe)*speed*dt,vy=(Math.sin(pa)*move+Math.cos(pa)*strafe)*speed*dt;if(!wall(px+vx*1.3,py))px+=vx;if(!wall(px,py+vy*1.3))py+=vy;let o=nearby();document.getElementById('interact').classList.toggle('show',!!o);const bottomInteract=document.getElementById('mobileE');if(bottomInteract){bottomInteract.disabled=!o;bottomInteract.classList.toggle('ready',!!o);bottomInteract.querySelector('small').textContent=o?'READY':'Find an item'}if(o)document.getElementById('interactText').textContent=o.name;document.getElementById('scanText').textContent=o?o.name:'No nearby signals';const roomKey=roomAt()+'|'+(activeMission?.id||1);if(roomKey!==lastHudRoom){lastHudRoom=roomKey;setRoom()}}safeRenderScene();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 addEventListener('keydown',e=>{keys[e.code]=true;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();if(e.code==='KeyE'&&started)interact();if(e.code==='Escape'&&document.pointerLockElement)document.exitPointerLock()});addEventListener('keyup',e=>keys[e.code]=false);canvas.addEventListener('click',()=>{});document.addEventListener('pointerlockchange',()=>mouseLocked=document.pointerLockElement===canvas);document.addEventListener('pointermove',e=>{if(started&&!mouseLocked)pa=aimBase+(e.clientX/W-.5)*Math.PI*2});document.getElementById('start').addEventListener('click',()=>{document.getElementById('briefing').classList.add('hidden');started=true;aimBase=pa;notify('MISSION ACCEPTED','Point with the cursor and click to move forward.');});document.getElementById('mobileE').innerHTML='E<small>INTERACT</small>';document.getElementById('mobileE').setAttribute('aria-label','Interact with nearby object (E)');document.getElementById('mobileE').addEventListener('click',interact);document.querySelectorAll('[data-move]').forEach(b=>{
  const action=b.dataset.move;
  const code={forward:'ArrowUp',back:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'}[action];
@@ -2359,67 +2359,81 @@ function safeRenderScene(){
 
 
 
-/* FINAL CONTROL REPAIR: keep one arrow pad, remove keyboard-layout confusion,
-   and make touch/mouse presses feed the same keys read by the movement loop. */
-const finalPad=document.querySelector('.clean-dock .mobilepad');
-if(finalPad){
- finalPad.setAttribute('aria-label','Yellow movement buttons');
- finalPad.querySelectorAll('button').forEach(btn=>{
-  const code=btn.classList.contains('up')?'ArrowUp':btn.classList.contains('down')?'ArrowDown':btn.classList.contains('left')?'ArrowLeft':'ArrowRight';
-  btn.dataset.moveCode=code;
-  btn.style.touchAction='none';
-  btn.addEventListener('contextmenu',e=>e.preventDefault());
-  let tapTimer=0;
-  const release=()=>{keys[code]=false;btn.classList.remove('is-pressed')};
-  btn.addEventListener('pointerdown',e=>{
-   e.preventDefault();
-   if(!started){document.getElementById('briefing')?.classList.remove('hidden');return}
-   if(tapTimer){clearTimeout(tapTimer);tapTimer=0}
-   keys[code]=true;btn.classList.add('is-pressed');
-   try{btn.setPointerCapture(e.pointerId)}catch(_){}
-  });
-  for(const eventName of ['pointerup','pointercancel','lostpointercapture']){
-   btn.addEventListener(eventName,()=>{
-    if(tapTimer)clearTimeout(tapTimer);
-    tapTimer=0;release();
-   });
-  }
-  btn.addEventListener('click',e=>{
-   e.preventDefault();
-   if(!started){document.getElementById('briefing')?.classList.remove('hidden');return}
-   /* pointerup happens before click on touchscreens, so provide a short tap step. */
-   keys[code]=true;btn.classList.add('is-pressed');
-   if(tapTimer)clearTimeout(tapTimer);
-   tapTimer=setTimeout(()=>{release();tapTimer=0},240);
-  });
- });
-}
-const finalControlStyle=document.createElement('style');
-finalControlStyle.textContent=`
- .clean-dock.is-collapsed{width:min(760px,calc(100% - 12px))!important;max-width:calc(100% - 12px)!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important}
- .clean-dock.is-collapsed .dock-movement{display:flex!important;justify-content:center!important;flex-wrap:wrap!important;gap:8px!important;padding:7px!important}
- .clean-dock.is-collapsed .dock-actions{display:flex!important;justify-content:center!important;flex-wrap:wrap!important;gap:5px!important}
- .clean-dock.is-collapsed .dock-main{display:none!important}
- .clean-dock .dock-main{display:block!important}
- .clean-dock .dock-step{width:100%!important}
- .clean-dock .mobilepad{display:grid!important;grid-template-columns:repeat(3,38px)!important;grid-template-rows:repeat(2,38px)!important;gap:4px!important}
+/* FINAL CONTROL REPAIR: one yellow arrow pad, dependable movement, working mystery start. */
+const finalPad=document.querySelector('.clean-dock .mobilepad')||document.querySelector('.mobilepad');
+const finalControlsStyle=document.createElement('style');
+finalControlsStyle.textContent=`
+ .controls{display:none!important}
+ .game>.mobilepad{display:none!important}
+ .clean-dock .mobilepad{display:grid!important;grid-template-columns:repeat(3,42px)!important;grid-template-rows:repeat(2,42px)!important;gap:4px!important;position:static!important;inset:auto!important;transform:none!important;pointer-events:auto!important;z-index:20!important}
  .clean-dock .mobilepad .up{grid-column:2!important;grid-row:1!important}
  .clean-dock .mobilepad .left{grid-column:1!important;grid-row:2!important}
  .clean-dock .mobilepad .down{grid-column:2!important;grid-row:2!important}
  .clean-dock .mobilepad .right{grid-column:3!important;grid-row:2!important}
- .clean-dock .mobilepad button{width:38px!important;min-width:38px!important;height:38px!important;min-height:38px!important;background:#f0c84b!important;border:1px solid #ffdf77!important;color:#17170e!important;box-shadow:0 2px 0 #98751d!important;touch-action:none!important;user-select:none!important;-webkit-user-select:none!important}
- .clean-dock .mobilepad button.is-pressed{transform:translateY(2px)!important;box-shadow:0 0 0 #98751d!important;background:#ffe17a!important}
+ .clean-dock .mobilepad button{display:flex!important;align-items:center!important;justify-content:center!important;width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;background:#f0c84b!important;border:1px solid #ffdf77!important;color:#17170e!important;box-shadow:0 2px 0 #98751d!important;touch-action:none!important;user-select:none!important;-webkit-user-select:none!important;pointer-events:auto!important;position:relative!important;z-index:21!important}
+ .clean-dock .mobilepad button.is-pressed{transform:translateY(2px)!important;box-shadow:none!important;background:#ffe17a!important}
  .clean-dock .mobilepad button small{display:none!important}
- .next-stop-route{overflow-wrap:anywhere}
- .field-tools.open{display:grid!important}
- .clean-dock .field-tools.open{grid-template-columns:repeat(3,minmax(0,1fr))!important}
- @media(max-width:390px){.clean-dock .mobilepad{grid-template-columns:repeat(3,32px)!important;grid-template-rows:repeat(2,32px)!important}.clean-dock .mobilepad button{width:32px!important;min-width:32px!important;height:32px!important;min-height:32px!important}}
+ .clean-dock .field-tools,.clean-dock .field-tools.open{position:relative!important;z-index:30!important;pointer-events:auto!important}
+ .clean-dock .field-tools button{pointer-events:auto!important;touch-action:manipulation}
+ #missionPanel{z-index:10000!important}
+ #missionPanel .mh-actions,#missionPanel #mhStart{position:relative!important;z-index:10002!important;pointer-events:auto!important}
+ #fullMapPanel{z-index:10000!important}
+ .upgrade-button{z-index:10001!important;pointer-events:auto!important}
+ @media(max-width:390px){.clean-dock .mobilepad{grid-template-columns:repeat(3,36px)!important;grid-template-rows:repeat(2,36px)!important}.clean-dock .mobilepad button{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important}}
 `;
-document.head.append(finalControlStyle);
-/* Make the map action explicitly refresh and reveal the real facility map. */
-if(fullMapButton)fullMapButton.onclick=()=>{try{refreshFullMap();fullMapPanel.classList.add('open')}catch(err){notify('MAP UNAVAILABLE','The map could not refresh. Close this message and try MAP again.');console.error(err)}};
-/* Keep gadget controls responsive even if another UI layer changes their visibility. */
-/* The existing gadgetToggle click listener remains the single source of toggle state. */
+document.head.append(finalControlsStyle);
+if(finalPad){
+ finalPad.setAttribute('aria-label','Yellow arrow movement controls');
+ finalPad.querySelectorAll('button').forEach(btn=>{
+  const code=btn.classList.contains('up')?'ArrowUp':btn.classList.contains('down')?'ArrowDown':btn.classList.contains('left')?'ArrowLeft':'ArrowRight';
+  btn.dataset.finalMoveCode=code;
+  btn.setAttribute('aria-label',({ArrowUp:'Move forward',ArrowDown:'Move backward',ArrowLeft:'Move left',ArrowRight:'Move right'})[code]);
+  btn.style.touchAction='none';
+  let timer=0;
+  const release=()=>{keys[code]=false;btn.classList.remove('is-pressed')};
+  /* Capture and replace older duplicate handlers on these same buttons. */
+  btn.addEventListener('pointerdown',e=>{
+   e.preventDefault();e.stopImmediatePropagation();
+   if(!started){document.getElementById('briefing')?.classList.remove('hidden');return}
+   if(timer){clearTimeout(timer);timer=0}
+   keys[code]=true;btn.classList.add('is-pressed');
+   try{btn.setPointerCapture(e.pointerId)}catch(_){}
+  },true);
+  for(const ev of ['pointerup','pointercancel','lostpointercapture']){
+   btn.addEventListener(ev,e=>{e.stopImmediatePropagation();if(timer){clearTimeout(timer);timer=0}release()},true);
+  }
+  btn.addEventListener('click',e=>{
+   e.preventDefault();e.stopImmediatePropagation();
+   if(!started){document.getElementById('briefing')?.classList.remove('hidden');return}
+   keys[code]=true;btn.classList.add('is-pressed');
+   if(timer)clearTimeout(timer);
+   timer=setTimeout(()=>{release();timer=0},260);
+  },true);
+ });
+}
+addEventListener('blur',()=>finalPad?.querySelectorAll('button').forEach(btn=>{const code=btn.dataset.finalMoveCode;if(code)keys[code]=false;btn.classList.remove('is-pressed')}));
+/* Use one authoritative launch path for every generated mystery's START button. */
+document.addEventListener('click',function(e){
+ const button=e.target&&e.target.closest?e.target.closest('#mhStart'):null;
+ if(!button)return;
+ e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+ const mission=selectedMission||activeMission||(typeof missions!=='undefined'?missions[0]:null);
+ if(!mission){notify('MYSTERY NOT READY','Choose a mystery from the archive and try again.');return}
+ try{activateMissionScene(mission)}catch(err){console.error('Could not load selected mystery',err);notify('MYSTERY LOAD ISSUE','The case could not load. Please choose another mystery.');return}
+ activeMission=mission;selectedMission=mission;started=true;dossierReviewed=true;
+ document.getElementById('briefing')?.classList.add('hidden');
+ document.getElementById('dossierPanel')?.classList.remove('open');
+ document.getElementById('missionPanel')?.classList.remove('open');
+ const status=document.getElementById('status');if(status)status.textContent='ACTIVE';
+ const agentName=document.getElementById('agentName');if(agentName)agentName.textContent=agent;
+ aimBase=pa;
+ try{setRoom();updateObjectives();updateKit();drawMap();refreshFullMap();updateFieldGuide();updateCleanPlan();refreshLiveNavigation();saveMissionProgress()}catch(err){console.error('Post-launch refresh failed',err)}
+ notify('MYSTERY STARTED',mission.title+' · '+mission.place+' — use the yellow arrows to move.');
+},true);
+/* Make the mission archive and gadget/map controls sit above decoration, never over each other. */
+if(typeof missionHub!=='undefined'){missionHub.style.zIndex='10001';missionHub.style.pointerEvents='auto'}
+document.querySelectorAll('.clean-dock .field-tools button,.clean-dock .field-tools-toggle,.clean-dock #missionHub,.clean-dock .upgrade-button').forEach(el=>{el.style.pointerEvents='auto';el.style.position='relative';el.style.zIndex='31'});
+if(typeof fullMapButton!=='undefined')fullMapButton.onclick=()=>{try{refreshFullMap();fullMapPanel.classList.add('open')}catch(err){console.error(err);notify('MAP UNAVAILABLE','The facility map could not refresh.')}};
 
 
 })();
