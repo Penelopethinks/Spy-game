@@ -1110,6 +1110,28 @@ document.getElementById('enterFacility').addEventListener('click',function(e){
  notify('MISSION STARTED','You are inside the facility. Follow the next-step guide to begin.');
 },true);
 
+
+/* HARDENED START: handle the opening button in capture phase so older overlays/listeners cannot swallow it. */
+document.addEventListener('click',function(e){
+ const button=e.target&&e.target.closest?e.target.closest('#start'):null;
+ if(!button)return;
+ e.preventDefault();
+ e.stopPropagation();
+ e.stopImmediatePropagation();
+ started=true;
+ dossierReviewed=true;
+ const briefing=document.getElementById('briefing');
+ if(briefing)briefing.classList.add('hidden');
+ if(dossierPanel)dossierPanel.classList.remove('open');
+ if(missionPanel)missionPanel.classList.remove('open');
+ document.getElementById('status').textContent='ACTIVE';
+ document.getElementById('agentName').textContent=agent;
+ aimBase=pa;
+ setRoom();updateObjectives();updateKit();drawMap();refreshFullMap();updateFieldGuide();updateCleanPlan();refreshLiveNavigation();
+ try{saveMissionProgress()}catch(err){}
+ notify('MISSION STARTED','You are now exploring. Follow the next-step guide and use the movement controls.');
+},true);
+
 })();
 
 </script></body></html>
