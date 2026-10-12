@@ -2119,6 +2119,95 @@ const launchBaseInteract=interact;
 interact=function(){launchBaseInteract();syncMissionLaunchButton()};
 syncMissionLaunchButton();
 
+
+/* SIMPLE DIRECTIONS PANEL: replace the confusing mini-map with one clear destination and one action. */
+const simpleDirectionsStyle=document.createElement('style');
+simpleDirectionsStyle.textContent=`
+.hudright .mapbox,.hudright>.readout{display:none!important}
+.hudright{pointer-events:none!important;top:105px!important;right:22px!important;width:min(285px,27vw)!important;max-width:calc(100vw - 24px)!important}
+.next-stop-panel{display:block;box-sizing:border-box;width:100%;padding:16px;border:1px solid #6d8a7c;background:rgba(13,25,23,.96);border-radius:12px;color:#eef5ef;box-shadow:0 12px 32px #0005;overflow-wrap:anywhere}
+.next-stop-kicker{font-size:10px;letter-spacing:.14em;color:#b8d8c7;font-weight:800}
+.next-stop-destination{font-size:22px;line-height:1.15;font-weight:900;margin:9px 0 12px;color:#e6f2e9}
+.next-stop-action{font-size:14px;line-height:1.55;color:#e3e9e3}
+.next-stop-action b{color:#c7e6d2}
+.next-stop-route{margin-top:12px;padding-top:11px;border-top:1px solid #ffffff22;font-size:11px;line-height:1.55;color:#b8c5bc}
+.next-stop-key{display:inline-block;margin:0 4px 4px 0;padding:4px 7px;border:1px solid #6c8979;border-radius:5px;color:#f1f5ef;font-weight:800}
+#missionPanel{overscroll-behavior:contain!important}
+#missionPanel .mh-wrap{padding-bottom:20px!important}
+#missionPanel .mh-grid{min-height:0!important}
+#missionPanel .mh-list,#missionPanel .mh-detail{min-height:0!important;overflow:auto!important;overscroll-behavior:contain!important}
+#missionPanel .mh-detail{overflow-wrap:anywhere!important}
+.topbar{height:auto!important;min-height:72px!important;max-height:none!important;padding-bottom:12px!important;z-index:30!important}
+.topbar>div:first-child{min-width:0!important;max-width:calc(100vw - 250px)!important}
+.brand,.sub{overflow:visible!important;white-space:normal!important;overflow-wrap:anywhere!important}
+.status{flex-wrap:wrap!important;max-width:45vw!important;justify-content:flex-end!important}
+.field-guide{z-index:20!important}
+@media(max-width:760px){
+ .topbar{position:absolute!important;display:flex!important;gap:8px!important;padding:9px 10px 12px!important;min-height:62px!important}
+ .topbar>div:first-child{max-width:48vw!important}
+ .status{max-width:48vw!important;gap:3px!important}
+ .hudleft{display:none!important}
+ .hudright{top:96px!important;left:10px!important;right:10px!important;width:auto!important;max-width:none!important;z-index:7!important}
+ .next-stop-panel{padding:10px 12px!important;border-radius:9px!important}
+ .next-stop-kicker{font-size:9px!important}
+ .next-stop-destination{font-size:17px!important;margin:5px 0 6px!important}
+ .next-stop-action{font-size:12px!important;line-height:1.4!important}
+ .next-stop-route{font-size:10px!important;margin-top:7px!important;padding-top:7px!important}
+ .field-guide{left:10px!important;right:10px!important;bottom:64px!important;width:auto!important;max-height:28dvh!important;z-index:9!important}
+ .mobilepad{z-index:10!important}
+ .mobileact{z-index:11!important}
+ #missionPanel{padding:10px!important}
+ #missionPanel .mh-wrap{padding-bottom:20px!important}
+ #missionPanel .mh-head{flex-wrap:wrap!important}
+ #missionPanel .mh-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important}
+ #missionPanel .mh-list{max-height:30dvh!important}
+ #missionPanel .mh-detail{max-height:none!important;min-height:0!important}
+}
+@media(max-height:650px) and (min-width:761px){
+ .hudright{top:90px!important;width:250px!important}
+ .next-stop-panel{padding:11px!important}
+ .next-stop-destination{font-size:18px!important}
+ .next-stop-action{font-size:12px!important}
+ .field-guide{max-height:34dvh!important}
+}
+`;
+document.head.append(simpleDirectionsStyle);
+const nextStopPanel=document.createElement('section');
+nextStopPanel.className='next-stop-panel';
+nextStopPanel.setAttribute('aria-live','polite');
+nextStopPanel.innerHTML='<div class="next-stop-kicker">YOUR NEXT DESTINATION</div><div class="next-stop-destination" id="nextStopDestination">Briefing Room</div><div class="next-stop-action" id="nextStopAction">Find the first glowing clue and press E when you are close.</div><div class="next-stop-route" id="nextStopRoute"><span class="next-stop-key">W A S D</span> Move <span class="next-stop-key">E</span> Inspect</div>';
+const directionsDock=document.querySelector('.hudright');
+if(directionsDock)directionsDock.prepend(nextStopPanel);
+function refreshSimpleDirections(){
+ if(!nextStopPanel||!activeMission)return;
+ const currentIndex=(py<6?0:py<12?1:2)*2+(px<11?0:1);
+ const currentName=navRoomNames[currentIndex]||'Current room';
+ const target=nextMissionTarget();
+ let targetName=currentName,action='Look around this room for anything marked.';
+ if(caseFound){targetName='Mystery solved';action='You recovered the missing item. Open the case archive to choose another mystery.'}
+ else if(target){
+  const ti=(target.y<6?0:target.y<12?1:2)*2+(target.x<11?0:1);
+  targetName=navRoomNames[ti]||currentName;
+  if(['a','b','c'].includes(target.id))action='Find the glowing clue '+(frags+1)+' of 3, move close, then press <b>E</b> to collect it.';
+  else if(target.type===10)action='Find <b>'+String(activeMission.contact||'your contact')+'</b>, move close, press <b>E</b>, and finish the conversation.';
+  else if(target.id==='terminal')action='Go to the case-file computer and press <b>E</b> to read the record.';
+  else if(target.id==='case')action='Go to the marked missing item and press <b>E</b> to recover it.';
+ }
+ const dest=document.getElementById('nextStopDestination');
+ const act=document.getElementById('nextStopAction');
+ const route=document.getElementById('nextStopRoute');
+ if(dest)dest.textContent=targetName===currentName?'Stay in '+currentName:targetName;
+ if(act)act.innerHTML=action;
+ if(route)route.innerHTML='<b>YOU ARE IN:</b> '+currentName+'<br><span class="next-stop-key">W A S D</span> Move <span class="next-stop-key">E</span> Inspect';
+}
+const originalSimplePlanUpdate=updateCleanPlan;
+updateCleanPlan=function(){originalSimplePlanUpdate();refreshSimpleDirections()};
+const originalSimpleRoomUpdate=setRoom;
+setRoom=function(){originalSimpleRoomUpdate();refreshSimpleDirections()};
+const originalSimpleObjectiveUpdate=updateObjectives;
+updateObjectives=function(){originalSimpleObjectiveUpdate();refreshSimpleDirections()};
+refreshSimpleDirections();
+
 })();
 
 </script></body></html>
