@@ -1780,6 +1780,92 @@ const viewportFitAndVibeStyle=document.createElement('style');viewportFitAndVibe
 
 const professionalUiStyle=document.createElement('style');professionalUiStyle.textContent="\n/* ONE CONSISTENT, RESPONSIVE DESIGN SYSTEM */\n:root{--ui-line:#344541;--ui-text:#edf2ee;--ui-muted:#a3b2ab;--ui-accent:#b7d7c8;--ui-accent-ink:#10201a}\n.game button{font-family:inherit!important;font-size:11px!important;font-weight:700!important;letter-spacing:.045em!important;line-height:1.25!important;text-transform:uppercase!important;border:1px solid var(--ui-line)!important;border-radius:7px!important;background:#172322!important;color:var(--ui-text)!important;box-shadow:none!important;transition:background .15s,border-color .15s!important;transform:none!important;white-space:normal!important;overflow-wrap:anywhere!important}\n.game button:hover{background:#202f2c!important;border-color:#718c7e!important;transform:none!important}\n.game button:focus-visible{outline:2px solid var(--ui-accent)!important;outline-offset:2px!important}\n.game button.start,.game #mhStart{background:var(--ui-accent)!important;border-color:var(--ui-accent)!important;color:var(--ui-accent-ink)!important}\n#missionHub,.upgrade-button{min-height:38px!important;padding:9px 12px!important;border:1px solid #4b6258!important;border-radius:7px!important;background:#101a1b!important;color:#eaf0eb!important;font-size:10px!important;box-shadow:none!important}\n#missionHub{background:var(--ui-accent)!important;border-color:var(--ui-accent)!important;color:var(--ui-accent-ink)!important}\n#missionPanel{padding:clamp(12px,2vw,24px)!important;background:rgba(7,12,13,.985)!important}\n#missionPanel .mh-head{gap:12px!important;align-items:center!important;padding:0 0 15px!important;border-bottom:1px solid #2d3b37!important}\n#missionPanel .mh-title{font-size:clamp(22px,2.6vw,30px)!important;letter-spacing:-.035em!important;color:#eef3ef!important}\n#missionPanel .mh-title span{color:var(--ui-accent)!important}\n#missionPanel .mh-sub{font-size:10px!important;line-height:1.5!important;letter-spacing:.07em!important;color:var(--ui-muted)!important}\n#missionPanel .mh-grid{grid-template-columns:minmax(230px,.78fr) minmax(0,1.22fr)!important;gap:clamp(12px,2vw,22px)!important;margin-top:16px!important;align-items:start!important}\n#missionPanel .mh-list{max-height:calc(100dvh - 160px)!important;padding:0 10px 0 0!important;border:0!important;border-right:1px solid #293633!important;background:transparent!important;overflow:auto!important}\n#missionPanel .mh-search{position:sticky!important;top:0!important;z-index:2!important;width:100%!important;margin:0 0 8px!important;padding:11px 12px!important;border:1px solid var(--ui-line)!important;border-radius:7px!important;background:#111b1b!important;color:var(--ui-text)!important;font:inherit!important;font-size:12px!important}\n#missionPanel .mh-count{font-size:10px!important;line-height:1.5!important;letter-spacing:.045em!important;color:var(--ui-muted)!important}\n#missionPanel .mh-card{display:block!important;width:100%!important;min-height:52px!important;margin:0!important;padding:10px 12px!important;text-align:left!important;text-transform:none!important;letter-spacing:0!important;border:0!important;border-bottom:1px solid #26322f!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}\n#missionPanel .mh-card:hover{background:#15201d!important;border-color:#26322f!important}\n#missionPanel .mh-card.active{background:#182722!important;border-left:3px solid var(--ui-accent)!important;padding-left:9px!important}\n#missionPanel .mh-card b{display:block!important;font-size:11px!important;line-height:1.4!important;font-weight:750!important;color:#eef3ef!important}\n#missionPanel .mh-card small{display:block!important;margin-top:4px!important;font-size:9px!important;line-height:1.4!important;color:var(--ui-muted)!important}\n#missionPanel .mh-detail{max-height:calc(100dvh - 160px)!important;overflow:auto!important;padding:clamp(14px,2vw,22px)!important;border:1px solid #293633!important;border-radius:10px!important;background:#0d1515!important}\n#missionPanel .case-layout{min-width:0!important;overflow-wrap:anywhere!important}\n#missionPanel .case-layout h2{font-size:clamp(23px,3vw,36px)!important;line-height:1.08!important;letter-spacing:-.035em!important;color:#f0f4f0!important}\n#missionPanel .case-layout .case-meta{gap:8px 14px!important;line-height:1.5!important}\n#missionPanel .case-layout .case-section p,#missionPanel .case-layout .case-contact p,#missionPanel .case-layout .case-callout p{font-size:12px!important;line-height:1.65!important;color:#b6c3bc!important}\n#missionPanel .case-layout .case-callout{border-radius:0 7px 7px 0!important;box-shadow:none!important}\n#missionPanel .case-layout .case-actions{display:flex!important;flex-wrap:wrap!important;gap:8px!important;position:sticky!important;bottom:-1px!important;padding:12px 0 2px!important;background:linear-gradient(0deg,#0d1515 78%,transparent)!important;z-index:2!important}\n#missionPanel .case-layout .case-actions button{flex:1 1 145px!important;min-height:40px!important}\n#missionPanel .case-layout.layout-0{--case-accent:#b7d7c8!important}\n#missionPanel .case-layout.layout-0 .case-top{display:grid!important;grid-template-columns:54px minmax(0,1fr)!important;gap:14px!important;align-items:start!important}\n#missionPanel .case-layout.layout-0 .case-number{display:grid!important;place-items:center!important;min-height:54px!important;border:1px solid var(--case-accent)!important;background:#14231d!important;border-radius:8px!important;font-size:20px!important}\n#missionPanel .case-layout.layout-1{--case-accent:#d9c49a!important}\n#missionPanel .case-layout.layout-1 .case-top{border-top:2px solid var(--case-accent)!important;padding-top:14px!important}\n#missionPanel .case-layout.layout-1 .case-kicker{color:var(--case-accent)!important}\n#missionPanel .case-layout.layout-2{--case-accent:#b7c8df!important}\n#missionPanel .case-layout.layout-2 .case-top{background:#121c27!important;padding:15px!important;border-left:3px solid var(--case-accent)!important}\n#missionPanel .case-layout.layout-2 .case-contact{background:#111a23!important;padding:13px!important;border:1px solid #2b3a4b!important;border-radius:7px!important}\n#missionPanel .case-layout.layout-3{--case-accent:#d4b8d9!important}\n#missionPanel .case-layout.layout-3 .case-top{background:linear-gradient(110deg,#201a24,transparent 85%)!important;padding:15px 12px!important;border-bottom:1px solid #3a2e3d!important}\n#missionPanel .case-layout.layout-3 .case-location{display:inline-block!important;margin:8px 0!important;padding:6px 9px!important;border:1px solid var(--case-accent)!important;border-radius:5px!important;color:var(--case-accent)!important;font-size:10px!important;letter-spacing:.04em!important}\n.field-guide{left:50%!important;bottom:64px!important;transform:translateX(-50%)!important;width:min(460px,calc(100% - 32px))!important;max-height:calc(100dvh - 155px)!important;overflow:auto!important;border:1px solid #40534a!important;border-radius:9px!important;background:rgba(13,20,20,.97)!important;box-shadow:0 8px 24px #0004!important}\n@media(max-width:760px){\n #missionPanel .mh-grid{grid-template-columns:minmax(0,1fr)!important;gap:12px!important}\n #missionPanel .mh-list{max-height:30dvh!important;border-right:0!important;border-bottom:1px solid #293633!important;padding:0 0 8px!important}\n #missionPanel .mh-detail{max-height:none!important;overflow:visible!important;padding:13px!important}\n #missionPanel .mh-head{position:sticky!important;top:-1px!important;z-index:4!important;align-items:flex-start!important}\n #missionPanel .mh-card{min-height:48px!important;padding:8px 10px!important}\n #missionPanel .case-layout .case-contact{grid-template-columns:36px minmax(0,1fr)!important;gap:10px!important;padding:12px 0!important}\n #missionPanel .case-layout .case-avatar{width:34px!important;height:34px!important}\n #missionPanel .case-layout .case-top{grid-template-columns:44px minmax(0,1fr)!important;gap:10px!important}\n #missionPanel .case-layout .case-number{min-height:44px!important;font-size:16px!important}\n #missionHub{right:10px!important;top:70px!important;bottom:auto!important;left:auto!important}\n .upgrade-button{top:70px!important;left:10px!important;right:auto!important}\n .topbar{min-height:58px!important;height:auto!important;padding:9px 10px!important;align-items:flex-start!important}\n .brand{max-width:45vw!important;font-size:9px!important;line-height:1.5!important}\n .sub{font-size:7px!important;letter-spacing:.05em!important}\n .status{gap:4px!important}\n .status>div{font-size:7px!important;padding:4px 5px!important}\n .status strong{font-size:9px!important;margin-top:2px!important}\n .field-guide{bottom:75px!important;width:calc(100% - 20px)!important;max-height:31dvh!important;padding:9px 11px!important}\n .field-guide span{font-size:12px!important;line-height:1.35!important}\n .field-guide small{font-size:9px!important}\n .mobilepad{left:8px!important;bottom:8px!important;transform:scale(.78)!important;transform-origin:bottom left!important}\n .mobileact{right:10px!important;bottom:10px!important}\n .mobileact button{width:48px!important;height:48px!important}\n .bottom{display:none!important}\n}\n@media(max-height:650px) and (min-width:761px){\n .field-guide{bottom:45px!important;max-height:28dvh!important;padding:8px 12px!important}\n .field-guide span{font-size:11px!important}\n #missionPanel .mh-list,#missionPanel .mh-detail{max-height:calc(100dvh - 135px)!important}\n}";document.head.append(professionalUiStyle);
 
+
+/* FINAL NAVIGATION + LAYOUT FIX */
+const simpleNavStyle=document.createElement('style');
+simpleNavStyle.textContent=`
+.game{overflow:hidden!important}
+.topbar{z-index:15!important;min-height:72px!important;height:auto!important;box-sizing:border-box!important;align-items:flex-start!important}
+.brand{line-height:1.45!important;white-space:normal!important;overflow:visible!important}
+.sub{display:block!important;line-height:1.45!important;white-space:normal!important;overflow:visible!important}
+.upgrade-panel{z-index:40!important;inset:0!important;box-sizing:border-box!important;overflow-x:hidden!important;overflow-y:auto!important;padding:clamp(12px,2.5vw,26px)!important;overscroll-behavior:contain}
+.upgrade-wrap{width:100%!important;max-width:900px!important;min-height:0!important;box-sizing:border-box!important;padding:clamp(14px,2.6vw,26px)!important;margin:0 auto 20px!important}
+#fullMapPanel .upgrade-head{position:sticky!important;top:0!important;z-index:8!important;align-items:flex-start!important;padding:8px 0 13px!important;background:#0b171d!important}
+#fullMapPanel .upgrade-title{font-size:clamp(25px,4vw,38px)!important;line-height:1.12!important;overflow-wrap:anywhere!important}
+#fullMapPanel .upgrade-copy{max-width:650px!important;font-size:13px!important;line-height:1.55!important}
+#fullMapPanel .facility-layout,#fullMapPanel .facility-map,#fullMapPanel .facility-map-key,#fullMapPanel .clean-legend{display:none!important}
+#fullMapPanel .clean-route{margin:14px 0!important;padding:16px!important;background:#152522!important;border:1px solid #52675d!important}
+#fullMapPanel .clean-route b{font-size:11px!important;color:#c4e0ce!important}
+#fullMapPanel .clean-route p{font-size:14px!important;line-height:1.65!important;overflow-wrap:anywhere!important}
+#fullMapPanel .clean-plan{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;margin:12px 0 20px!important}
+#fullMapPanel .clean-room{min-width:0!important;box-sizing:border-box!important;padding:13px!important;overflow-wrap:anywhere!important}
+#fullMapPanel .clean-room h3{font-size:13px!important;line-height:1.3!important}
+#fullMapPanel .clean-room p{font-size:12px!important;line-height:1.5!important;overflow-wrap:anywhere!important}
+#fullMapPanel .upgrade-actions{display:flex!important;position:sticky!important;bottom:0!important;z-index:8!important;gap:10px!important;flex-wrap:wrap!important;padding:12px 0 0!important;background:#0b171d!important}
+#fullMapPanel .upgrade-actions button{flex:1 1 170px!important;min-width:0!important;min-height:42px!important}
+.upgrade-button{z-index:18!important;top:78px!important;right:18px!important;left:auto!important;max-width:calc(100vw - 36px)!important}
+.help-button{top:78px!important;left:18px!important;right:auto!important;z-index:18!important;max-width:calc(100vw - 36px)!important}
+.field-guide{z-index:10!important;box-sizing:border-box!important;overflow-wrap:anywhere!important}
+.hudleft,.hudright{z-index:5!important}
+@media(max-width:760px){
+ .topbar{padding:9px 10px!important;min-height:66px!important}
+ .brand{font-size:9px!important;max-width:48vw!important}
+ .sub{font-size:7px!important}
+ .status{max-width:49vw!important;flex-wrap:wrap!important;justify-content:flex-end!important}
+ .upgrade-button{top:108px!important;left:10px!important;right:auto!important}
+ .help-button{top:108px!important;left:auto!important;right:10px!important}
+ #fullMapPanel .upgrade-head{gap:10px!important}
+ #fullMapPanel .upgrade-head>button{flex:0 0 auto!important;min-width:82px!important;padding:9px!important}
+ #fullMapPanel .clean-plan{grid-template-columns:minmax(0,1fr)!important}
+ #fullMapPanel .clean-room{padding:12px!important}
+ #fullMapPanel .upgrade-actions{position:sticky!important}
+ .field-guide{bottom:78px!important;max-height:26dvh!important;width:calc(100% - 20px)!important;left:10px!important;transform:none!important}
+}
+@media(max-height:620px){
+ #fullMapPanel .upgrade-wrap{padding:10px!important}
+ #fullMapPanel .upgrade-head{position:relative!important}
+ #fullMapPanel .upgrade-actions{position:relative!important}
+}
+`;
+document.head.append(simpleNavStyle);
+fullMapButton.textContent='WHERE TO GO';
+const mapIntroText=fullMapPanel.querySelector('.upgrade-copy');
+if(mapIntroText)mapIntroText.textContent='Simple directions for your current mission. The highlighted room is where you are; the gold room is where to go next. Read the instruction card first, then follow the room connections.';
+const navRoomIds=['brief','lab','kit','ops','evidence','roof'];
+const navRoomNames=['Briefing Room','Tech Lab','Equipment Bay','Operations','Evidence Storage','Rooftop Access'];
+const navNeighbors={brief:['lab','kit'],lab:['brief','ops'],kit:['brief','ops','evidence'],ops:['lab','kit','roof'],evidence:['kit','roof'],roof:['ops','evidence']};
+function updateCleanPlan(){
+ if(!cleanPlan||!activeMission)return;
+ const currentIndex=(py<6?0:py<12?1:2)*2+(px<11?0:1);
+ const current=navRoomIds[currentIndex];
+ const targetObject=frags<3?objects.find(o=>['a','b','c'].includes(o.id)&&!kit.includes('INTEL '+o.id.toUpperCase())):!contactBriefed?objects.find(o=>o.type===10):!terminal?objects.find(o=>o.id==='terminal'):!caseFound?objects.find(o=>o.id==='case'):null;
+ const targetIndex=targetObject?(targetObject.y<6?0:targetObject.y<12?1:2)*2+(targetObject.x<11?0:1):currentIndex;
+ const target=navRoomIds[targetIndex];
+ const task=getNextTask();
+ const queue=[current],prev={[current]:null};
+ for(let i=0;i<queue.length;i++)for(const n of navNeighbors[queue[i]])if(!(n in prev)){prev[n]=queue[i];queue.push(n)}
+ const path=[];let at=target;while(at&&at!==current){path.unshift(at);at=prev[at]}
+ const routeNames=[current,...path].map(id=>navRoomNames[navRoomIds.indexOf(id)]);
+ let action='';if(frags<3)action='Search for the next glowing intel fragment and press E when you are close.';else if(!contactBriefed)action='Find '+(activeMission.contact||'your contact')+', press E, and ask all the questions.';else if(!terminal)action='Walk up to the secure terminal and press E to read the case file.';else if(!caseFound)action='Find the missing item, walk close to it, and press E.';else action='Mystery solved! Choose another case when you are ready.';
+ const roomCards=cleanPlan.querySelectorAll('.clean-room');
+ roomCards.forEach((card,i)=>{
+  card.classList.toggle('current',i===currentIndex);card.classList.toggle('target',i===targetIndex);
+  const h=card.querySelector('h3'),ps=card.querySelectorAll('p'),state=card.querySelector('.state');
+  if(h)h.textContent=navRoomNames[i];
+  if(ps[0])ps[0].textContent=['Start here and look for the first glowing intel clue.','Look around the workstations for evidence.','Check the locker and look for your contact.','Use the secure terminal after collecting evidence and interviewing the contact.','Search for the missing item after the terminal unlocks it.','Look for the final intel clue in this area.'][i];
+  if(ps[1])ps[1].textContent='Connects to: '+navNeighbors[navRoomIds[i]].map(id=>navRoomNames[navRoomIds.indexOf(id)]).join(', ')+'.';
+  if(state)state.textContent=i===currentIndex&&i===targetIndex?'YOU ARE HERE · OBJECTIVE HERE':i===currentIndex?'YOU ARE HERE':i===targetIndex?'GO HERE NEXT':'OTHER ROOM';
+ });
+ const title=document.getElementById('cleanRouteTitle'),copy=document.getElementById('cleanRouteText');
+ if(title)title.textContent=caseFound?'CASE COMPLETE':'YOUR NEXT STEP';
+ if(copy)copy.textContent=caseFound?action:'1. You are in '+navRoomNames[currentIndex]+'. '+(targetIndex===currentIndex?'2. The next objective is in this room. ':'2. Go through the connected rooms in this order: '+routeNames.join(' → ')+'. ')+'3. '+task.body+' '+action;
+ const guide= document.querySelector('.field-guide');
+ if(guide){const strong=guide.querySelector('strong'),span=guide.querySelector('span'),small=guide.querySelector('small');if(strong)strong.textContent=caseFound?'CASE COMPLETE':'NEXT STEP · '+(frags<3?frags+1+'/3 EVIDENCE':!contactBriefed?'CONTACT':!terminal?'CASE FILE':'FINAL ITEM');if(span)span.textContent=caseFound?'You solved this mystery. Open the case archive to choose another.':(targetIndex===currentIndex?'Stay in '+navRoomNames[currentIndex]+'. ':'Go to '+navRoomNames[targetIndex]+'. ')+action;if(small)small.textContent='Move with WASD or the arrow buttons. Press E when close to the highlighted person or object.'}
+}
+const priorNavRefresh=refreshFullMap;
+refreshFullMap=function(){priorNavRefresh();updateCleanPlan()};
+updateCleanPlan();
+
 })();
 
 </script></body></html>
