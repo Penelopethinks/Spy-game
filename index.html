@@ -882,10 +882,10 @@ setInterval(saveMissionProgress,1200);
 
 // Cursor aim + click-to-step: keep the pointer visible and move in the direction it points.
 /* aim state initialized with the player state above */
-document.addEventListener('pointerdown',e=>{if(started&&!e.target.closest('.clean-dock button,.modal,.upgrade-panel,.mission-panel,#talkPanel'))e.stopImmediatePropagation()},true);
-document.addEventListener('pointermove',e=>e.stopImmediatePropagation(),true);
-document.addEventListener('keydown',e=>{if(/^(KeyW|KeyA|KeyS|KeyD|KeyE|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|ShiftLeft|ShiftRight)$/.test(e.code)){e.preventDefault();e.stopImmediatePropagation()}},true);
-document.addEventListener('keyup',e=>{if(/^(KeyW|KeyA|KeyS|KeyD|KeyE|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|ShiftLeft|ShiftRight)$/.test(e.code))e.stopImmediatePropagation()},true);
+document.addEventListener('pointerdown',e=>{if(started&&!e.target.closest('#playControls,.clean-dock button,.modal,.upgrade-panel,.mission-panel,#talkPanel'))e.stopImmediatePropagation()},true);
+// Do not intercept pointermove here: the game uses it for mouse-look.
+document.addEventListener('keydown',e=>{if(/^(KeyW|KeyA|KeyS|KeyD|KeyE|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|ShiftLeft|ShiftRight)$/.test(e.code))e.preventDefault()},true);
+// Let keyup reach the game so movement keys cannot get stuck.
 const missionHeaderUpdate=()=>{const label=document.querySelector('.hudleft .eyebrow');if(label)label.textContent='SETTING · '+activeMission.place;};
 const previousRoomUpdate=setRoom;setRoom=function(){previousRoomUpdate();missionHeaderUpdate();if(activeMission){const site=activeMission.place.split(' — ')[0],row=py<6?0:py<12?1:2,col=px<11?0:1,areas=['ENTRY HALL','EAST WING','SERVICE HALL','CONTROL ROOM','EVIDENCE ROOM','OBSERVATION WING'];document.getElementById('roomName').textContent=site.toUpperCase();document.getElementById('roomDesc').textContent=areas[row*2+col]+' · '+activeMission.place.split(' — ').slice(1).join(' — ')+' · Follow the next step below.';}};
 const missionControlCopy=document.querySelector('#dossierPanel .upgrade-copy');if(missionControlCopy)missionControlCopy.textContent='Use the buttons at the bottom to walk and turn. Tap INTERACT when it lights up. Follow the next-step card to solve the mystery.';
@@ -2424,7 +2424,7 @@ function releaseHeldControl(btn){const code=btn.dataset.hold;if(code)keys[code]=
 playControls.querySelectorAll('[data-hold]').forEach(btn=>{
  const code=btn.dataset.hold;
  btn.addEventListener('pointerdown',e=>{e.preventDefault();if(!started){document.getElementById('briefing').classList.remove('hidden');return}keys[code]=true;btn.classList.add('is-held');try{btn.setPointerCapture(e.pointerId)}catch(_){}});
- ['pointerup','pointercancel','lostpointercapture','pointerleave'].forEach(ev=>btn.addEventListener(ev,()=>releaseHeldControl(btn)));
+ ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>btn.addEventListener(ev,()=>releaseHeldControl(btn)));
 });
 addEventListener('blur',()=>playControls.querySelectorAll('[data-hold]').forEach(releaseHeldControl));
 
