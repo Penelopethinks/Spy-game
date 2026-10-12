@@ -458,7 +458,69 @@ function tileZone(x,y){if(y<6)return x<11?'brief':'lab';if(y<12)return x<11?'kit
 const mapIntro=fullMapPanel.querySelector('.upgrade-copy');if(mapIntro)mapIntro.textContent='TOP = NORTH. You start in the upper-left room. The facility is arranged in 3 rows and 2 columns: Briefing Room (top-left), Tech Lab (top-right), Equipment Bay (middle-left), Operations (middle-right), Evidence Storage (bottom-left), and Rooftop Access (bottom-right). Grey blocks are walls; the gaps in them are doorways. Follow the highlighted route to your next objective.';
 const mapRoomNotes=[ 'TOP LEFT · START HERE — Search the briefing desk for Intel A.', 'TOP RIGHT — Find the workstation and Intel B.', 'MIDDLE LEFT — Check the field-kit locker and talk to nearby contacts.', 'MIDDLE RIGHT — The secure terminal is here; collect all 3 intel fragments first.', 'BOTTOM LEFT — Find the missing briefcase here.', 'BOTTOM RIGHT — Search for Intel C and check the corridor.'];
 fullMapPanel.querySelectorAll('.room-item').forEach((item,i)=>{if(i<mapRoomNotes.length){const detail=item.querySelector('div');const b=detail?.querySelector('b');if(b)b.textContent=(i+1).toString().padStart(2,'0')+' · '+b.textContent.replace(/^\d+\s*·\s*/,'');if(detail){const textNode=[...detail.childNodes].find(n=>n.nodeType===3&&n.textContent.trim());if(textNode)textNode.textContent=mapRoomNotes[i]}}});
-function refreshFullMap(){const el=document.getElementById('facilityMapGrid');if(!el)return;el.innerHTML='';for(let y=0;y<mh;y++){for(let x=0;x<mw;x++){const d=document.createElement('div');d.className='facility-tile '+tileZone(x,y);if(map[y][x]===1)d.classList.add('wall');if(Math.floor(px)===x&&Math.floor(py)===y)d.className='facility-tile you';else if(objects.some(o=>((o.id==='case'&&!caseFound)||(['a','b','c'].includes(o.id)&&!kit.includes('INTEL '+o.id.toUpperCase()))||(o.id==='terminal'&&!terminal))&&Math.floor(o.x)===x&&Math.floor(o.y)===y))d.classList.add('target');d.title=`Grid ${x+1}, ${y+1}`;el.append(d)}}}
+// Detailed facility map: preserve the original 24×19 world grid, but add clear
+// room labels, door indicators, landmarks, live agent markers, and a route to the next objective.
+const detailedMapStyle=document.createElement('style');
+detailedMapStyle.textContent=`
+.facility-map{position:relative;display:grid;grid-template-columns:repeat(24,minmax(0,1fr));grid-template-rows:repeat(19,minmax(0,1fr));gap:2px;min-height:clamp(310px,48vh,560px);padding:12px;background:#08151c;border:1px solid #44636b;border-radius:8px;overflow:hidden;isolation:isolate}
+.facility-tile{position:relative;min-width:0;min-height:0;border:1px solid #24434a;border-radius:2px;background:#15333a}
+.facility-tile.brief{background:#24575a}.facility-tile.lab{background:#24456a}.facility-tile.kit{background:#5a422b}.facility-tile.ops{background:#44365f}.facility-tile.evidence{background:#24523f}.facility-tile.roof{background:#5b552e}
+.facility-tile.wall{background:linear-gradient(135deg,#536771,#263d48)!important;border-color:#8ba2aa;box-shadow:inset 0 0 0 1px #172c35}
+.facility-tile.door{background:#c4b17b!important;border-color:#f3dfa2;box-shadow:0 0 5px #f3dfa288}
+.facility-tile.landmark:after{content:attr(data-mark);position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(7px,.65vw,10px);font-weight:900;color:#f4f8ef;text-shadow:0 1px 3px #000}
+.facility-tile.route{background:#c8df75!important;box-shadow:0 0 5px #d8f58b;border-color:#f0ffbf}
+.facility-tile.target{background:#ffe16b!important;border:2px solid #fff3a4;box-shadow:0 0 9px #ffe16bcc;z-index:2}
+.facility-tile.you{background:#64fff0!important;border:2px solid #eaffff;border-radius:50%;box-shadow:0 0 12px #64fff0;z-index:4}
+.facility-room-label{position:absolute;z-index:5;pointer-events:none;padding:3px 5px;border:1px solid #b9e9e555;border-radius:3px;background:#061219d9;color:#e8faf7;font-size:clamp(7px,.75vw,10px);letter-spacing:.08em;font-weight:800;white-space:nowrap;box-shadow:0 2px 8px #0007}
+.facility-room-label small{display:block;font-size:8px;font-weight:500;color:#9ec3c5;letter-spacing:.04em;margin-top:2px}
+.facility-map-key{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:10px;color:#b7ced0;font-size:10px;letter-spacing:.05em}
+.facility-map-key span{display:inline-flex;align-items:center;gap:6px}.facility-map-key i{display:inline-block;width:10px;height:10px;border:1px solid #d5e4e7;background:#536771;border-radius:2px}.facility-map-key i.player{background:#64fff0;border-color:#eaffff;border-radius:50%}.facility-map-key i.goal{background:#ffe16b;border-color:#fff3a4}.facility-map-key i.route{background:#c8df75;border-color:#f0ffbf}.facility-map-key i.door{background:#c4b17b;border-color:#f3dfa2}
+@media(max-width:680px){.facility-map{gap:1px;padding:6px;min-height:300px}.facility-room-label{font-size:6px;padding:2px}.facility-room-label small{display:none}}
+`;
+document.head.append(detailedMapStyle);
+function refreshFullMap(){
+ const el=document.getElementById('facilityMapGrid');if(!el)return;
+ el.innerHTML='';
+ const playerX=Math.max(0,Math.min(mw-1,Math.floor(px))),playerY=Math.max(0,Math.min(mh-1,Math.floor(py)));
+ let target=null;
+ if(frags<3){const next=['a','b','c'].find(id=>!kit.includes('INTEL '+id.toUpperCase()));target=objects.find(o=>o.id===next)}
+ else if(!terminal)target=objects.find(o=>o.id==='terminal');
+ else if(!caseFound)target=objects.find(o=>o.id==='case');
+ const roomName=(x,y)=>y<6?(x<11?'BRIEFING ROOM':'TECH LAB'):y<12?(x<11?'EQUIPMENT BAY':'OPERATIONS'):(x<11?'EVIDENCE STORAGE':'ROOFTOP ACCESS');
+ const doors=new Set(['10,3','10,4','10,8','10,9','10,14','10,15','4,6','5,6','16,6','17,6','4,12','5,12','16,12','17,12']);
+ const landmarks=new Map(objects.filter(o=>['locker','terminal','case'].includes(o.id)||(['a','b','c'].includes(o.id)&&!kit.includes('INTEL '+o.id.toUpperCase()))).map(o=>[Math.floor(o.x)+','+Math.floor(o.y),o.id==='locker'?'L':o.id==='terminal'?'T':o.id==='case'?'C':'✦']));
+ const route=[];
+ if(target){
+  let x=playerX,y=playerY,tx=Math.floor(target.x),ty=Math.floor(target.y),guard=0;
+  route.push(x+','+y);
+  while((x!==tx||y!==ty)&&guard++<mw+mh){
+   const nx=x!==tx?x+Math.sign(tx-x):x,ny=x===tx&&y!==ty?y+Math.sign(ty-y):y;
+   if(nx>=0&&nx<mw&&ny>=0&&ny<mh&&map[ny][nx]!==1){x=nx;y=ny}
+   else if(y!==ty&&map[y+Math.sign(ty-y)]&&map[y+Math.sign(ty-y)][x]!==1)y+=Math.sign(ty-y);
+   else if(x!==tx&&map[y][x+Math.sign(tx-x)]!==1)x+=Math.sign(tx-x);
+   else break;
+   route.push(x+','+y);
+  }
+ }
+ const routeSet=new Set(route);
+ for(let y=0;y<mh;y++)for(let x=0;x<mw;x++){
+  const d=document.createElement('div');d.className='facility-tile '+tileZone(x,y);
+  if(map[y][x]===1)d.classList.add('wall');
+  if(doors.has(x+','+y)&&map[y][x]!==1)d.classList.add('door');
+  if(routeSet.has(x+','+y)&&map[y][x]!==1)d.classList.add('route');
+  const mark=landmarks.get(x+','+y);
+  if(mark){d.classList.add('landmark');d.dataset.mark=mark;d.title=mark==='L'?'Equipment locker':mark==='T'?'Secure terminal':mark==='C'?'Missing briefcase':'Intel fragment'}
+  if(target&&Math.floor(target.x)===x&&Math.floor(target.y)===y){d.classList.add('target');d.title='NEXT OBJECTIVE: '+target.name}
+  if(playerX===x&&playerY===y){d.classList.add('you');d.title='YOUR POSITION · '+roomName(x,y)}
+  else if(!d.title)d.title=roomName(x,y)+' · GRID '+(x+1)+','+(y+1);
+  el.append(d);
+ }
+ const labels=[{x:1,y:1,w:8,title:'01 · BRIEFING',sub:'Mission desk'},{x:13,y:1,w:9,title:'02 · TECH LAB',sub:'Workstations'},{x:1,y:7,w:8,title:'03 · EQUIPMENT',sub:'Field locker'},{x:13,y:7,w:9,title:'04 · OPERATIONS',sub:'Secure terminal'},{x:1,y:13,w:8,title:'05 · EVIDENCE',sub:'Case storage'},{x:13,y:13,w:9,title:'06 · ROOFTOP',sub:'Access corridor'}];
+ for(const r of labels){const label=document.createElement('div');label.className='facility-room-label';label.style.left=(r.x/mw*100)+'%';label.style.top=(r.y/mh*100)+'%';label.style.width=(r.w/mw*100)+'%';label.innerHTML=r.title+'<small>'+r.sub+'</small>';el.append(label)}
+ let key=el.parentElement.querySelector('.facility-map-key');
+ if(!key){key=document.createElement('div');key.className='facility-map-key';el.insertAdjacentElement('afterend',key)}
+ key.innerHTML='<span><i class="player"></i>You are here</span><span><i class="goal"></i>Next objective</span><span><i class="route"></i>Suggested route</span><span><i class="door"></i>Doorway</span><span><i></i>Wall</span><span>✦ Intel · L Locker · T Terminal · C Case</span>';
+}
 function openFullMap(){refreshFullMap();fullMapPanel.classList.add('open')};function closeFullMap(){fullMapPanel.classList.remove('open')};fullMapButton.addEventListener('click',openFullMap);document.getElementById('closeFullMap').addEventListener('click',closeFullMap);document.getElementById('closeMapContinue').addEventListener('click',closeFullMap);document.getElementById('mapBackToBrief').addEventListener('click',()=>{closeFullMap();document.getElementById('dossierPanel')?.classList.add('open')});
 // Distinct, welcoming visual identity for every room (not just the same grey corridor).
 const sceneSign=document.createElement('div');sceneSign.className='scene-sign';sceneSign.innerHTML='NORTHSTAR HQ <span>FIELD VIEW</span>';document.querySelector('.game').append(sceneSign);function drawVenueDetails(site,accent){
