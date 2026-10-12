@@ -1866,6 +1866,49 @@ const priorNavRefresh=refreshFullMap;
 refreshFullMap=function(){priorNavRefresh();updateCleanPlan()};
 updateCleanPlan();
 
+
+/* FIELD GUIDE CLIPPING FIX: allow the whole instruction card and gadget drawer to be seen */
+const fieldGuideFitStyle=document.createElement('style');
+fieldGuideFitStyle.textContent=`
+.field-guide{
+ box-sizing:border-box!important;
+ max-height:calc(100dvh - 190px)!important;
+ overflow-x:hidden!important;
+ overflow-y:auto!important;
+ overscroll-behavior:contain!important;
+ scrollbar-width:thin!important;
+ scrollbar-color:#71877b #15201d!important;
+ padding:13px 15px!important;
+ gap:7px!important;
+}
+.field-guide strong,.field-guide span,.field-guide small{flex:0 0 auto!important;min-width:0!important;overflow:visible!important;overflow-wrap:anywhere!important;white-space:normal!important}
+.field-guide span{line-height:1.5!important}
+.field-tools-toggle{flex:0 0 auto!important;min-height:34px!important;white-space:normal!important}
+.field-tools.open{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.field-tools button{min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important}
+.field-notes{white-space:normal!important;overflow-wrap:anywhere!important}
+@media(max-width:760px){
+ .field-guide{
+  left:10px!important;right:10px!important;bottom:72px!important;transform:none!important;
+  width:auto!important;max-height:calc(100dvh - 175px)!important;
+  padding:12px!important;gap:7px!important;
+ }
+ .field-guide strong{font-size:10px!important;line-height:1.4!important}
+ .field-guide span{font-size:12px!important;line-height:1.5!important}
+ .field-guide small{font-size:10px!important;line-height:1.45!important}
+ .field-tools.open{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ .field-tools button{padding:8px 6px!important}
+ .field-tools button b{font-size:9px!important;line-height:1.35!important}
+ .field-tools button small{font-size:8px!important;line-height:1.35!important}
+ .field-notes{font-size:10px!important;line-height:1.5!important}
+}
+@media(max-width:380px){
+ .field-tools.open{grid-template-columns:minmax(0,1fr)!important}
+ .field-tools button{display:grid!important;grid-template-columns:minmax(0,1fr)!important}
+}
+`;
+document.head.append(fieldGuideFitStyle);
+
 })();
 
 </script></body></html>
