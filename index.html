@@ -343,7 +343,44 @@ const pinLayer=document.createElement('div');pinLayer.id='pinLayer';pinLayer.sty
 const talkPanel=document.createElement('div');talkPanel.id='talkPanel';talkPanel.style.cssText='display:none;position:absolute;left:50%;bottom:105px;transform:translateX(-50%);z-index:9;width:min(510px,calc(100% - 28px));padding:18px;background:linear-gradient(135deg,#0b2029f5,#061117f5);border:1px solid #61f5e4;box-shadow:0 10px 45px #0009;pointer-events:auto';talkPanel.innerHTML='<div id="talkRole" style="font-size:9px;letter-spacing:.2em;color:#61f5e4">NORTHSTAR CONTACT</div><div id="talkName" style="font-size:22px;font-weight:900;margin:7px 0">CONTACT</div><p id="talkLine" style="font-size:13px;line-height:1.65;color:#c2d5d8;margin:8px 0 15px"></p><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="talkMore">ASK ANOTHER QUESTION ↗</button><button id="talkClose">END CONVERSATION</button></div>';document.querySelector('.game').append(talkPanel);let talkingTo=null,talkIndex=0;
 document.getElementById('talkClose').onclick=()=>{talkPanel.style.display='none';talkingTo=null};document.getElementById('talkMore').onclick=()=>{if(!talkingTo)return;talkIndex=(talkIndex+1)%talkingTo.dialogue.length;document.getElementById('talkLine').textContent=talkingTo.dialogue[talkIndex];notify('NEW INFORMATION',talkingTo.name+' shared another detail.')};document.getElementById('talkMore').addEventListener('click',()=>{if(talkingTo&&talkIndex===talkingTo.dialogue.length-1&&!contactBriefed){contactBriefed=true;updateObjectives();updateFieldGuide();notify('CONTACT INTERVIEWED',talkingTo.name+' shared all three details.')}});
 function drawAgents(){for(const o of objects){if(o.type!==10)continue;let dx=o.x-px,dy=o.y-py,d=Math.hypot(dx,dy),a=Math.atan2(dy,dx)-pa;while(a<-Math.PI)a+=Math.PI*2;while(a>Math.PI)a-=Math.PI*2;if(Math.abs(a)>Math.PI/3||d<.35)continue;const fov=Math.PI/2.85,sx=W/2+Math.tan(a)/Math.tan(fov/2)*(W/2),scale=Math.min(H*.32,H*.52/(d*Math.max(.2,Math.cos(a)))),base=H*.49+scale*.5;if(sx<0||sx>W)continue;if(cast(Math.atan2(dy,dx)).dist<d-.4)continue;ctx.save();ctx.translate(sx,base);ctx.globalAlpha=.94;ctx.shadowColor='#aebbb2';ctx.shadowBlur=3;ctx.fillStyle='#142e39';ctx.beginPath();ctx.ellipse(0,-scale*.78,scale*.16,scale*.19,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=o.id==='npc-mara'?'#65c6b8':o.id==='npc-theo'?'#80a8ce':'#c2a3d9';ctx.fillRect(-scale*.19,-scale*.59,scale*.38,scale*.48);ctx.fillStyle='#1a2d36';ctx.fillRect(-scale*.17,-scale*.12,scale*.13,scale*.32);ctx.fillRect(scale*.04,-scale*.12,scale*.13,scale*.32);ctx.restore();}}
-function updatePinpoints(){pinLayer.innerHTML='';const nextId=frags<3?['a','b','c'].find(id=>!kit.includes('INTEL '+id.toUpperCase())):!terminal?'terminal':'case';const targets=objects.filter(o=>o.id===nextId||(o.type===10&&Math.hypot(o.x-px,o.y-py)<5));for(const o of targets){const dx=o.x-px,dy=o.y-py,d=Math.hypot(dx,dy);let a=Math.atan2(dy,dx)-pa;while(a<-Math.PI)a+=Math.PI*2;while(a>Math.PI)a-=Math.PI*2;let x=W/2+Math.tan(Math.max(-1.25,Math.min(1.25,a)))/Math.tan(Math.PI/5.7)*(W/2);x=Math.max(72,Math.min(W-72,x));const y=Math.abs(a)<1.05?Math.max(80,H*.15+Math.abs(a)*12):H*.21;const el=document.createElement('div');el.style.cssText=`position:absolute;left:${x}px;top:${y}px;transform:translate(-50%,-50%);text-align:center;color:${o.type===10?'#61f5e4':'#d9ff78'};font-size:9px;letter-spacing:.12em;text-shadow:0 2px 5px #000;white-space:nowrap`;el.innerHTML=`<span style="display:inline-block;width:8px;height:8px;border:2px solid currentColor;border-radius:50%;box-shadow:0 0 10px currentColor;margin-right:5px"></span>${o.type===10?'CONTACT · ':''}${o.name}<div style="margin-top:3px;opacity:.8">${d.toFixed(1)} m ${Math.abs(a)>1.05?'◀ / ▶':''}</div>`;pinLayer.append(el)}}
+// Keep navigation pins mounted and update their contents in place to prevent flicker.
+const pinpointNodes=new Map();
+function updatePinpoints(){
+ const nextId=frags<3?['a','b','c'].find(id=>!kit.includes('INTEL '+id.toUpperCase())):!terminal?'terminal':'case';
+ const targets=objects.filter(o=>o.id===nextId||(o.type===10&&Math.hypot(o.x-px,o.y-py)<5));
+ const activeIds=new Set();
+ for(const o of targets){
+  activeIds.add(o.id);
+  const dx=o.x-px,dy=o.y-py,d=Math.hypot(dx,dy);
+  let a=Math.atan2(dy,dx)-pa;
+  while(a<-Math.PI)a+=Math.PI*2;
+  while(a>Math.PI)a-=Math.PI*2;
+  let x=W/2+Math.tan(Math.max(-1.25,Math.min(1.25,a)))/Math.tan(Math.PI/5.7)*(W/2);
+  x=Math.max(72,Math.min(W-72,x));
+  const y=Math.abs(a)<1.05?Math.max(80,H*.15+Math.abs(a)*12):H*.21;
+  let el=pinpointNodes.get(o.id);
+  if(!el){
+   el=document.createElement('div');
+   el.style.cssText='position:absolute;transform:translate(-50%,-50%);text-align:center;font-size:9px;letter-spacing:.12em;text-shadow:0 2px 5px #000;white-space:nowrap;pointer-events:none';
+   const dot=document.createElement('span');
+   dot.style.cssText='display:inline-block;width:8px;height:8px;border:2px solid currentColor;border-radius:50%;box-shadow:0 0 10px currentColor;margin-right:5px';
+   const label=document.createElement('span');
+   const distance=document.createElement('div');
+   distance.style.cssText='margin-top:3px;opacity:.8';
+   el.append(dot,label,distance);
+   pinLayer.append(el);
+   pinpointNodes.set(o.id,el);
+  }
+  el.style.left=x+'px';
+  el.style.top=y+'px';
+  el.style.color=o.type===10?'#61f5e4':'#d9ff78';
+  el.children[1].textContent=(o.type===10?'CONTACT · ':'')+o.name;
+  el.children[2].textContent=d.toFixed(1)+' m '+(Math.abs(a)>1.05?'◀ / ▶':'');
+ }
+ for(const [id,el] of pinpointNodes){
+  if(!activeIds.has(id)){el.remove();pinpointNodes.delete(id)}
+ }
+}
 function openDialogue(o){talkingTo=o;talkIndex=0;document.getElementById('talkRole').textContent='NORTHSTAR CONTACT / '+o.desc.toUpperCase();document.getElementById('talkName').textContent=o.name;document.getElementById('talkLine').textContent=o.dialogue[0];talkPanel.style.display='block';notify('CONTACT ESTABLISHED',o.name+' is ready to talk.')}
 function nearby(){let best=null,bd=2.8;for(const o of objects){if((o.id==='a'&&kit.includes('INTEL A'))||(o.id==='b'&&kit.includes('INTEL B'))||(o.id==='c'&&kit.includes('INTEL C'))||(o.id==='locker'&&kit.includes('FIELD KIT'))||(o.id==='terminal'&&terminal)||(o.id==='case'&&caseFound))continue;let dx=o.x-px,dy=o.y-py,d=Math.hypot(dx,dy),ang=Math.atan2(dy,dx)-pa;while(ang<-Math.PI)ang+=Math.PI*2;while(ang>Math.PI)ang-=Math.PI*2;if(d<bd&&Math.abs(ang)<.78){best=o;bd=d}}return best}
 function interact(){let o=nearby();if(!o){notify('NO INTERACTABLE SIGNAL','Move closer and face a marked object.');return}if(o.type===10){openDialogue(o);return}if(o.id==='a'||o.id==='b'||o.id==='c'){kit.push('INTEL '+o.id.toUpperCase());frags++;notify('EVIDENCE FOUND',o.desc);updateObjectives()}else if(o.id==='locker'){kit.push('FIELD KIT');notify('FIELD KIT ACQUIRED','Flashlight and facility access badge added.')}else if(o.id==='terminal'){if(frags<3||!contactBriefed)notify('NEXT STEP',frags<3?`Collect all three evidence fragments first (${frags}/3).`:'Talk to '+activeMission.contact+' before opening the terminal.');else{terminal=true;kit.push('TERMINAL ACCESS');notify('FINAL RECORD FOUND','The terminal confirms the missing item is marked on your map.');updateObjectives()}}else if(o.id==='case'){if(!terminal)notify('ITEM STILL SECURED','Collect three evidence fragments and read the terminal first.');else{caseFound=true;completedMissions.add(activeMission.id);notify('MYSTERY SOLVED',activeMission.id===1?'You recovered the briefcase. Great detective work!':'You recovered the missing item at '+activeMission.place+'. Great detective work!');document.getElementById('status').textContent='COMPLETE';updateObjectives()}}else if(o.id==='brief')notify('MISSION BRIEF',activeMission.brief);else if(o.id==='work')notify('CLUE NOTE',activeMission.clue);else if(o.id==='note')notify('CONTACT NOTE',activeMission.contactNote);else notify(o.name,o.desc);updateKit()}
