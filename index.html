@@ -1988,6 +1988,27 @@ document.getElementById('start')?.addEventListener('click',function(){
  notify('MISSION STARTED','Move with WASD or the arrow buttons. Press E when you are close to an item.');
 });
  
+
+/* Targeted fix only: give the mission instruction card enough room so its bottom controls aren't clipped. */
+const missionCardHeightFix=document.createElement('style');
+missionCardHeightFix.textContent=`
+.field-guide{
+ max-height:calc(100dvh - 125px)!important;
+ overflow-y:auto!important;
+ overflow-x:hidden!important;
+ padding-bottom:15px!important;
+}
+.field-guide>*{flex-shrink:0!important}
+@media(max-width:760px){
+ .field-guide{
+  max-height:calc(100dvh - 140px)!important;
+  bottom:64px!important;
+  padding-bottom:14px!important;
+ }
+}
+`;
+document.head.append(missionCardHeightFix);
+
 })();
 
 </script></body></html>
