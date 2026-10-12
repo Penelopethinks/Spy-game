@@ -2009,6 +2009,74 @@ missionCardHeightFix.textContent=`
 `;
 document.head.append(missionCardHeightFix);
 
+
+/* FINAL SMALL FIXES: make the full field card reachable and keep case steps consistent. */
+const finalFieldCardStyle=document.createElement('style');
+finalFieldCardStyle.textContent=`
+.field-guide{
+ box-sizing:border-box!important;
+ width:min(390px,calc(100vw - 32px))!important;
+ max-height:min(48dvh,430px)!important;
+ overflow-x:hidden!important;
+ overflow-y:auto!important;
+ overscroll-behavior:contain!important;
+ padding:12px 14px 16px!important;
+ gap:7px!important;
+}
+.field-guide>*{min-width:0!important;max-width:100%!important;flex-shrink:0!important}
+.field-guide strong,.field-guide span,.field-guide small{display:block!important;white-space:normal!important;overflow:visible!important;overflow-wrap:anywhere!important}
+.field-tools-toggle{display:block!important;align-self:stretch!important;width:100%!important;min-height:38px!important;box-sizing:border-box!important;text-align:center!important;line-height:1.4!important}
+.field-tools{width:100%!important;box-sizing:border-box!important}
+.field-tools.open{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.field-tools button{box-sizing:border-box!important;overflow-wrap:anywhere!important}
+@media(max-width:760px){
+ .field-guide{left:10px!important;right:10px!important;bottom:64px!important;width:auto!important;max-height:min(42dvh,360px)!important;padding:10px 12px 14px!important}
+ .field-tools.open{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media(max-width:380px){.field-tools.open{grid-template-columns:minmax(0,1fr)!important}}
+`;
+document.head.append(finalFieldCardStyle);
+
+function makeMissionStepsConsistent(){
+ const target=nextMissionTarget();
+ const title=fieldGuide.querySelector('strong'),body=fieldGuide.querySelector('span'),detail=fieldGuide.querySelector('small');
+ if(caseFound){if(title)title.textContent='MYSTERY SOLVED';if(body)body.textContent='You recovered the missing item. Choose another case whenever you are ready.';if(detail)detail.textContent='No timer. Take your time.';return}
+ if(!target)return;
+ if(title)title.textContent='YOUR ONE JOB RIGHT NOW';
+ if(body){
+  if(['a','b','c'].includes(target.id))body.textContent='Find clue '+(frags+1)+' of 3. Look for the glowing gold clue marker, move close, and press E to collect it.';
+  else if(target.type===10)body.textContent='Step 4 of 6: Find '+target.name+', talk to them, and finish the conversation.';
+  else if(target.id==='terminal')body.textContent='Step 5 of 6: Go to the case-file computer and press E to read the final record.';
+  else if(target.id==='case')body.textContent='Step 6 of 6: Go to the marked missing item and press E to recover it.';
+ }
+ if(detail)detail.textContent='Gold = next goal · Mint = you · Pink = contact. Press E when close. No rush.';
+}
+const beforeFinalStepGuide=updateFieldGuide;
+updateFieldGuide=function(){beforeFinalStepGuide();makeMissionStepsConsistent()};
+const beforeFinalObjectiveUpdate=updateObjectives;
+updateObjectives=function(){beforeFinalObjectiveUpdate();makeMissionStepsConsistent()};
+const beforeFinalActivate=activateMissionScene;
+activateMissionScene=function(m){
+ beforeFinalActivate(m);
+ const item=objects.find(o=>o.id==='case');
+ if(item){
+  const goal=String(m.goal||'').replace(/\s+/g,' ').trim();
+  const found=goal.match(/(?:find|recover|pick up)\s+(?:the\s+)?([^.;,]+?)(?:\.\s|,|\.|$)/i);
+  const noun=found&&found[1]?found[1].replace(/^(?:missing|lost)\s+/i,'').trim():m.kind.toLowerCase();
+  item.name='MISSING ITEM · '+noun.toUpperCase();
+  item.desc='This is the item named in “'+m.title+'”. '+goal+' Recover it only after collecting the three clues, speaking with your contact, and reading the case file.';
+ }
+ makeMissionStepsConsistent();
+};
+const activeCaseItem=objects.find(o=>o.id==='case');
+if(activeCaseItem&&activeMission){
+ const activeGoal=String(activeMission.goal||'').replace(/\s+/g,' ').trim();
+ const activeMatch=activeGoal.match(/(?:find|recover|pick up)\s+(?:the\s+)?([^.;,]+?)(?:\.\s|,|\.|$)/i);
+ if(activeMatch&&activeMatch[1])activeCaseItem.name='MISSING ITEM · '+activeMatch[1].replace(/^(?:missing|lost)\s+/i,'').trim().toUpperCase();
+ activeCaseItem.desc='This is the item named in “'+activeMission.title+'”. '+activeGoal+' Recover it after collecting the clues, speaking with your contact, and reading the case file.';
+}
+makeMissionStepsConsistent();
+
 })();
 
 </script></body></html>
