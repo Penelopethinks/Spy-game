@@ -1367,6 +1367,97 @@ const oldStart=document.getElementById('start');if(oldStart)oldStart.textContent
 const oldEnter=document.getElementById('enterFacility');if(oldEnter)oldEnter.textContent='ENTER MISSION →';
 
 
+
+/* VISUAL MAP REDESIGN: no words or letter-markers on the floor plan. */
+const intuitiveMapStyle=document.createElement('style');
+intuitiveMapStyle.textContent=`
+#fullMapPanel .facility-room-label{display:none!important}
+#fullMapPanel .facility-map{position:relative;isolation:isolate;overflow:hidden;aspect-ratio:24/19;min-height:0!important;grid-template-columns:repeat(24,minmax(0,1fr))!important;grid-template-rows:repeat(19,minmax(0,1fr))!important;gap:2px!important;padding:10px!important;border-radius:15px!important;background:#09131d!important;border:1px solid #4c7581!important;box-shadow:inset 0 0 45px #0008,0 12px 34px #0005}
+#fullMapPanel .facility-map:before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(circle at 22% 17%,#4fffe51a,transparent 26%),radial-gradient(circle at 76% 18%,#5ea8ff20,transparent 25%),radial-gradient(circle at 20% 52%,#ffb45a19,transparent 27%),radial-gradient(circle at 75% 53%,#bd91ff1b,transparent 27%),radial-gradient(circle at 22% 85%,#6dffb51b,transparent 25%),radial-gradient(circle at 76% 85%,#ffdb7518,transparent 25%);animation:mapAurora 12s ease-in-out infinite alternate}
+#fullMapPanel .facility-tile{z-index:1;position:relative;min-width:0;min-height:0;border-radius:3px!important;transition:background-color .3s,box-shadow .3s;overflow:visible}
+#fullMapPanel .facility-tile.brief{background:#18544f!important;border-color:#347e75!important}
+#fullMapPanel .facility-tile.lab{background:#1d4166!important;border-color:#326b96!important}
+#fullMapPanel .facility-tile.kit{background:#61432a!important;border-color:#9a7040!important}
+#fullMapPanel .facility-tile.ops{background:#443266!important;border-color:#7055a1!important}
+#fullMapPanel .facility-tile.evidence{background:#20513d!important;border-color:#397b59!important}
+#fullMapPanel .facility-tile.roof{background:#615328!important;border-color:#978344!important}
+#fullMapPanel .facility-tile.wall{background:linear-gradient(135deg,#80949a,#334750 52%,#53656e)!important;border:1px solid #a6bbc1!important;box-shadow:inset 0 0 0 1px #1c303a,0 1px 2px #0008!important}
+#fullMapPanel .facility-tile.door{background:linear-gradient(90deg,#c5dce1,#536d77,#c5dce1)!important;border:1px solid #e1f4f4!important;box-shadow:0 0 8px #a9eaff70!important}
+#fullMapPanel .facility-tile.route{background:#f5d66c!important;border:1px solid #fff1b3!important;box-shadow:0 0 8px #ffe67eaa!important;animation:routePulse 1.6s ease-in-out infinite alternate}
+#fullMapPanel .facility-tile.target{background:#ffca61!important;border:2px solid #fff4b8!important;box-shadow:0 0 0 3px #ffce5b55,0 0 17px #ffbd4d!important;z-index:3;animation:targetPulse .9s ease-in-out infinite alternate}
+#fullMapPanel .facility-tile.you{background:#65fff0!important;border:2px solid #e9fffd!important;border-radius:50%!important;box-shadow:0 0 0 4px #65fff044,0 0 20px #65fff0!important;z-index:5;animation:youPulse 1.8s ease-in-out infinite}
+#fullMapPanel .facility-tile.landmark:after{content:"";position:absolute;inset:23%;border-radius:3px;background:#d8e9ef;box-shadow:0 0 8px #e5faff99;transform:rotate(45deg)}
+#fullMapPanel .facility-tile.contact:after,#fullMapPanel .facility-tile.person:after{content:"";position:absolute;inset:18%;border-radius:50%;background:#ff8fba;border:1px solid #ffe0ed;box-shadow:0 0 8px #ff8fba;z-index:4}
+#fullMapPanel .facility-tile.clue:after{content:"";position:absolute;inset:20%;background:#fff1a0;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:0 0 8px #fff1a0;z-index:4}
+#fullMapPanel .facility-tile.terminal:after{content:"";position:absolute;inset:20%;border-radius:2px;background:#7ce9ff;border:1px solid #e4fbff;box-shadow:0 0 8px #7ce9ff;z-index:4}
+#fullMapPanel .facility-tile.case:after{content:"";position:absolute;inset:20%;background:#ffc875;border:1px solid #fff1cc;box-shadow:0 0 8px #ffc875;z-index:4}
+#fullMapPanel .facility-map-key{display:flex!important;flex-wrap:wrap;gap:12px!important;justify-content:center;align-items:center;padding:12px!important;background:#0b1922!important;border-radius:10px!important}
+#fullMapPanel .facility-map-key span{display:inline-flex;align-items:center;gap:5px;font-size:0!important;color:transparent!important;min-width:22px;min-height:20px}
+#fullMapPanel .facility-map-key span i{display:inline-block!important;width:12px!important;height:12px!important;min-width:12px;min-height:12px;border-radius:3px;background:#8ca0a8!important;border:1px solid #d3e4e7!important}
+#fullMapPanel .facility-map-key span i.player{background:#65fff0!important;border-radius:50%}
+#fullMapPanel .facility-map-key span i.goal,#fullMapPanel .facility-map-key span i.goals{background:#ffca61!important;transform:rotate(45deg)}
+#fullMapPanel .facility-map-key span i.route{background:#f5d66c!important}
+#fullMapPanel .facility-map-key span i.door{background:#c5dce1!important}
+#fullMapPanel .facility-map-key span i.people{background:#ff8fba!important;border-radius:50%}
+#fullMapPanel .facility-map-key span i:after{content:none!important}
+#fullMapPanel .facility-map-key span{font-size:0!important}
+@keyframes mapAurora{from{filter:hue-rotate(-8deg) brightness(.92)}to{filter:hue-rotate(10deg) brightness(1.16)}}
+@keyframes routePulse{from{opacity:.62}to{opacity:1}}
+@keyframes targetPulse{from{transform:scale(.88)}to{transform:scale(1.04)}}
+@keyframes youPulse{0%,100%{box-shadow:0 0 0 3px #65fff033,0 0 13px #65fff0}50%{box-shadow:0 0 0 7px #65fff055,0 0 24px #65fff0}}
+@media(max-width:700px){#fullMapPanel .facility-map{gap:1px!important;padding:6px!important}#fullMapPanel .facility-map-key{gap:8px!important}}
+`;
+document.head.append(intuitiveMapStyle);
+const visualMapRefresh=refreshFullMap;
+refreshFullMap=function(){
+ visualMapRefresh();
+ const el=document.getElementById('facilityMapGrid');if(!el)return;
+ el.querySelectorAll('.facility-room-label').forEach(n=>n.remove());
+ for(const tile of el.children){
+  tile.removeAttribute('title');tile.removeAttribute('aria-label');
+  if(tile.classList.contains('you'))tile.setAttribute('aria-label','Your position');
+  else if(tile.classList.contains('target'))tile.setAttribute('aria-label','Next objective');
+  else if(tile.classList.contains('contact')||tile.classList.contains('person'))tile.setAttribute('aria-label','Contact');
+  else if(tile.classList.contains('clue'))tile.setAttribute('aria-label','Clue');
+ }
+ const key=el.parentElement.querySelector('.facility-map-key');
+ if(key)key.innerHTML='<span title="You"><i class="player"></i></span><span title="Next objective"><i class="goal"></i></span><span title="Route"><i class="route"></i></span><span title="Door"><i class="door"></i></span><span title="Contact"><i class="people"></i></span><span title="Landmark"><i></i></span>';
+};
+const finalMapCopy=fullMapPanel.querySelector('.upgrade-copy');
+if(finalMapCopy)finalMapCopy.textContent='Find the glowing gold marker. Follow the gold path from the mint dot. Purple-pink dots are people. The colored areas are different parts of the building.';
+const finalMapTitle=fullMapPanel.querySelector('.upgrade-title');
+if(finalMapTitle)finalMapTitle.textContent='Explore the building';
+const finalMapKicker=fullMapPanel.querySelector('.upgrade-kicker');
+if(finalMapKicker)finalMapKicker.textContent='LIVE MAP';
+if(sceneSign)sceneSign.style.display='none';
+
+/* Clear objective: one sentence and one next action, with the optional hint right below. */
+const simpleObjectiveStyle=document.createElement('style');
+simpleObjectiveStyle.textContent=`
+.field-guide{background:rgba(5,17,24,.96)!important;border:1px solid #68dcca!important;box-shadow:0 8px 35px #0008,0 0 20px #43e5ce15!important}
+.field-guide strong{font-size:10px!important;letter-spacing:.14em!important;color:#7af8e5!important}
+.field-guide span{font-size:13px!important;line-height:1.5!important}
+.field-guide small{font-size:10px!important;line-height:1.5!important}
+`;
+document.head.append(simpleObjectiveStyle);
+const finalGuideUpdate=refreshSimpleMissionGuide;
+refreshSimpleMissionGuide=function(){
+ finalGuideUpdate();
+ const target=nextMissionTarget(),title=fieldGuide.querySelector('strong'),body=fieldGuide.querySelector('span'),detail=fieldGuide.querySelector('small');
+ if(caseFound){if(title)title.textContent='YOU SOLVED IT';if(body)body.textContent='You found the missing item! Choose another mystery to keep exploring.';if(detail)detail.textContent='There is no timer. Take your time.';return}
+ if(!target)return;
+ if(title)title.textContent='YOUR ONE JOB RIGHT NOW';
+ if(body){
+  if(['a','b','c'].includes(target.id))body.textContent='Find the glowing gold clue. You need 3 clues total ('+frags+' of 3 found).';
+  else if(target.type===10)body.textContent='Find the pink person and talk to them. Read each line, then continue until the conversation ends.';
+  else if(target.id==='terminal')body.textContent='Go to the glowing gold computer and press E to open the case file.';
+  else if(target.id==='case')body.textContent='Follow the gold path and pick up the missing item to solve the mystery.';
+ }
+ if(detail)detail.textContent='Gold = next goal · Mint = you · Pink = person · Press E when close. No rush.';
+};
+refreshFullMap();
+refreshSimpleMissionGuide();
+
 })();
 
 </script></body></html>
