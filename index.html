@@ -944,7 +944,7 @@ function nextGadgetTarget(){const task=getNextTask();if(task.title.includes('COL
 let scannerTarget=null,scannerUntil=0;
 document.getElementById('scannerGadget').addEventListener('click',()=>{scannerTarget=nextGadgetTarget();if(!scannerTarget){notify('SCANNER CLEAR','You have completed this mystery.');return}scannerUntil=performance.now()+6500;const dx=scannerTarget.x-px,dy=scannerTarget.y-py,distance=Math.hypot(dx,dy),angle=Math.atan2(dy,dx),directions=['E','SE','S','SW','W','NW','N','NE'],direction=directions[(Math.round(angle/(Math.PI/4))+8)%8];notify('SCANNER PING',scannerTarget.name+' · about '+Math.max(1,Math.round(distance))+' steps '+direction);updatePinpoints()});
 const baseUpdatePinpointsForScanner=updatePinpoints;
-updatePinpoints=function(){baseUpdatePinpointsForScanner();if(!scannerTarget||performance.now()>scannerUntil){scannerTarget=null;return}const dx=scannerTarget.x-px,dy=scannerTarget.y-py,d=Math.hypot(dx,dy),a=Math.atan2(dy,dx)-pa;while(a<-Math.PI)a+=Math.PI*2;while(a>Math.PI)a-=Math.PI*2;const x=Math.max(90,Math.min(W-90,W/2+Math.tan(Math.max(-1.25,Math.min(1.25,a)))/Math.tan(Math.PI/5.7)*(W/2))),beacon=document.createElement('div');beacon.style.cssText='position:absolute;left:'+x+'px;top:calc(22% + 34px);transform:translateX(-50%);padding:7px 10px;background:rgba(12,22,22,.95);border:1px solid #d8c28a;border-radius:7px;color:#f1dfb4;font-size:9px;font-weight:800;letter-spacing:.08em;text-align:center;box-shadow:0 0 18px #d8c28a55;white-space:nowrap';beacon.textContent='SCANNER  '+scannerTarget.name+'  ·  '+Math.round(d)+' STEPS';pinLayer.append(beacon)};
+updatePinpoints=function(){baseUpdatePinpointsForScanner();if(!scannerTarget||performance.now()>scannerUntil){scannerTarget=null;return}const dx=scannerTarget.x-px,dy=scannerTarget.y-py,d=Math.hypot(dx,dy),a=Math.atan2(dy,dx)-pa;while(a<-Math.PI)a+=Math.PI*2;while(a>Math.PI)a-=Math.PI*2;const x=Math.max(90,Math.min(W-90,W/2+Math.tan(Math.max(-1.25,Math.min(1.25,a)))/Math.tan(Math.PI/5.7)*(W/2))),beacon=document.createElement('div');beacon.className='scanner-beacon';beacon.style.cssText='position:absolute;left:'+x+'px;top:calc(22% + 34px);transform:translateX(-50%);padding:7px 10px;background:rgba(12,22,22,.95);border:1px solid #d8c28a;border-radius:7px;color:#f1dfb4;font-size:9px;font-weight:800;letter-spacing:.08em;text-align:center;box-shadow:0 0 18px #d8c28a55;white-space:nowrap';beacon.textContent='SCANNER  '+scannerTarget.name+'  ·  '+Math.round(d)+' STEPS';pinLayer.append(beacon)};
 document.getElementById('flashlightGadget').addEventListener('click',e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',String(on));e.currentTarget.querySelector('small').textContent=on?'On · click to switch off':'Brighten the scene';canvas.style.filter=on?'brightness(1.24) contrast(1.04) saturate(1.04)':'';notify(on?'FLASHLIGHT ON':'FLASHLIGHT OFF',on?'The scene is brighter.':'The scene returned to normal lighting.')});
 document.getElementById('notesGadget').addEventListener('click',()=>{const open=gadgetNotes.classList.toggle('open');if(open){gadgetNotes.innerHTML='';const title=document.createElement('b');title.textContent=activeMission.title+' · FIELD NOTES';const brief=document.createElement('p');brief.textContent=activeMission.brief;const clue=document.createElement('p');clue.textContent='Clue to look for: '+activeMission.clue;const contact=document.createElement('p');contact.textContent='Contact: '+activeMission.contact+' · '+activeMission.contactNote;gadgetNotes.append(title,brief,clue,contact)}});
 
@@ -2411,10 +2411,10 @@ if(yellowPad){
   btn.dataset.finalMoveCode=code;
   btn.setAttribute('aria-label',({ArrowUp:'Move forward',ArrowDown:'Move backward',ArrowLeft:'Turn left',ArrowRight:'Turn right'})[code]);
   btn.style.touchAction='none';
-  let pointerActive=false,tapTimer=0;
+  let pointerActive=false,pointerHandled=false,tapTimer=0;
   const release=()=>{keys[code]=false;btn.classList.remove('is-pressed')};
   btn.addEventListener('pointerdown',e=>{
-   e.preventDefault();e.stopPropagation();pointerActive=true;
+   e.preventDefault();e.stopPropagation();pointerActive=true;pointerHandled=true;
    if(!started){document.getElementById('briefing')?.classList.remove('hidden');return}
    keys[code]=true;btn.classList.add('is-pressed');moveFromYellowButton(code);
    try{btn.setPointerCapture(e.pointerId)}catch(_){}
@@ -2424,6 +2424,7 @@ if(yellowPad){
   btn.addEventListener('click',e=>{
    e.preventDefault();e.stopPropagation();
    if(!started){document.getElementById('briefing')?.classList.remove('hidden');return}
+   if(pointerHandled){pointerHandled=false;return}
    if(pointerActive)return;
    moveFromYellowButton(code);
    keys[code]=true;btn.classList.add('is-pressed');
