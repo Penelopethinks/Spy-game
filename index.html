@@ -2077,6 +2077,48 @@ if(activeCaseItem&&activeMission){
 }
 makeMissionStepsConsistent();
 
+
+/* CLEAR MISSION START: give players a visible, reliable way to begin from the briefing room. */
+const missionLaunchStyle=document.createElement('style');
+missionLaunchStyle.textContent=`
+.mission-launch-button{position:absolute;z-index:15;left:50%;bottom:76px;transform:translateX(-50%);width:min(340px,calc(100% - 32px));padding:15px 18px;border:1px solid #a9fff0;border-radius:10px;background:linear-gradient(135deg,#c8fff0,#73e6d2);color:#10272a;font-size:13px;font-weight:950;letter-spacing:.08em;box-shadow:0 8px 30px #0009,0 0 24px #70f4df33;cursor:pointer;pointer-events:auto}
+.mission-launch-button:hover{filter:brightness(1.06);transform:translateX(-50%) translateY(-2px)}
+.mission-launch-button[hidden]{display:none!important}
+@media(max-width:700px){.mission-launch-button{bottom:142px;padding:13px 12px;font-size:12px}}
+`;
+document.head.append(missionLaunchStyle);
+const missionLaunchButton=document.createElement('button');
+missionLaunchButton.type='button';
+missionLaunchButton.className='mission-launch-button';
+missionLaunchButton.textContent='START MY MISSION →';
+missionLaunchButton.setAttribute('aria-label','Start the mission and begin the investigation');
+document.querySelector('.game').append(missionLaunchButton);
+missionLaunchButton.addEventListener('click',function(e){
+ e.preventDefault();
+ e.stopPropagation();
+ started=true;
+ dossierReviewed=true;
+ const briefing=document.getElementById('briefing');
+ if(briefing)briefing.classList.add('hidden');
+ if(typeof dossierPanel!=='undefined')dossierPanel.classList.remove('open');
+ if(typeof missionPanel!=='undefined')missionPanel.classList.remove('open');
+ document.getElementById('status').textContent='ACTIVE';
+ document.getElementById('agentName').textContent=agent;
+ aimBase=pa;
+ missionLaunchButton.hidden=true;
+ setRoom();updateObjectives();updateKit();drawMap();refreshFullMap();updateFieldGuide();updateCleanPlan();refreshLiveNavigation();
+ try{saveMissionProgress()}catch(err){}
+ notify('MISSION STARTED','Your first task: find INTEL FRAGMENT A in the Briefing Room. Move close, face the glowing clue, then press E or tap INTERACT.');
+});
+function syncMissionLaunchButton(){
+ missionLaunchButton.hidden=frags>0||caseFound||roomAt()!=='BRIEFING ROOM';
+}
+const launchBaseSetRoom=setRoom;
+setRoom=function(){launchBaseSetRoom();syncMissionLaunchButton()};
+const launchBaseInteract=interact;
+interact=function(){launchBaseInteract();syncMissionLaunchButton()};
+syncMissionLaunchButton();
+
 })();
 
 </script></body></html>
