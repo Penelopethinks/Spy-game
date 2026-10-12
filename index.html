@@ -2413,7 +2413,7 @@ document.head.append(finalControlStyle);
 /* Make the map action explicitly refresh and reveal the real facility map. */
 if(fullMapButton)fullMapButton.onclick=()=>{try{refreshFullMap();fullMapPanel.classList.add('open')}catch(err){notify('MAP UNAVAILABLE','The map could not refresh. Close this message and try MAP again.');console.error(err)}};
 /* Keep gadget controls responsive even if another UI layer changes their visibility. */
-if(gadgetToggle)gadgetToggle.onclick=()=>{const open=gadgetPanel.classList.toggle('open');gadgetToggle.textContent=open?'GADGETS ▴':'GADGETS ▾';gadgetToggle.setAttribute('aria-expanded',String(open));gadgetPanel.style.display=open?'grid':'none';if(open)cleanDock?.classList.remove('is-collapsed');if(!open)gadgetNotes.classList.remove('open')};
+/* The existing gadgetToggle click listener remains the single source of toggle state. */
 
 
 })();
