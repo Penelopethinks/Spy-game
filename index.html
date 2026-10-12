@@ -1909,6 +1909,85 @@ fieldGuideFitStyle.textContent=`
 `;
 document.head.append(fieldGuideFitStyle);
 
+/* START + LAYOUT RECOVERY: keep the entry button reachable and stop HUD cards colliding. */
+const startAndLayoutStyle=document.createElement('style');
+startAndLayoutStyle.textContent=`
+#briefing{
+ z-index:100!important;
+ box-sizing:border-box!important;
+ overflow-y:auto!important;
+ overflow-x:hidden!important;
+ align-items:flex-start!important;
+ padding:clamp(12px,3vh,30px) 14px!important;
+}
+#briefing .brief{
+ box-sizing:border-box!important;
+ width:min(600px,100%)!important;
+ max-height:none!important;
+ margin:auto!important;
+ padding:clamp(18px,4vw,34px)!important;
+}
+#briefing .brief h1{font-size:clamp(30px,7vw,54px)!important;line-height:1!important}
+#briefing .briefgrid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;margin:16px 0!important}
+#briefing .briefgrid div{min-width:0!important;padding:10px 8px!important;overflow-wrap:anywhere!important}
+#briefing .briefgrid b{font-size:10px!important;line-height:1.4!important;overflow-wrap:anywhere!important}
+#briefing .brief p{font-size:13px!important;line-height:1.6!important;margin:12px 0!important}
+#briefing #start{
+ position:relative!important;z-index:101!important;
+ display:block!important;width:100%!important;min-height:54px!important;
+ margin:18px 0 4px!important;padding:15px 18px!important;
+ font-size:14px!important;font-weight:900!important;
+ background:#61f5e4!important;color:#061419!important;
+ border:2px solid #c4fff7!important;border-radius:8px!important;
+ box-shadow:0 0 0 3px #61f5e422,0 8px 25px #0008!important;
+ cursor:pointer!important;pointer-events:auto!important;
+}
+#briefing .brief,#briefing .brief *{pointer-events:auto}
+.topbar,.hudleft,.hudright,.scene-sign,.field-guide,.bottom,.help,.help-button,.upgrade-button,#missionHub{box-sizing:border-box;min-width:0}
+.hudleft,.hudright{max-width:calc(50vw - 24px);overflow-wrap:anywhere}
+.hudleft *,.hudright *{min-width:0;overflow-wrap:anywhere}
+@media(max-width:760px){
+ #briefing{padding:10px!important}
+ #briefing .brief{padding:18px 15px!important}
+ #briefing .stamp{font-size:9px!important;letter-spacing:.14em!important;line-height:1.5!important}
+ #briefing .briefgrid{grid-template-columns:minmax(0,1fr)!important;margin:12px 0!important}
+ #briefing .briefgrid div{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;text-align:left!important}
+ #briefing .briefgrid b{margin:0!important;text-align:right!important}
+ #briefing #start{position:sticky!important;bottom:0!important}
+ .hudleft{top:78px!important;left:10px!important;right:10px!important;width:auto!important;max-width:none!important}
+ .hudright{top:auto!important;right:10px!important;bottom:128px!important;width:min(155px,42vw)!important;max-width:42vw!important}
+ .field-guide{z-index:6!important}
+ .scene-sign{max-width:calc(100vw - 24px)!important;left:12px!important;right:12px!important;transform:none!important}
+ .help{display:none!important}
+ .help-button{right:10px!important;bottom:10px!important}
+ .upgrade-button{right:10px!important;bottom:48px!important}
+ #missionHub{right:10px!important;bottom:88px!important}
+}
+@media(max-height:620px){
+ #briefing{align-items:flex-start!important}
+ #briefing .brief{padding:14px 18px!important}
+ #briefing h1{margin:10px 0!important}
+ #briefing .briefgrid{margin:10px 0!important}
+ #briefing #start{margin-top:10px!important}
+}
+`;
+document.head.append(startAndLayoutStyle);
+
+/* Reliable start action: one obvious button hides the opening brief and begins movement. */
+document.getElementById('start')?.addEventListener('click',function(){
+ started=true;
+ const briefing=document.getElementById('briefing');
+ if(briefing)briefing.classList.add('hidden');
+ if(typeof dossierPanel!=='undefined')dossierPanel.classList.remove('open');
+ const status=document.getElementById('status');
+ if(status)status.textContent='ACTIVE';
+ const name=document.getElementById('agentName');
+ if(name)name.textContent=agent;
+ aimBase=pa;
+ try{setRoom();updateObjectives();updateKit();drawMap();refreshFullMap();updateFieldGuide();updateCleanPlan();refreshLiveNavigation();saveMissionProgress()}catch(err){}
+ notify('MISSION STARTED','Move with WASD or the arrow buttons. Press E when you are close to an item.');
+});
+ 
 })();
 
 </script></body></html>
