@@ -1458,6 +1458,115 @@ refreshSimpleMissionGuide=function(){
 refreshFullMap();
 refreshSimpleMissionGuide();
 
+
+/* CLEAN CASE FILES: one calm archive layout, with a distinct composition for each case. */
+const cleanCaseArchiveStyle=document.createElement('style');
+cleanCaseArchiveStyle.textContent=`
+#missionPanel{background:rgba(5,12,16,.985)!important;padding:clamp(16px,3vw,38px)!important}
+.mh-wrap{max-width:1160px!important}
+.mh-head{border-bottom:1px solid #33464b!important;padding-bottom:20px!important}
+.mh-title{font-size:clamp(23px,3.2vw,34px)!important;letter-spacing:-.035em!important}
+.mh-sub{letter-spacing:.08em!important;line-height:1.6!important}
+.mh-grid{grid-template-columns:minmax(230px,.72fr) minmax(0,1.35fr)!important;gap:clamp(18px,3vw,38px)!important;margin-top:24px!important;align-items:start!important}
+.mh-list{max-height:calc(100dvh - 205px)!important;overflow:auto!important;padding:0 12px 8px 0!important;border:0!important;border-right:1px solid #27383d!important;background:transparent!important}
+.mh-search{position:sticky!important;top:0!important;z-index:2;background:#101d22!important;border:1px solid #34494e!important;border-radius:8px!important;padding:12px 13px!important;width:100%!important;margin:0 0 12px!important}
+.mh-count{font-size:10px!important;letter-spacing:.06em!important;margin:10px 0!important}
+.mh-card{display:block!important;width:100%!important;text-align:left!important;text-transform:none!important;letter-spacing:0!important;border:0!important;border-bottom:1px solid #26373b!important;border-radius:0!important;background:transparent!important;padding:13px 10px!important;box-shadow:none!important}
+.mh-card:hover{background:#122126!important;border-color:#34494e!important}
+.mh-card.active{background:#13272b!important;border-left:3px solid #76e1ce!important;padding-left:12px!important;border-bottom-color:#26373b!important}
+.mh-card b{font-size:12px!important;font-weight:700!important;line-height:1.4!important;color:#e9f2ef!important}
+.mh-card small{font-size:10px!important;color:#9aadae!important;margin-top:4px!important}
+.mh-detail{min-height:0!important;padding:0!important;border:0!important;background:transparent!important;overflow:visible!important}
+.mh-detail h2{font-size:clamp(26px,4vw,42px)!important;letter-spacing:-.045em!important;line-height:1.04!important;margin:12px 0 15px!important;max-width:760px!important}
+.mh-detail p{font-size:13px!important;line-height:1.75!important;color:#b6c4c3!important}
+.case-layout{--case-accent:#83d9c7;min-width:0}
+.case-layout .case-kicker{font-size:10px;letter-spacing:.13em;color:var(--case-accent);font-weight:800;text-transform:uppercase}
+.case-layout .case-meta{display:flex;flex-wrap:wrap;gap:8px 18px;padding:12px 0;border-top:1px solid #2a3b40;border-bottom:1px solid #2a3b40;color:#a6b7b7;font-size:11px}
+.case-layout .case-meta span{display:inline-flex;gap:6px;align-items:center}
+.case-layout .case-meta b{color:#e1eae7;font-weight:650}
+.case-layout .case-section{margin:24px 0 0}
+.case-layout .case-section h3{font-size:10px;letter-spacing:.13em;color:var(--case-accent);margin:0 0 9px;text-transform:uppercase}
+.case-layout .case-section p{margin:0;max-width:760px}
+.case-layout .case-callout{margin-top:18px;padding:15px 17px;border-left:3px solid var(--case-accent);background:#101c20;border-radius:0 8px 8px 0}
+.case-layout .case-callout strong{display:block;font-size:13px;color:#f1f5f2;margin-bottom:4px}
+.case-layout .case-callout p{margin:0;font-size:12px}
+.case-layout .case-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:22px}
+.case-layout .case-step{padding:12px 10px 11px;border-top:2px solid #3b5053;background:#0d191d;min-width:0}
+.case-layout .case-step em{display:block;font-size:10px;font-style:normal;color:var(--case-accent);margin-bottom:8px}
+.case-layout .case-step b{display:block;font-size:11px;line-height:1.45;color:#dfe9e6}
+.case-layout .case-contact{display:grid;grid-template-columns:54px minmax(0,1fr);gap:14px;align-items:start;margin-top:22px;padding:17px 0;border-top:1px solid #2a3b40;border-bottom:1px solid #2a3b40}
+.case-layout .case-avatar{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--case-accent) 15%,#0b161a);border:1px solid color-mix(in srgb,var(--case-accent) 45%,#25373b);font-size:21px;color:var(--case-accent)}
+.case-layout .case-contact strong{display:block;color:#f0f4f2;font-size:14px;margin:3px 0 5px}
+.case-layout .case-contact p{margin:0;font-size:12px}
+.case-layout .case-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:24px}
+.case-layout .case-actions button{border-radius:7px;padding:12px 15px;font-size:10px}
+.case-layout .case-actions .start{background:var(--case-accent)!important;color:#071311!important;border:0!important;font-weight:900}
+.case-layout .case-actions button:not(.start){background:#111f23!important;border:1px solid #34484d!important}
+.case-layout .case-location{font-size:clamp(18px,2.3vw,25px);letter-spacing:-.025em;color:#eef4f1;line-height:1.25;margin-top:9px}
+.case-layout .case-number{font-size:clamp(38px,7vw,78px);font-weight:850;letter-spacing:-.07em;line-height:.95;color:var(--case-accent);opacity:.95}
+.case-layout.layout-0 .case-top{display:grid;grid-template-columns:110px minmax(0,1fr);gap:18px;align-items:center;padding:20px 0}
+.case-layout.layout-1 .case-top{padding:19px 0 15px;border-bottom:1px solid #2a3b40}
+.case-layout.layout-2 .case-top{display:grid;grid-template-columns:minmax(0,1fr) 90px;gap:18px;align-items:start;padding:20px 0}
+.case-layout.layout-3 .case-top{padding:20px 0;background:linear-gradient(110deg,#142328,transparent 85%);border-left:3px solid var(--case-accent);padding-left:18px}
+.case-layout.layout-3 .case-location{font-size:clamp(23px,3vw,32px)}
+@media(max-width:760px){
+ #missionPanel{padding:13px!important}
+ .mh-head{align-items:flex-start!important}
+ .mh-grid{grid-template-columns:1fr!important;gap:17px!important;margin-top:15px!important}
+ .mh-list{max-height:24dvh!important;border-right:0!important;border-bottom:1px solid #27383d!important;padding:0 0 8px!important}
+ .mh-card{display:inline-block!important;vertical-align:top!important;width:min(245px,78%)!important;border:1px solid #26373b!important;border-radius:8px!important;margin:0 7px 5px 0!important;padding:10px!important}
+ .mh-card.active{border:1px solid #76e1ce!important;padding:10px!important}
+ .mh-search{padding:10px!important}
+ .mh-detail h2{font-size:29px!important}
+ .case-layout .case-steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .case-layout.layout-0 .case-top{grid-template-columns:65px minmax(0,1fr);gap:12px}
+ .case-layout .case-number{font-size:48px}
+ .case-layout .case-meta{gap:8px 12px}
+ .case-layout .case-section{margin-top:18px}
+}
+`;
+document.head.append(cleanCaseArchiveStyle);
+
+selectMission=function(m){
+ selectedMission=m;
+ const detail=document.getElementById('mhDetail');
+ const variant=((m.id-1)%4), accents=['#83d9c7','#f0c27b','#9dbdff','#d8a7f3'];
+ const accent=accents[variant];
+ const solved=completedMissions.has(m.id);
+ const goal=m.goal||'Complete the investigation and recover the missing item.';
+ const brief=m.brief||'Explore the location, gather evidence, and speak with your contact.';
+ const clue=m.clue||'Review the evidence notes for the next lead.';
+ const contactNote=m.contactNote||'Ask questions to learn what they know.';
+ const location=m.place||'Unspecified location';
+ const contact=m.contact||'Field contact';
+ const role=m.role||'CONTACT';
+ const stage=['CASE SUMMARY','FIELD REPORT','CONTACT DOSSIER','LOCATION BRIEF'][variant];
+ const steps=variant===1
+  ? '<div class="case-steps"><div class="case-step"><em>01</em><b>Gather 3 clues</b></div><div class="case-step"><em>02</em><b>Interview contact</b></div><div class="case-step"><em>03</em><b>Read case file</b></div><div class="case-step"><em>04</em><b>Recover item</b></div></div>'
+  : '';
+ let top='';
+ if(variant===0) top='<div class="case-top"><div class="case-number">'+String(m.id).padStart(3,'0')+'</div><div><div class="case-kicker">CASE SUMMARY</div><h2>'+m.title+'</h2><p>'+brief+'</p></div></div>';
+ if(variant===1) top='<div class="case-top"><div class="case-kicker">FIELD REPORT · '+String(m.id).padStart(3,'0')+'</div><h2>'+m.title+'</h2><p>'+brief+'</p></div>';
+ if(variant===2) top='<div class="case-top"><div><div class="case-kicker">CONTACT DOSSIER</div><h2>'+m.title+'</h2><p>'+contactNote+'</p></div><div class="case-number">'+String(m.id).padStart(3,'0')+'</div></div>';
+ if(variant===3) top='<div class="case-top"><div class="case-kicker">LOCATION BRIEF</div><div class="case-location">'+location+'</div><h2>'+m.title+'</h2><p>'+brief+'</p></div>';
+ detail.innerHTML='<article class="case-layout layout-'+variant+'" style="--case-accent:'+accent+'">'+
+  top+
+  '<div class="case-meta"><span>TYPE <b>'+m.kind+'</b></span><span>LEVEL <b>'+m.level+'</b></span><span>STATUS <b>'+(solved?'SOLVED':'READY')+'</b></span></div>'+
+  (variant===1?steps:'')+
+  '<section class="case-section"><h3>'+(variant===0?'Primary objective':variant===1?'Assignment':variant===2?'Investigation objective':'What happened')+'</h3><p>'+goal+'</p></section>'+
+  '<div class="case-callout"><strong>Lead to watch for</strong><p>'+clue+'</p></div>'+
+  (variant===2?'<section class="case-contact"><div class="case-avatar" aria-hidden="true">✦</div><div><div class="case-kicker">YOUR FIELD CONTACT · '+role.toUpperCase()+'</div><strong>'+contact+'</strong><p>'+contactNote+'</p><button id="mhContact" type="button" style="margin-top:11px">OPEN CONTACT FILE</button></div></section>':'<section class="case-contact"><div class="case-avatar" aria-hidden="true">✦</div><div><div class="case-kicker">FIELD CONTACT · '+role.toUpperCase()+'</div><strong>'+contact+'</strong><p>'+contactNote+'</p><button id="mhContact" type="button" style="margin-top:11px">OPEN CONTACT FILE</button></div></section>')+
+  (variant===0?'<div class="case-steps"><div class="case-step"><em>01</em><b>Find 3 clues</b></div><div class="case-step"><em>02</em><b>Talk to contact</b></div><div class="case-step"><em>03</em><b>Read case file</b></div><div class="case-step"><em>04</em><b>Recover item</b></div></div>':'')+
+  '<div class="case-actions"><button class="start" id="mhStart">'+(solved?'PLAY AGAIN':'START THIS CASE')+'</button><button id="mhNext">NEXT CASE →</button></div></article>';
+ document.getElementById('mhContact').onclick=()=>{
+  const box=detail.querySelector('.case-contact');
+  if(box){box.querySelector('p').textContent='“'+contactNote+'” You can speak with '+contact+' during the mystery and ask all three questions to hear their full account.';box.querySelector('button').remove();}
+ };
+ document.getElementById('mhStart').onclick=()=>{activateMissionScene(m);missionPanel.classList.remove('open');notify('CASE STARTED',m.place+' is ready. Follow the next step below.')};
+ document.getElementById('mhNext').onclick=()=>selectMission(missions[m.id%missions.length]);
+ renderMissionList(document.getElementById('mhSearch').value);
+};
+
 })();
 
 </script></body></html>
