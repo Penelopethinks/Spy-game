@@ -685,7 +685,7 @@ drawWorld=function(){
 // Touch users can drag anywhere on the scene to look around; movement buttons remain available.
 let touchLookX=null;canvas.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&started){touchLookX=e.clientX;canvas.setPointerCapture?.(e.pointerId)}});canvas.addEventListener('pointermove',e=>{if(e.pointerType==='touch'&&touchLookX!==null&&started){pa+=(e.clientX-touchLookX)*.009;touchLookX=e.clientX}});canvas.addEventListener('pointerup',()=>touchLookX=null);canvas.addEventListener('pointercancel',()=>touchLookX=null);
 // Plain-language mission guide: fewer words, clear steps, and simpler map instructions.
-dossierPanel.innerHTML=`<div class="upgrade-wrap"><div class="upgrade-head"><div><div class="upgrade-kicker">YOUR DETECTIVE MISSION</div><div class="upgrade-title">Find the missing briefcase</div><div class="upgrade-copy">You are at Northstar HQ. This is a friendly mystery game. Explore the rooms, look for glowing clues, and talk to the people you meet.</div></div><button id="dossierClose">CLOSE ✕</button></div><div class="dossier-grid"><article class="dossier-card"><b>YOUR GOAL</b><p>Find the missing briefcase in Evidence Storage. It is locked, so you must find 3 clues first.</p></article><article class="dossier-card"><b>STEP 1 · LOOK AROUND</b><p>Start in the Briefing Room. Walk near objects and press E when you see something you can inspect.</p></article><article class="dossier-card"><b>STEP 2 · FIND 3 CLUES</b><p>Look for Intel A, Intel B, and Intel C. The map marks clues in yellow.</p></article><article class="dossier-card"><b>STEP 3 · UNLOCK THE CASE</b><p>Go to Operations and use the terminal. Then go to Evidence Storage and collect the briefcase.</p></article><article class="dossier-card"><b>HOW TO MOVE</b><p>W A S D = move · Mouse or arrow keys = look around · E = inspect · Shift = run.</p></article><article class="dossier-card"><b>WHERE TO GO</b><p>Blue = Tech Lab · Orange = Equipment Bay · Purple = Operations · Green = Evidence Storage · Gold = Rooftop Access.</p></article></div><div class="upgrade-actions"><button id="dossierMap">SHOW ME THE MAP</button><button id="enterFacility" class="primary">START THE MISSION →</button></div></div>`;
+dossierPanel.innerHTML=`<div class="upgrade-wrap"><div class="upgrade-head"><div><div class="upgrade-kicker">YOUR DETECTIVE MISSION</div><div class="upgrade-title">Find the missing briefcase</div><div class="upgrade-copy">You are at Northstar HQ. This is a friendly mystery game. Explore the rooms, look for glowing clues, and talk to the people you meet.</div></div><button id="dossierClose">CLOSE ✕</button></div><div class="dossier-grid"><article class="dossier-card"><b>YOUR GOAL</b><p>Find the missing briefcase in Evidence Storage. It is locked, so you must find 3 clues first.</p></article><article class="dossier-card"><b>STEP 1 · LOOK AROUND</b><p>Start in the Briefing Room. Walk near objects and press E when you see something you can inspect.</p></article><article class="dossier-card"><b>STEP 2 · FIND 3 CLUES</b><p>Look for Intel A, Intel B, and Intel C. The map marks clues in yellow.</p></article><article class="dossier-card"><b>STEP 3 · UNLOCK THE CASE</b><p>Go to Operations and use the terminal. Then go to Evidence Storage and collect the briefcase.</p></article><article class="dossier-card"><b>HOW TO MOVE</b><p>Yellow arrows = move and turn · E = inspect · Shift = run.</p></article><article class="dossier-card"><b>WHERE TO GO</b><p>Blue = Tech Lab · Orange = Equipment Bay · Purple = Operations · Green = Evidence Storage · Gold = Rooftop Access.</p></article></div><div class="upgrade-actions"><button id="dossierMap">SHOW ME THE MAP</button><button id="enterFacility" class="primary">START THE MISSION →</button></div></div>`;
 document.getElementById('dossierClose').addEventListener('click',()=>dossierPanel.classList.remove('open'));
 document.getElementById('dossierMap').addEventListener('click',()=>{dossierPanel.classList.remove('open');openFullMap()});
 document.getElementById('enterFacility').addEventListener('click',()=>{dossierReviewed=true;dossierPanel.classList.remove('open');startButton.click()});
@@ -711,7 +711,7 @@ const baseDrawMap=drawMap;drawMap=function(){baseDrawMap();const el=document.get
 const baseInteract=interact;interact=function(){baseInteract();updateFieldGuide();if(fullMapPanel.classList.contains('open'))refreshFullMap()};
 const baseFrameForGuide=setRoom;setRoom=function(){baseFrameForGuide();updateFieldGuide()};
 // Put practical, plain-language controls first in the mission briefing.
-const controlCopy=document.querySelector('#dossierPanel .upgrade-copy');if(controlCopy)controlCopy.textContent='Quick start: move with W A S D or the on-screen arrows. Turn with the left/right buttons or arrow keys. Walk toward a glowing item and press E (or tap INTERACT). Use FULL FACILITY MAP to see the rooms, people, clues, and the suggested route to your next objective.';
+const controlCopy=document.querySelector('#dossierPanel .upgrade-copy');if(controlCopy)controlCopy.textContent='Quick start: use the yellow arrows to walk forward/back and turn left/right. Walk toward a glowing item and press E or tap INTERACT. Open FULL FACILITY MAP to see rooms, people, clues, and your next destination..';
 // Clean layout pass: one map, one route, one clear next step.
 const finalLayoutStyle=document.createElement('style');
 finalLayoutStyle.textContent=`
@@ -1388,7 +1388,7 @@ document.querySelector('#briefing .brief .stamp').textContent='WELCOME, AGENT ·
 const briefingCopy=document.querySelector('#briefing .brief>p');
 if(briefingCopy)briefingCopy.textContent='A useful item is missing. Your job is to find it. You do not have to guess: the game marks your next target and gives you extra clues whenever you need them.';
 const briefingControls=document.querySelector('#briefing .brief>p:nth-of-type(2)');
-if(briefingControls)briefingControls.innerHTML='<b style="color:#e6f8f6">HOW TO PLAY</b><br>1. Follow the gold marker to find 3 clue notes.<br>2. Find the purple person and talk to them. Read all three lines.<br>3. Go to the case-file computer and press E.<br>4. Follow the gold marker and pick up the missing item.<br><br><b style="color:#e6f8f6">MOVING</b><br>Use W A S D or the on-screen arrows. Walk close to an object, face it, then press E or tap INTERACT. Open MAP if you get lost.';
+if(briefingControls)briefingControls.innerHTML='<b style="color:#e6f8f6">HOW TO PLAY</b><br>1. Follow the gold marker to find 3 clue notes.<br>2. Find the purple person and talk to them. Read all three lines.<br>3. Go to the case-file computer and press E.<br>4. Follow the gold marker and pick up the missing item.<br><br><b style="color:#e6f8f6">MOVING</b><br>Use the yellow arrow buttons to walk forward/back and turn left/right. Walk close to an object, face it, then press E or tap INTERACT. Open MAP if you get lost.';
 const oldStart=document.getElementById('start');if(oldStart)oldStart.textContent='START MY MISSION →';
 const oldEnter=document.getElementById('enterFacility');if(oldEnter)oldEnter.textContent='ENTER MISSION →';
 
@@ -2201,7 +2201,7 @@ document.head.append(simpleDirectionsStyle);
 const nextStopPanel=document.createElement('section');
 nextStopPanel.className='next-stop-panel';
 nextStopPanel.setAttribute('aria-live','polite');
-nextStopPanel.innerHTML='<div class="next-stop-kicker">YOUR NEXT DESTINATION</div><div class="next-stop-destination" id="nextStopDestination">Briefing Room</div><div class="next-stop-action" id="nextStopAction">Find the first glowing clue and press E when you are close.</div><div class="next-stop-route" id="nextStopRoute"><span class="next-stop-key">W A S D</span> Move <span class="next-stop-key">E</span> Inspect</div>';
+nextStopPanel.innerHTML='<div class="next-stop-kicker">YOUR NEXT DESTINATION</div><div class="next-stop-destination" id="nextStopDestination">Briefing Room</div><div class="next-stop-action" id="nextStopAction">Find the first glowing clue and press E when you are close.</div><div class="next-stop-route" id="nextStopRoute"><span class="next-stop-key">▲ ▼</span> Walk · <span class="next-stop-key">◀ ▶</span> Turn · <span class="next-stop-key">E</span> Inspect</div>';
 const directionsDock=document.querySelector('.hudright');
 if(directionsDock)directionsDock.prepend(nextStopPanel);
 function refreshSimpleDirections(){
@@ -2224,7 +2224,7 @@ function refreshSimpleDirections(){
  const route=document.getElementById('nextStopRoute');
  if(dest)dest.textContent=targetName===currentName?'Stay in '+currentName:targetName;
  if(act)act.innerHTML=action;
- if(route)route.innerHTML='<b>YOU ARE IN:</b> '+currentName+'<br><span class="next-stop-key">W A S D</span> Move <span class="next-stop-key">E</span> Inspect';
+ if(route)route.innerHTML='<b>YOU ARE IN:</b> '+currentName+'<br><span class="next-stop-key">▲ ▼</span> Walk · <span class="next-stop-key">◀ ▶</span> Turn · <span class="next-stop-key">E</span> Inspect';
 }
 const originalSimplePlanUpdate=updateCleanPlan;
 updateCleanPlan=function(){originalSimplePlanUpdate();refreshSimpleDirections()};
@@ -2357,6 +2357,63 @@ function safeRenderScene(){
 }
 
 
+
+
+/* FINAL CONTROL REPAIR: keep one arrow pad, remove keyboard-layout confusion,
+   and make touch/mouse presses feed the same keys read by the movement loop. */
+const finalPad=document.querySelector('.clean-dock .mobilepad');
+if(finalPad){
+ finalPad.setAttribute('aria-label','Yellow movement buttons');
+ finalPad.querySelectorAll('button').forEach(btn=>{
+  const code=btn.classList.contains('up')?'ArrowUp':btn.classList.contains('down')?'ArrowDown':btn.classList.contains('left')?'ArrowLeft':'ArrowRight';
+  btn.dataset.moveCode=code;
+  btn.style.touchAction='none';
+  btn.addEventListener('contextmenu',e=>e.preventDefault());
+  let tapTimer=0;
+  const release=()=>{keys[code]=false;btn.classList.remove('is-pressed')};
+  btn.addEventListener('pointerdown',e=>{
+   e.preventDefault();
+   if(!started){document.getElementById('briefing')?.classList.remove('hidden');return}
+   if(tapTimer){clearTimeout(tapTimer);tapTimer=0}
+   keys[code]=true;btn.classList.add('is-pressed');
+   try{btn.setPointerCapture(e.pointerId)}catch(_){}
+  });
+  for(const eventName of ['pointerup','pointercancel','lostpointercapture']){
+   btn.addEventListener(eventName,()=>{
+    if(tapTimer)clearTimeout(tapTimer);
+    tapTimer=0;release();
+   });
+  }
+  btn.addEventListener('click',e=>{
+   e.preventDefault();
+   if(!started){document.getElementById('briefing')?.classList.remove('hidden');return}
+   /* pointerup happens before click on touchscreens, so provide a short tap step. */
+   keys[code]=true;btn.classList.add('is-pressed');
+   if(tapTimer)clearTimeout(tapTimer);
+   tapTimer=setTimeout(()=>{release();tapTimer=0},240);
+  });
+ });
+}
+const finalControlStyle=document.createElement('style');
+finalControlStyle.textContent=`
+ .clean-dock .mobilepad{display:grid!important;grid-template-columns:repeat(3,38px)!important;grid-template-rows:repeat(2,38px)!important;gap:4px!important}
+ .clean-dock .mobilepad .up{grid-column:2!important;grid-row:1!important}
+ .clean-dock .mobilepad .left{grid-column:1!important;grid-row:2!important}
+ .clean-dock .mobilepad .down{grid-column:2!important;grid-row:2!important}
+ .clean-dock .mobilepad .right{grid-column:3!important;grid-row:2!important}
+ .clean-dock .mobilepad button{width:38px!important;min-width:38px!important;height:38px!important;min-height:38px!important;background:#f0c84b!important;border:1px solid #ffdf77!important;color:#17170e!important;box-shadow:0 2px 0 #98751d!important;touch-action:none!important;user-select:none!important;-webkit-user-select:none!important}
+ .clean-dock .mobilepad button.is-pressed{transform:translateY(2px)!important;box-shadow:0 0 0 #98751d!important;background:#ffe17a!important}
+ .clean-dock .mobilepad button small{display:none!important}
+ .next-stop-route{overflow-wrap:anywhere}
+ .field-tools.open{display:grid!important}
+ .clean-dock .field-tools.open{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ @media(max-width:390px){.clean-dock .mobilepad{grid-template-columns:repeat(3,32px)!important;grid-template-rows:repeat(2,32px)!important}.clean-dock .mobilepad button{width:32px!important;min-width:32px!important;height:32px!important;min-height:32px!important}}
+`;
+document.head.append(finalControlStyle);
+/* Make the map action explicitly refresh and reveal the real facility map. */
+if(fullMapButton)fullMapButton.onclick=()=>{try{refreshFullMap();fullMapPanel.classList.add('open')}catch(err){notify('MAP UNAVAILABLE','The map could not refresh. Close this message and try MAP again.');console.error(err)}};
+/* Keep gadget controls responsive even if another UI layer changes their visibility. */
+if(gadgetToggle)gadgetToggle.onclick=()=>{const open=gadgetPanel.classList.toggle('open');gadgetToggle.textContent=open?'GADGETS ▴':'GADGETS ▾';gadgetToggle.setAttribute('aria-expanded',String(open));gadgetPanel.style.display=open?'grid':'none';if(open)cleanDock?.classList.remove('is-collapsed');if(!open)gadgetNotes.classList.remove('open')};
 
 
 })();
