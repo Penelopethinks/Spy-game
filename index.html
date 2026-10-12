@@ -1715,9 +1715,7 @@ selectMission=function(m){
  renderMissionList(document.getElementById('mhSearch').value);
 };
 
-})();
 
-</script></body></html>
 const viewportFitAndVibeStyle=document.createElement('style');viewportFitAndVibeStyle.textContent=`
 /* VIEWPORT FIT + DISTINCT CASE ATMOSPHERES */
 #missionPanel{position:absolute!important;inset:0!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;padding:clamp(10px,2.2vw,24px)!important}
@@ -1779,3 +1777,7 @@ const viewportFitAndVibeStyle=document.createElement('style');viewportFitAndVibe
  #missionPanel .mh-list,#missionPanel .mh-detail{max-height:calc(100dvh - 130px)!important}
 }
 `;document.head.append(viewportFitAndVibeStyle);
+
+})();
+
+</script></body></html>
