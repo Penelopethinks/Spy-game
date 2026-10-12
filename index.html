@@ -2208,6 +2208,101 @@ const originalSimpleObjectiveUpdate=updateObjectives;
 updateObjectives=function(){originalSimpleObjectiveUpdate();refreshSimpleDirections()};
 refreshSimpleDirections();
 
+const finalPolishStyle=document.createElement('style');finalPolishStyle.textContent=`
+/* FINAL LAYOUT SYSTEM: fixed viewport, independent scroll zones, one button language */
+:root{--ui-bg:#0b1114;--ui-panel:#111a1e;--ui-panel-2:#151f23;--ui-border:#344247;--ui-muted:#9aa9ad;--ui-text:#edf2f0;--ui-accent:#b8d8ca;--ui-accent-ink:#122019}
+button,.mh-search{font-family:inherit!important;letter-spacing:.025em!important;text-transform:none!important;box-shadow:none!important;transition:background-color .15s,border-color .15s,color .15s!important}
+button{min-height:38px!important;padding:9px 13px!important;border:1px solid var(--ui-border)!important;border-radius:8px!important;background:var(--ui-panel-2)!important;color:var(--ui-text)!important;font-size:11px!important;font-weight:650!important;line-height:1.25!important}
+button:hover{transform:none!important;border-color:#7f9e91!important;background:#202d31!important}
+button:focus-visible,input:focus-visible{outline:2px solid var(--ui-accent)!important;outline-offset:2px!important}
+button.start,.case-actions .start,.mh-actions .start{background:var(--ui-accent)!important;border:1px solid var(--ui-accent)!important;color:var(--ui-accent-ink)!important;font-weight:800!important}
+button.start:hover,.case-actions .start:hover,.mh-actions .start:hover{background:#d0e7dc!important}
+#missionHub,.upgrade-button{border:1px solid #42554e!important;border-radius:8px!important;background:#15221e!important;color:#d8e8df!important;min-height:38px!important;padding:9px 12px!important;font-size:10px!important;white-space:nowrap!important}
+.topbar{height:auto!important;min-height:64px!important;padding:12px clamp(12px,2vw,24px)!important;align-items:center!important;gap:12px!important}
+.brand{line-height:1.35!important}
+.status{display:flex!important;flex-wrap:wrap!important;gap:6px!important}
+.status>div{min-width:70px!important;padding:7px 9px!important;border:1px solid #344247!important;border-radius:8px!important;background:rgba(11,17,20,.9)!important}
+.status strong{color:var(--ui-accent)!important}
+.field-guide{left:50%!important;bottom:54px!important;transform:translateX(-50%)!important;width:min(470px,calc(100% - 28px))!important;max-height:calc(100dvh - 150px)!important;overflow:auto!important;padding:12px 15px!important;border:1px solid #394b46!important;border-radius:12px!important;background:rgba(13,21,23,.97)!important;box-shadow:0 12px 32px #0005!important}
+.field-guide strong{font-size:9px!important;letter-spacing:.09em!important;color:var(--ui-accent)!important}
+.field-guide span{font-size:12px!important;line-height:1.45!important}
+.field-guide small{font-size:10px!important;line-height:1.4!important}
+#missionPanel{position:fixed!important;inset:0!important;z-index:50!important;display:none;overflow:hidden!important;padding:clamp(10px,1.8vw,22px)!important;background:#0b1114!important}
+#missionPanel.open{display:block!important}
+#missionPanel .mh-wrap{height:100%!important;max-width:1280px!important;width:100%!important;margin:0 auto!important;display:flex!important;flex-direction:column!important;min-height:0!important}
+#missionPanel .mh-head{position:relative!important;top:auto!important;flex:0 0 auto!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;padding:0 0 12px!important;border-bottom:1px solid #2d393d!important;background:transparent!important;backdrop-filter:none!important}
+#missionPanel .mh-stamp{font-size:9px!important;letter-spacing:.12em!important;color:#9cbbb0!important;line-height:1.5!important}
+#missionPanel .mh-title{font-size:clamp(22px,3vw,31px)!important;letter-spacing:-.035em!important;line-height:1.1!important;margin-top:4px!important}
+#missionPanel .mh-title span{color:var(--ui-accent)!important}
+#missionPanel .mh-sub{margin-top:6px!important;font-size:10px!important;letter-spacing:.035em!important;color:var(--ui-muted)!important;line-height:1.4!important}
+#missionPanel .mh-grid{display:grid!important;grid-template-columns:minmax(260px,.82fr) minmax(0,1.35fr)!important;gap:clamp(12px,2vw,24px)!important;flex:1 1 auto!important;min-height:0!important;height:auto!important;margin-top:14px!important;align-items:stretch!important;overflow:hidden!important}
+#missionPanel .mh-list,#missionPanel .mh-detail{min-width:0!important;min-height:0!important;height:100%!important;max-height:none!important;overflow-y:auto!important;overscroll-behavior:contain!important;scrollbar-gutter:stable!important}
+#missionPanel .mh-list{padding:0 10px 8px 0!important;border:0!important;border-right:1px solid #273438!important;background:transparent!important}
+#missionPanel .mh-search{position:sticky!important;top:0!important;z-index:2!important;display:block!important;width:100%!important;min-height:42px!important;margin:0 0 9px!important;padding:10px 12px!important;border:1px solid var(--ui-border)!important;border-radius:8px!important;background:#111a1e!important;color:var(--ui-text)!important;font-size:12px!important}
+#missionPanel .mh-count{font-size:10px!important;letter-spacing:.04em!important;color:var(--ui-muted)!important;margin:9px 0!important;line-height:1.5!important}
+#missionPanel .mh-card{display:block!important;width:100%!important;min-height:0!important;margin:0!important;padding:11px 10px!important;text-align:left!important;border:0!important;border-bottom:1px solid #273438!important;border-radius:0!important;background:transparent!important;color:var(--ui-text)!important}
+#missionPanel .mh-card:hover{background:#151f23!important}
+#missionPanel .mh-card.active{padding-left:12px!important;border-left:3px solid var(--ui-accent)!important;background:#17241f!important}
+#missionPanel .mh-card b{display:block!important;font-size:11px!important;font-weight:700!important;line-height:1.45!important;color:var(--ui-text)!important}
+#missionPanel .mh-card small{display:block!important;margin-top:5px!important;font-size:9px!important;line-height:1.4!important;color:var(--ui-muted)!important}
+#missionPanel .mh-detail{padding:clamp(12px,2vw,24px)!important;border:1px solid #2b393d!important;border-radius:12px!important;background:#0f171a!important}
+#missionPanel .case-layout{min-width:0!important;overflow-wrap:anywhere!important;color:var(--ui-text)!important}
+#missionPanel .case-layout .case-top{margin:0!important;padding:0 0 15px!important;border:0!important;border-bottom:1px solid #2b393d!important;background:transparent!important}
+#missionPanel .case-layout h2{font-size:clamp(23px,3vw,37px)!important;line-height:1.12!important;letter-spacing:-.035em!important;margin:8px 0 10px!important;color:var(--ui-text)!important}
+#missionPanel .case-layout .case-top p,#missionPanel .case-layout .case-section p,#missionPanel .case-layout .case-callout p,#missionPanel .case-layout .case-contact p{font-size:12px!important;line-height:1.65!important;color:#b5c0c1!important}
+#missionPanel .case-layout .case-meta{display:flex!important;flex-wrap:wrap!important;gap:8px 15px!important;padding:12px 0!important;border:0!important;border-bottom:1px solid #2b393d!important;font-size:10px!important;line-height:1.5!important}
+#missionPanel .case-layout .case-section{margin:18px 0 0!important}
+#missionPanel .case-layout .case-section h3,#missionPanel .case-layout .case-kicker{font-size:9px!important;letter-spacing:.09em!important;line-height:1.5!important;color:var(--case-accent,var(--ui-accent))!important}
+#missionPanel .case-layout .case-callout{margin-top:16px!important;padding:12px 14px!important;border:1px solid #2d3d40!important;border-left:3px solid var(--case-accent,var(--ui-accent))!important;border-radius:8px!important;background:#141e21!important}
+#missionPanel .case-layout .case-contact{margin-top:16px!important;padding:14px 0!important;gap:12px!important;border-top:1px solid #2b393d!important;border-bottom:1px solid #2b393d!important}
+#missionPanel .case-layout .case-contact strong{font-size:13px!important;line-height:1.5!important}
+#missionPanel .case-layout .case-actions{display:flex!important;flex-wrap:wrap!important;gap:8px!important;position:sticky!important;bottom:-1px!important;margin-top:16px!important;padding:12px 0 1px!important;background:linear-gradient(0deg,#0f171a 78%,transparent)!important;z-index:3!important}
+#missionPanel .case-layout .case-actions button{flex:1 1 145px!important;min-height:42px!important}
+#missionPanel .case-layout.layout-0 .case-top{display:grid!important;grid-template-columns:52px minmax(0,1fr)!important;gap:12px!important;align-items:start!important}
+#missionPanel .case-layout.layout-0 .case-number{display:grid!important;place-items:center!important;width:48px!important;height:48px!important;border:1px solid var(--case-accent)!important;border-radius:10px!important;background:#14231e!important;font-size:20px!important}
+#missionPanel .case-layout.layout-1 .case-top{border-top:3px solid var(--case-accent)!important;padding-top:12px!important}
+#missionPanel .case-layout.layout-2 .case-top{padding:14px!important;border-left:3px solid var(--case-accent)!important;background:#151f2a!important}
+#missionPanel .case-layout.layout-2 .case-contact{padding:12px!important;border:1px solid #2b394d!important;border-radius:9px!important;background:#131d27!important}
+#missionPanel .case-layout.layout-3 .case-top{padding:14px 0!important;background:radial-gradient(ellipse at 0 0,#21192a,transparent 78%)!important}
+#missionPanel .case-layout.layout-3 .case-location{display:inline-block!important;margin:8px 0!important;padding:6px 9px!important;border:1px solid var(--case-accent)!important;border-radius:6px!important;font-size:10px!important;line-height:1.4!important}
+#missionPanel .mh-actions{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
+#missionPanel .mh-box{border:1px solid #2b393d!important;border-radius:8px!important;background:#141e21!important;padding:12px!important}
+@media(max-width:760px){
+ #missionPanel{padding:10px!important}
+ #missionPanel .mh-head{gap:8px!important}
+ #missionPanel .mh-head>button{flex:0 0 auto!important;padding:8px 10px!important}
+ #missionPanel .mh-grid{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(120px,28dvh) minmax(0,1fr)!important;gap:10px!important}
+ #missionPanel .mh-list{border-right:0!important;border-bottom:1px solid #2b393d!important;padding:0 0 8px!important}
+ #missionPanel .mh-detail{padding:13px!important}
+ #missionPanel .case-layout .case-steps{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #missionPanel .case-layout .case-contact{grid-template-columns:38px minmax(0,1fr)!important;gap:10px!important}
+ #missionPanel .case-layout .case-avatar{width:36px!important;height:36px!important}
+ #missionHub{top:66px!important;right:10px!important;bottom:auto!important;left:auto!important}
+ .upgrade-button{top:66px!important;left:10px!important;right:auto!important;bottom:auto!important}
+ .topbar{min-height:56px!important;padding:9px 10px!important;align-items:flex-start!important}
+ .brand{max-width:45vw!important;font-size:9px!important}
+ .sub{font-size:7px!important;letter-spacing:.04em!important}
+ .status{gap:4px!important}
+ .status>div{min-width:0!important;padding:4px 5px!important;font-size:7px!important}
+ .status strong{font-size:9px!important;margin-top:2px!important}
+ .field-guide{bottom:70px!important;max-height:28dvh!important;width:calc(100% - 20px)!important;padding:9px 11px!important}
+ .field-guide span{font-size:11px!important}
+ .field-guide small{font-size:9px!important}
+ .mobilepad{left:8px!important;bottom:8px!important;transform:scale(.78)!important;transform-origin:bottom left!important}
+ .mobileact{right:8px!important;bottom:10px!important}
+ .mobileact button{width:48px!important;height:48px!important;min-height:48px!important;padding:0!important}
+ .bottom{display:none!important}
+}
+@media(max-height:650px) and (min-width:761px){
+ #missionPanel{padding:8px!important}
+ #missionPanel .mh-grid{margin-top:8px!important}
+ #missionPanel .mh-detail{padding:12px!important}
+ #missionPanel .case-layout .case-section{margin-top:12px!important}
+ #missionPanel .case-layout .case-callout{margin-top:10px!important}
+ .field-guide{bottom:44px!important;max-height:25dvh!important;padding:8px 12px!important}
+}
+`;document.head.append(finalPolishStyle);
+
 })();
 
 </script></body></html>
