@@ -999,8 +999,8 @@ frame=function(now){
 
 
 /* CLARITY FIX: make the real floor map and field gadgets easy to find. */
-const clarityStyle=document.createElement('style');
-clarityStyle.textContent=`
+const mapAccessStyle=document.createElement('style');
+mapAccessStyle.textContent=`
 #fullMapPanel .facility-layout{display:grid!important;grid-template-columns:minmax(0,1.3fr) minmax(210px,.7fr)!important;gap:18px!important;align-items:start}
 #fullMapPanel .facility-map{display:grid!important;grid-template-columns:repeat(24,minmax(0,1fr))!important;gap:2px!important;width:100%;min-height:240px;padding:8px;background:#0a171d;border:1px solid #31464d;border-radius:10px}
 #fullMapPanel .facility-tile{min-width:0;aspect-ratio:1/1;border-radius:2px}
@@ -1016,7 +1016,7 @@ clarityStyle.textContent=`
  .quick-access-button{padding:6px 7px!important;font-size:7px!important}
 }
 `;
-document.head.append(clarityStyle);
+document.head.append(mapAccessStyle);
 /* The quick buttons remain visible even when the control dock is collapsed. */
 const quickMapButton=document.createElement('button');
 quickMapButton.type='button';quickMapButton.className='quick-access-button';quickMapButton.textContent='⌖ MAP';quickMapButton.setAttribute('aria-label','Open live facility map');
