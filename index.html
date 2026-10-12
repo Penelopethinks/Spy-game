@@ -191,7 +191,97 @@ button{letter-spacing:.045em}
 .mh-stamp{letter-spacing:.12em}
 #fullMapPanel .clean-room .state{font-size:8px}
 @media(max-width:700px){.setting-preview{padding:9px;font-size:10px}.setting-preview small{font-size:9px}}
-</style></head><body><div class="game"><canvas id="view"></canvas><div class="vignette"></div><div class="scan"></div><div class="topbar"><div><div class="brand">NORTHSTAR <span>◈</span> MYSTERY CLUB</div><div class="sub">A FRIENDLY DETECTIVE ADVENTURE</div></div><div class="status"><div>AGENT<strong id="agentName">NOVA-07</strong></div><div>CLUES<strong id="clearance">0/3</strong></div><div>STATUS<strong id="status">ACTIVE</strong></div></div></div><aside class="hudleft"><div class="eyebrow">Current operation / 001</div><div class="missiontitle" id="roomName">NORTHSTAR HQ</div><div class="description" id="roomDesc">A quiet briefing floor. Something important has gone missing.</div><div class="objectives"><div class="eyebrow">Mission objectives</div><div class="obj" id="obj1"><i class="dot"></i><span>Locate the intel fragments <b id="fragCount">0/3</b></span></div><div class="obj" id="obj2"><i class="dot"></i><span>Access the secure terminal</span></div><div class="obj" id="obj3"><i class="dot"></i><span>Recover the missing briefcase</span></div></div></aside><aside class="hudright"><div class="mapbox"><div class="maphead"><span>FACILITY MAP</span><span>● LIVE</span></div><div class="mapgrid" id="mapgrid"></div><div class="maplegend">CYAN: YOU &nbsp; LIME: OBJECTIVE</div></div><div class="readout">PROXIMITY SCAN<strong id="scanText">No nearby signals</strong></div><div class="readout">FIELD KIT<strong id="kitText">Empty · 0 items</strong></div></aside><div class="crosshair"></div><div class="interact" id="interact"><b>[ E ]</b><span id="interactText">INTERACT</span></div><div class="toast" id="toast"><strong>INTEL ACQUIRED</strong><span>Data fragment recovered.</span></div><div class="bottom"><div class="controls"><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span><span class="hint">MOVE</span><span class="key">← →</span><span class="hint">LOOK</span><span class="key">E</span><span class="hint">INTERACT</span><span class="key">SHIFT</span><span class="hint">SPRINT</span></div><div class="eyebrow">CLICK TO WALK · PRESS E TO INSPECT</div></div><div class="mobilepad"><button class="up" data-move="forward">▲</button><button class="left" data-move="left">◀</button><button class="down" data-move="back">▼</button><button class="right" data-move="right">▶</button></div><div class="mobileact"><button id="mobileE">INTERACT<br><b>E</b></button></div><div class="help">POINT WITH CURSOR · CLICK TO MOVE FORWARD</div><div class="modal" id="briefing"><div class="brief"><div class="stamp">// CLASSIFIED BRIEFING · CLEARANCE REQUIRED</div><h1>OPERATION:<br><span>ANYWHERE</span></h1><p>A secure briefcase has vanished from Northstar HQ. Three intel fragments are scattered across the facility. Explore the rooms, investigate suspicious equipment, access the terminal, and recover the case.</p><div class="briefgrid"><div><small>MISSION</small><b>THE MISSING CASE</b></div><div><small>LOCATION</small><b>NORTHSTAR FACILITY</b></div><div><small>PACE</small><b style="color:var(--lime)"TAKE YOUR TIME</b></div></div><p><b style="color:#e6f8f6">CONTROLS</b> &nbsp; WASD to move · Move cursor to aim · click to step forward · E to interact · Shift to sprint. Walk through open doorways to reach every room.</p><button class="start" id="start">START EXPLORING &nbsp; →</button></div></div></div>
+</style>
+<style id="persistentPlayControlsStyle">
+ #playControls{position:fixed!important;z-index:9999!important;left:14px!important;right:14px!important;bottom:10px!important;display:flex!important;align-items:flex-end!important;gap:10px!important;pointer-events:none!important;font-family:system-ui,sans-serif!important;color:#eef5ef!important}
+ #playControls *{box-sizing:border-box!important}
+ #playControls .pc-group{pointer-events:auto!important;min-width:0!important;padding:9px!important;background:rgba(9,17,20,.97)!important;border:1px solid #53665d!important;border-radius:12px!important;box-shadow:0 8px 25px #0007!important}
+ #playControls .pc-label{font-size:9px!important;font-weight:850!important;letter-spacing:.15em!important;color:#b8d8ca!important;margin:0 0 7px 2px!important}
+ #playControls .pc-pad{display:grid!important;grid-template-columns:repeat(3,40px)!important;grid-template-rows:repeat(2,38px)!important;gap:5px!important}
+ #playControls .pc-up{grid-column:2!important;grid-row:1!important}
+ #playControls .pc-left{grid-column:1!important;grid-row:2!important}
+ #playControls .pc-down{grid-column:2!important;grid-row:2!important}
+ #playControls .pc-right{grid-column:3!important;grid-row:2!important}
+ #playControls button{display:flex!important;align-items:center!important;justify-content:center!important;touch-action:none!important;user-select:none!important;-webkit-user-select:none!important;min-height:38px!important;border:1px solid #60766a!important;border-radius:8px!important;background:#1a2a26!important;color:#f4fff8!important;padding:6px 10px!important;font-size:19px!important;font-weight:900!important;line-height:1!important;letter-spacing:0!important;cursor:pointer!important}
+ #playControls button.is-held,#playControls button:active{background:#b8d8ca!important;color:#102019!important;border-color:#e3fff0!important}
+ #playControls .pc-help{font-size:9px!important;color:#aabbb2!important;margin:6px 2px 0!important;white-space:nowrap!important}
+ #playControls .pc-row{display:flex!important;gap:6px!important}
+ #playControls .pc-lookbtn{width:43px!important;height:43px!important;font-size:22px!important}
+ #playControls .pc-actions{display:flex!important;flex-direction:column!important;gap:6px!important;min-width:190px!important}
+ #playControls .pc-actions .pc-label{margin-bottom:0!important}
+ #playControls .pc-action{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;text-align:left!important;width:100%!important;min-height:42px!important;font-size:12px!important}
+ #playControls .pc-action .pc-action-icon{display:grid!important;place-items:center!important;flex:0 0 28px!important;height:28px!important;border-radius:7px!important;background:#2a3d35!important;color:#cde7d8!important;font-size:12px!important}
+ #playControls .pc-action b{display:block!important;font-size:10px!important;letter-spacing:.07em!important}
+ #playControls .pc-action small{display:block!important;margin-top:3px!important;font-size:9px!important;font-weight:500!important;color:#b6c8be!important}
+ #playControls .pc-interact{background:#b8d8ca!important;border-color:#b8d8ca!important;color:#102019!important}
+ #playControls .pc-interact .pc-action-icon{background:#213b30!important;color:#e2f4e9!important}
+ #playControls .pc-interact small{color:#315647!important}
+ #playControls .pc-tools{margin-top:1px!important}
+ #playControls .pc-tool{flex:1!important;font-size:11px!important;min-height:35px!important}
+ /* Keep the original upper readouts, left objectives, right-side map and lower instructions. */
+ .topbar{z-index:12!important}
+ .hudleft,.hudright{z-index:11!important;display:block!important}
+ .mapbox,.readout{display:block!important;visibility:visible!important;opacity:1!important}
+ .bottom{display:flex!important;visibility:visible!important;opacity:1!important;position:fixed!important;z-index:10!important;left:50%!important;transform:translateX(-50%)!important;bottom:120px!important;max-width:calc(100vw - 24px)!important;width:max-content!important;flex-wrap:wrap!important;justify-content:center!important;gap:8px!important;padding:8px 12px!important;border:1px solid #3a4a45!important;border-radius:10px!important;background:rgba(9,17,20,.94)!important;color:#e8f2ec!important}
+ .bottom .controls{display:flex!important;flex-wrap:wrap!important;align-items:center!important;justify-content:center!important;gap:5px!important}
+ .bottom .eyebrow{font-size:9px!important;line-height:1.35!important;text-align:center!important}
+ .mobilepad,.mobileact{display:none!important}
+ @media(max-width:760px){
+  #playControls{left:6px!important;right:6px!important;bottom:6px!important;gap:5px!important;align-items:stretch!important}
+  #playControls .pc-group{padding:6px!important;border-radius:9px!important}
+  #playControls .pc-label{font-size:8px!important;margin-bottom:5px!important}
+  #playControls .pc-pad{grid-template-columns:repeat(3,32px)!important;grid-template-rows:repeat(2,32px)!important;gap:4px!important}
+  #playControls button{min-height:32px!important;padding:4px!important;font-size:17px!important}
+  #playControls .pc-move,#playControls .pc-look{flex:0 0 auto!important}
+  #playControls .pc-lookbtn{width:34px!important;height:36px!important;font-size:19px!important}
+  #playControls .pc-actions{flex:1!important;min-width:0!important;gap:4px!important}
+  #playControls .pc-action{gap:5px!important;min-height:36px!important}
+  #playControls .pc-action .pc-action-icon{flex-basis:22px!important;height:22px!important;font-size:10px!important}
+  #playControls .pc-action b{font-size:8px!important}
+  #playControls .pc-action small{font-size:8px!important}
+  #playControls .pc-tools{gap:4px!important}
+  #playControls .pc-tool{font-size:9px!important;min-height:29px!important}
+  #playControls .pc-help{font-size:8px!important;white-space:normal!important;line-height:1.2!important}
+  .bottom{bottom:111px!important;width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important;padding:5px!important;gap:4px!important}
+  .bottom .controls{gap:3px!important}
+  .bottom .key{padding:3px 5px!important;min-width:18px!important}
+  .bottom .eyebrow{font-size:8px!important}
+  .hudleft{top:75px!important;left:8px!important;width:min(44vw,190px)!important;max-height:29dvh!important;overflow:auto!important}
+  .hudright{top:75px!important;right:8px!important;width:min(40vw,170px)!important;max-height:28dvh!important;overflow:auto!important}
+  .mapbox{padding:7px!important}
+  .readout{padding:7px!important}
+ }
+ @media(max-width:390px){
+  #playControls{gap:3px!important}
+  #playControls .pc-group{padding:4px!important}
+  #playControls .pc-pad{grid-template-columns:repeat(3,27px)!important;grid-template-rows:repeat(2,29px)!important;gap:3px!important}
+  #playControls .pc-lookbtn{width:28px!important;height:32px!important}
+  #playControls .pc-actions{min-width:0!important}
+  #playControls .pc-action small{display:none!important}
+  #playControls .pc-action{min-height:33px!important}
+  .bottom{bottom:103px!important}
+ }
+</style>
+</head><body><div class="game"><canvas id="view"></canvas><div class="vignette"></div><div class="scan"></div><div class="topbar"><div><div class="brand">NORTHSTAR <span>◈</span> MYSTERY CLUB</div><div class="sub">A FRIENDLY DETECTIVE ADVENTURE</div></div><div class="status"><div>AGENT<strong id="agentName">NOVA-07</strong></div><div>CLUES<strong id="clearance">0/3</strong></div><div>STATUS<strong id="status">ACTIVE</strong></div></div></div><aside class="hudleft"><div class="eyebrow">Current operation / 001</div><div class="missiontitle" id="roomName">NORTHSTAR HQ</div><div class="description" id="roomDesc">A quiet briefing floor. Something important has gone missing.</div><div class="objectives"><div class="eyebrow">Mission objectives</div><div class="obj" id="obj1"><i class="dot"></i><span>Locate the intel fragments <b id="fragCount">0/3</b></span></div><div class="obj" id="obj2"><i class="dot"></i><span>Access the secure terminal</span></div><div class="obj" id="obj3"><i class="dot"></i><span>Recover the missing briefcase</span></div></div></aside><aside class="hudright"><div class="mapbox"><div class="maphead"><span>FACILITY MAP</span><span>● LIVE</span></div><div class="mapgrid" id="mapgrid"></div><div class="maplegend">CYAN: YOU &nbsp; LIME: OBJECTIVE</div></div><div class="readout">PROXIMITY SCAN<strong id="scanText">No nearby signals</strong></div><div class="readout">FIELD KIT<strong id="kitText">Empty · 0 items</strong></div></aside><div class="crosshair"></div><div class="interact" id="interact"><b>[ E ]</b><span id="interactText">INTERACT</span></div><div class="toast" id="toast"><strong>INTEL ACQUIRED</strong><span>Data fragment recovered.</span></div><div class="bottom"><div class="controls"><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span><span class="hint">MOVE</span><span class="key">← →</span><span class="hint">LOOK</span><span class="key">E</span><span class="hint">INTERACT</span><span class="key">SHIFT</span><span class="hint">SPRINT</span></div><div class="eyebrow">CLICK TO WALK · PRESS E TO INSPECT</div></div><div class="mobilepad"><button class="up" data-move="forward">▲</button><button class="left" data-move="left">◀</button><button class="down" data-move="back">▼</button><button class="right" data-move="right">▶</button></div><div class="mobileact"><button id="mobileE">INTERACT<br><b>E</b></button></div><div class="help">POINT WITH CURSOR · CLICK TO MOVE FORWARD</div><div class="modal" id="briefing"><div class="brief"><div class="stamp">// CLASSIFIED BRIEFING · CLEARANCE REQUIRED</div><h1>OPERATION:<br><span>ANYWHERE</span></h1><p>A secure briefcase has vanished from Northstar HQ. Three intel fragments are scattered across the facility. Explore the rooms, investigate suspicious equipment, access the terminal, and recover the case.</p><div class="briefgrid"><div><small>MISSION</small><b>THE MISSING CASE</b></div><div><small>LOCATION</small><b>NORTHSTAR FACILITY</b></div><div><small>PACE</small><b style="color:var(--lime)"TAKE YOUR TIME</b></div></div><p><b style="color:#e6f8f6">CONTROLS</b> &nbsp; WASD to move · Move cursor to aim · click to step forward · E to interact · Shift to sprint. Walk through open doorways to reach every room.</p><button class="start" id="start">START EXPLORING &nbsp; →</button></div></div></div>
+
+<!-- Persistent movement dock: plain HTML so the arrows are visible even if a later script has an error. -->
+<section id="playControls" aria-label="Movement and action controls">
+ <div class="pc-group pc-move"><div class="pc-label">MOVE</div><div class="pc-pad">
+  <button type="button" class="pc-key pc-up" data-hold="KeyW" aria-label="Move forward">▲</button>
+  <button type="button" class="pc-key pc-left" data-hold="KeyA" aria-label="Strafe left">◀</button>
+  <button type="button" class="pc-key pc-down" data-hold="KeyS" aria-label="Move backward">▼</button>
+  <button type="button" class="pc-key pc-right" data-hold="KeyD" aria-label="Strafe right">▶</button>
+ </div><div class="pc-help">Hold to move</div></div>
+ <div class="pc-group pc-look"><div class="pc-label">LOOK</div><div class="pc-row">
+  <button type="button" class="pc-key pc-lookbtn" data-hold="ArrowLeft" aria-label="Turn left">↶</button>
+  <button type="button" class="pc-key pc-lookbtn" data-hold="ArrowRight" aria-label="Turn right">↷</button>
+ </div><div class="pc-help">Turn</div></div>
+ <div class="pc-group pc-actions"><div class="pc-label">ACTIONS</div>
+  <button type="button" class="pc-action pc-interact" id="pcInteract"><span class="pc-action-icon">E</span><span><b>INTERACT</b><small>Inspect · Collect · Talk</small></span></button>
+  <button type="button" class="pc-action" data-hold="ShiftLeft"><span class="pc-action-icon">⇧</span><span><b>SPRINT</b><small>Hold to run</small></span></button>
+  <div class="pc-row pc-tools"><button type="button" class="pc-tool" id="pcMap">⌖ Map</button><button type="button" class="pc-tool" id="pcCases">☷ Cases</button></div>
+ </div>
+</section>
 <script>
 (()=>{'use strict';const canvas=document.getElementById('view'),ctx=canvas.getContext('2d');let W=innerWidth,H=innerHeight,lastFrameDraw=0,lastHudRoom='';function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight}addEventListener('resize',resize);resize();
 // 0 open floor, 1 walls, 2 door, 3 desk/console, 4 intel, 5 terminal, 6 case, 7 locker, 8 plant, 9 bench
@@ -926,7 +1016,7 @@ const cleanDockStyle=document.createElement('style');
 cleanDockStyle.textContent=`
  .hudleft,.hudright,.scene-sign,.help,.scan{display:none!important}
  #pinLayer>div:not(.scanner-beacon){display:none!important}
- .bottom{display:none!important}
+ .bottom{display:flex!important}
  .clean-dock{transition:max-height .28s ease,padding .28s ease,bottom .28s ease;}
  .clean-dock.is-collapsed{max-height:58px!important;overflow:hidden;padding:8px 10px;bottom:8px}
  .clean-dock.is-collapsed .dock-main{display:none!important}
@@ -1616,7 +1706,7 @@ unclutteredGameStyle.textContent=`
  .field-guide span{font-size:11px!important}
  .field-guide small{font-size:8px!important}
  .field-tools-toggle{font-size:7px!important;padding:5px 7px!important}
- .bottom{display:none!important}
+ .bottom{display:flex!important}
  .mobilepad{left:10px!important;bottom:10px!important}
  .mobilepad button{width:36px!important;height:36px!important}
  .mobileact{right:10px!important;bottom:10px!important}
@@ -1768,7 +1858,7 @@ const viewportFitAndVibeStyle=document.createElement('style');viewportFitAndVibe
  .mobilepad{left:10px!important;bottom:10px!important;transform:scale(.82);transform-origin:bottom left!important}
  .mobileact{right:10px!important;bottom:12px!important}
  .mobileact button{width:50px!important;height:50px!important}
- .bottom{display:none!important}
+ .bottom{display:flex!important}
 }
 @media(max-height:650px) and (min-width:761px){
  .field-guide{bottom:48px!important;max-height:30dvh!important;padding:9px 13px!important}
@@ -1778,7 +1868,7 @@ const viewportFitAndVibeStyle=document.createElement('style');viewportFitAndVibe
 }
 `;document.head.append(viewportFitAndVibeStyle);
 
-const professionalUiStyle=document.createElement('style');professionalUiStyle.textContent="\n/* ONE CONSISTENT, RESPONSIVE DESIGN SYSTEM */\n:root{--ui-line:#344541;--ui-text:#edf2ee;--ui-muted:#a3b2ab;--ui-accent:#b7d7c8;--ui-accent-ink:#10201a}\n.game button{font-family:inherit!important;font-size:11px!important;font-weight:700!important;letter-spacing:.045em!important;line-height:1.25!important;text-transform:uppercase!important;border:1px solid var(--ui-line)!important;border-radius:7px!important;background:#172322!important;color:var(--ui-text)!important;box-shadow:none!important;transition:background .15s,border-color .15s!important;transform:none!important;white-space:normal!important;overflow-wrap:anywhere!important}\n.game button:hover{background:#202f2c!important;border-color:#718c7e!important;transform:none!important}\n.game button:focus-visible{outline:2px solid var(--ui-accent)!important;outline-offset:2px!important}\n.game button.start,.game #mhStart{background:var(--ui-accent)!important;border-color:var(--ui-accent)!important;color:var(--ui-accent-ink)!important}\n#missionHub,.upgrade-button{min-height:38px!important;padding:9px 12px!important;border:1px solid #4b6258!important;border-radius:7px!important;background:#101a1b!important;color:#eaf0eb!important;font-size:10px!important;box-shadow:none!important}\n#missionHub{background:var(--ui-accent)!important;border-color:var(--ui-accent)!important;color:var(--ui-accent-ink)!important}\n#missionPanel{padding:clamp(12px,2vw,24px)!important;background:rgba(7,12,13,.985)!important}\n#missionPanel .mh-head{gap:12px!important;align-items:center!important;padding:0 0 15px!important;border-bottom:1px solid #2d3b37!important}\n#missionPanel .mh-title{font-size:clamp(22px,2.6vw,30px)!important;letter-spacing:-.035em!important;color:#eef3ef!important}\n#missionPanel .mh-title span{color:var(--ui-accent)!important}\n#missionPanel .mh-sub{font-size:10px!important;line-height:1.5!important;letter-spacing:.07em!important;color:var(--ui-muted)!important}\n#missionPanel .mh-grid{grid-template-columns:minmax(230px,.78fr) minmax(0,1.22fr)!important;gap:clamp(12px,2vw,22px)!important;margin-top:16px!important;align-items:start!important}\n#missionPanel .mh-list{max-height:calc(100dvh - 160px)!important;padding:0 10px 0 0!important;border:0!important;border-right:1px solid #293633!important;background:transparent!important;overflow:auto!important}\n#missionPanel .mh-search{position:sticky!important;top:0!important;z-index:2!important;width:100%!important;margin:0 0 8px!important;padding:11px 12px!important;border:1px solid var(--ui-line)!important;border-radius:7px!important;background:#111b1b!important;color:var(--ui-text)!important;font:inherit!important;font-size:12px!important}\n#missionPanel .mh-count{font-size:10px!important;line-height:1.5!important;letter-spacing:.045em!important;color:var(--ui-muted)!important}\n#missionPanel .mh-card{display:block!important;width:100%!important;min-height:52px!important;margin:0!important;padding:10px 12px!important;text-align:left!important;text-transform:none!important;letter-spacing:0!important;border:0!important;border-bottom:1px solid #26322f!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}\n#missionPanel .mh-card:hover{background:#15201d!important;border-color:#26322f!important}\n#missionPanel .mh-card.active{background:#182722!important;border-left:3px solid var(--ui-accent)!important;padding-left:9px!important}\n#missionPanel .mh-card b{display:block!important;font-size:11px!important;line-height:1.4!important;font-weight:750!important;color:#eef3ef!important}\n#missionPanel .mh-card small{display:block!important;margin-top:4px!important;font-size:9px!important;line-height:1.4!important;color:var(--ui-muted)!important}\n#missionPanel .mh-detail{max-height:calc(100dvh - 160px)!important;overflow:auto!important;padding:clamp(14px,2vw,22px)!important;border:1px solid #293633!important;border-radius:10px!important;background:#0d1515!important}\n#missionPanel .case-layout{min-width:0!important;overflow-wrap:anywhere!important}\n#missionPanel .case-layout h2{font-size:clamp(23px,3vw,36px)!important;line-height:1.08!important;letter-spacing:-.035em!important;color:#f0f4f0!important}\n#missionPanel .case-layout .case-meta{gap:8px 14px!important;line-height:1.5!important}\n#missionPanel .case-layout .case-section p,#missionPanel .case-layout .case-contact p,#missionPanel .case-layout .case-callout p{font-size:12px!important;line-height:1.65!important;color:#b6c3bc!important}\n#missionPanel .case-layout .case-callout{border-radius:0 7px 7px 0!important;box-shadow:none!important}\n#missionPanel .case-layout .case-actions{display:flex!important;flex-wrap:wrap!important;gap:8px!important;position:sticky!important;bottom:-1px!important;padding:12px 0 2px!important;background:linear-gradient(0deg,#0d1515 78%,transparent)!important;z-index:2!important}\n#missionPanel .case-layout .case-actions button{flex:1 1 145px!important;min-height:40px!important}\n#missionPanel .case-layout.layout-0{--case-accent:#b7d7c8!important}\n#missionPanel .case-layout.layout-0 .case-top{display:grid!important;grid-template-columns:54px minmax(0,1fr)!important;gap:14px!important;align-items:start!important}\n#missionPanel .case-layout.layout-0 .case-number{display:grid!important;place-items:center!important;min-height:54px!important;border:1px solid var(--case-accent)!important;background:#14231d!important;border-radius:8px!important;font-size:20px!important}\n#missionPanel .case-layout.layout-1{--case-accent:#d9c49a!important}\n#missionPanel .case-layout.layout-1 .case-top{border-top:2px solid var(--case-accent)!important;padding-top:14px!important}\n#missionPanel .case-layout.layout-1 .case-kicker{color:var(--case-accent)!important}\n#missionPanel .case-layout.layout-2{--case-accent:#b7c8df!important}\n#missionPanel .case-layout.layout-2 .case-top{background:#121c27!important;padding:15px!important;border-left:3px solid var(--case-accent)!important}\n#missionPanel .case-layout.layout-2 .case-contact{background:#111a23!important;padding:13px!important;border:1px solid #2b3a4b!important;border-radius:7px!important}\n#missionPanel .case-layout.layout-3{--case-accent:#d4b8d9!important}\n#missionPanel .case-layout.layout-3 .case-top{background:linear-gradient(110deg,#201a24,transparent 85%)!important;padding:15px 12px!important;border-bottom:1px solid #3a2e3d!important}\n#missionPanel .case-layout.layout-3 .case-location{display:inline-block!important;margin:8px 0!important;padding:6px 9px!important;border:1px solid var(--case-accent)!important;border-radius:5px!important;color:var(--case-accent)!important;font-size:10px!important;letter-spacing:.04em!important}\n.field-guide{left:50%!important;bottom:64px!important;transform:translateX(-50%)!important;width:min(460px,calc(100% - 32px))!important;max-height:calc(100dvh - 155px)!important;overflow:auto!important;border:1px solid #40534a!important;border-radius:9px!important;background:rgba(13,20,20,.97)!important;box-shadow:0 8px 24px #0004!important}\n@media(max-width:760px){\n #missionPanel .mh-grid{grid-template-columns:minmax(0,1fr)!important;gap:12px!important}\n #missionPanel .mh-list{max-height:30dvh!important;border-right:0!important;border-bottom:1px solid #293633!important;padding:0 0 8px!important}\n #missionPanel .mh-detail{max-height:none!important;overflow:visible!important;padding:13px!important}\n #missionPanel .mh-head{position:sticky!important;top:-1px!important;z-index:4!important;align-items:flex-start!important}\n #missionPanel .mh-card{min-height:48px!important;padding:8px 10px!important}\n #missionPanel .case-layout .case-contact{grid-template-columns:36px minmax(0,1fr)!important;gap:10px!important;padding:12px 0!important}\n #missionPanel .case-layout .case-avatar{width:34px!important;height:34px!important}\n #missionPanel .case-layout .case-top{grid-template-columns:44px minmax(0,1fr)!important;gap:10px!important}\n #missionPanel .case-layout .case-number{min-height:44px!important;font-size:16px!important}\n #missionHub{right:10px!important;top:70px!important;bottom:auto!important;left:auto!important}\n .upgrade-button{top:70px!important;left:10px!important;right:auto!important}\n .topbar{min-height:58px!important;height:auto!important;padding:9px 10px!important;align-items:flex-start!important}\n .brand{max-width:45vw!important;font-size:9px!important;line-height:1.5!important}\n .sub{font-size:7px!important;letter-spacing:.05em!important}\n .status{gap:4px!important}\n .status>div{font-size:7px!important;padding:4px 5px!important}\n .status strong{font-size:9px!important;margin-top:2px!important}\n .field-guide{bottom:75px!important;width:calc(100% - 20px)!important;max-height:31dvh!important;padding:9px 11px!important}\n .field-guide span{font-size:12px!important;line-height:1.35!important}\n .field-guide small{font-size:9px!important}\n .mobilepad{left:8px!important;bottom:8px!important;transform:scale(.78)!important;transform-origin:bottom left!important}\n .mobileact{right:10px!important;bottom:10px!important}\n .mobileact button{width:48px!important;height:48px!important}\n .bottom{display:none!important}\n}\n@media(max-height:650px) and (min-width:761px){\n .field-guide{bottom:45px!important;max-height:28dvh!important;padding:8px 12px!important}\n .field-guide span{font-size:11px!important}\n #missionPanel .mh-list,#missionPanel .mh-detail{max-height:calc(100dvh - 135px)!important}\n}";document.head.append(professionalUiStyle);
+const professionalUiStyle=document.createElement('style');professionalUiStyle.textContent="\n/* ONE CONSISTENT, RESPONSIVE DESIGN SYSTEM */\n:root{--ui-line:#344541;--ui-text:#edf2ee;--ui-muted:#a3b2ab;--ui-accent:#b7d7c8;--ui-accent-ink:#10201a}\n.game button{font-family:inherit!important;font-size:11px!important;font-weight:700!important;letter-spacing:.045em!important;line-height:1.25!important;text-transform:uppercase!important;border:1px solid var(--ui-line)!important;border-radius:7px!important;background:#172322!important;color:var(--ui-text)!important;box-shadow:none!important;transition:background .15s,border-color .15s!important;transform:none!important;white-space:normal!important;overflow-wrap:anywhere!important}\n.game button:hover{background:#202f2c!important;border-color:#718c7e!important;transform:none!important}\n.game button:focus-visible{outline:2px solid var(--ui-accent)!important;outline-offset:2px!important}\n.game button.start,.game #mhStart{background:var(--ui-accent)!important;border-color:var(--ui-accent)!important;color:var(--ui-accent-ink)!important}\n#missionHub,.upgrade-button{min-height:38px!important;padding:9px 12px!important;border:1px solid #4b6258!important;border-radius:7px!important;background:#101a1b!important;color:#eaf0eb!important;font-size:10px!important;box-shadow:none!important}\n#missionHub{background:var(--ui-accent)!important;border-color:var(--ui-accent)!important;color:var(--ui-accent-ink)!important}\n#missionPanel{padding:clamp(12px,2vw,24px)!important;background:rgba(7,12,13,.985)!important}\n#missionPanel .mh-head{gap:12px!important;align-items:center!important;padding:0 0 15px!important;border-bottom:1px solid #2d3b37!important}\n#missionPanel .mh-title{font-size:clamp(22px,2.6vw,30px)!important;letter-spacing:-.035em!important;color:#eef3ef!important}\n#missionPanel .mh-title span{color:var(--ui-accent)!important}\n#missionPanel .mh-sub{font-size:10px!important;line-height:1.5!important;letter-spacing:.07em!important;color:var(--ui-muted)!important}\n#missionPanel .mh-grid{grid-template-columns:minmax(230px,.78fr) minmax(0,1.22fr)!important;gap:clamp(12px,2vw,22px)!important;margin-top:16px!important;align-items:start!important}\n#missionPanel .mh-list{max-height:calc(100dvh - 160px)!important;padding:0 10px 0 0!important;border:0!important;border-right:1px solid #293633!important;background:transparent!important;overflow:auto!important}\n#missionPanel .mh-search{position:sticky!important;top:0!important;z-index:2!important;width:100%!important;margin:0 0 8px!important;padding:11px 12px!important;border:1px solid var(--ui-line)!important;border-radius:7px!important;background:#111b1b!important;color:var(--ui-text)!important;font:inherit!important;font-size:12px!important}\n#missionPanel .mh-count{font-size:10px!important;line-height:1.5!important;letter-spacing:.045em!important;color:var(--ui-muted)!important}\n#missionPanel .mh-card{display:block!important;width:100%!important;min-height:52px!important;margin:0!important;padding:10px 12px!important;text-align:left!important;text-transform:none!important;letter-spacing:0!important;border:0!important;border-bottom:1px solid #26322f!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}\n#missionPanel .mh-card:hover{background:#15201d!important;border-color:#26322f!important}\n#missionPanel .mh-card.active{background:#182722!important;border-left:3px solid var(--ui-accent)!important;padding-left:9px!important}\n#missionPanel .mh-card b{display:block!important;font-size:11px!important;line-height:1.4!important;font-weight:750!important;color:#eef3ef!important}\n#missionPanel .mh-card small{display:block!important;margin-top:4px!important;font-size:9px!important;line-height:1.4!important;color:var(--ui-muted)!important}\n#missionPanel .mh-detail{max-height:calc(100dvh - 160px)!important;overflow:auto!important;padding:clamp(14px,2vw,22px)!important;border:1px solid #293633!important;border-radius:10px!important;background:#0d1515!important}\n#missionPanel .case-layout{min-width:0!important;overflow-wrap:anywhere!important}\n#missionPanel .case-layout h2{font-size:clamp(23px,3vw,36px)!important;line-height:1.08!important;letter-spacing:-.035em!important;color:#f0f4f0!important}\n#missionPanel .case-layout .case-meta{gap:8px 14px!important;line-height:1.5!important}\n#missionPanel .case-layout .case-section p,#missionPanel .case-layout .case-contact p,#missionPanel .case-layout .case-callout p{font-size:12px!important;line-height:1.65!important;color:#b6c3bc!important}\n#missionPanel .case-layout .case-callout{border-radius:0 7px 7px 0!important;box-shadow:none!important}\n#missionPanel .case-layout .case-actions{display:flex!important;flex-wrap:wrap!important;gap:8px!important;position:sticky!important;bottom:-1px!important;padding:12px 0 2px!important;background:linear-gradient(0deg,#0d1515 78%,transparent)!important;z-index:2!important}\n#missionPanel .case-layout .case-actions button{flex:1 1 145px!important;min-height:40px!important}\n#missionPanel .case-layout.layout-0{--case-accent:#b7d7c8!important}\n#missionPanel .case-layout.layout-0 .case-top{display:grid!important;grid-template-columns:54px minmax(0,1fr)!important;gap:14px!important;align-items:start!important}\n#missionPanel .case-layout.layout-0 .case-number{display:grid!important;place-items:center!important;min-height:54px!important;border:1px solid var(--case-accent)!important;background:#14231d!important;border-radius:8px!important;font-size:20px!important}\n#missionPanel .case-layout.layout-1{--case-accent:#d9c49a!important}\n#missionPanel .case-layout.layout-1 .case-top{border-top:2px solid var(--case-accent)!important;padding-top:14px!important}\n#missionPanel .case-layout.layout-1 .case-kicker{color:var(--case-accent)!important}\n#missionPanel .case-layout.layout-2{--case-accent:#b7c8df!important}\n#missionPanel .case-layout.layout-2 .case-top{background:#121c27!important;padding:15px!important;border-left:3px solid var(--case-accent)!important}\n#missionPanel .case-layout.layout-2 .case-contact{background:#111a23!important;padding:13px!important;border:1px solid #2b3a4b!important;border-radius:7px!important}\n#missionPanel .case-layout.layout-3{--case-accent:#d4b8d9!important}\n#missionPanel .case-layout.layout-3 .case-top{background:linear-gradient(110deg,#201a24,transparent 85%)!important;padding:15px 12px!important;border-bottom:1px solid #3a2e3d!important}\n#missionPanel .case-layout.layout-3 .case-location{display:inline-block!important;margin:8px 0!important;padding:6px 9px!important;border:1px solid var(--case-accent)!important;border-radius:5px!important;color:var(--case-accent)!important;font-size:10px!important;letter-spacing:.04em!important}\n.field-guide{left:50%!important;bottom:64px!important;transform:translateX(-50%)!important;width:min(460px,calc(100% - 32px))!important;max-height:calc(100dvh - 155px)!important;overflow:auto!important;border:1px solid #40534a!important;border-radius:9px!important;background:rgba(13,20,20,.97)!important;box-shadow:0 8px 24px #0004!important}\n@media(max-width:760px){\n #missionPanel .mh-grid{grid-template-columns:minmax(0,1fr)!important;gap:12px!important}\n #missionPanel .mh-list{max-height:30dvh!important;border-right:0!important;border-bottom:1px solid #293633!important;padding:0 0 8px!important}\n #missionPanel .mh-detail{max-height:none!important;overflow:visible!important;padding:13px!important}\n #missionPanel .mh-head{position:sticky!important;top:-1px!important;z-index:4!important;align-items:flex-start!important}\n #missionPanel .mh-card{min-height:48px!important;padding:8px 10px!important}\n #missionPanel .case-layout .case-contact{grid-template-columns:36px minmax(0,1fr)!important;gap:10px!important;padding:12px 0!important}\n #missionPanel .case-layout .case-avatar{width:34px!important;height:34px!important}\n #missionPanel .case-layout .case-top{grid-template-columns:44px minmax(0,1fr)!important;gap:10px!important}\n #missionPanel .case-layout .case-number{min-height:44px!important;font-size:16px!important}\n #missionHub{right:10px!important;top:70px!important;bottom:auto!important;left:auto!important}\n .upgrade-button{top:70px!important;left:10px!important;right:auto!important}\n .topbar{min-height:58px!important;height:auto!important;padding:9px 10px!important;align-items:flex-start!important}\n .brand{max-width:45vw!important;font-size:9px!important;line-height:1.5!important}\n .sub{font-size:7px!important;letter-spacing:.05em!important}\n .status{gap:4px!important}\n .status>div{font-size:7px!important;padding:4px 5px!important}\n .status strong{font-size:9px!important;margin-top:2px!important}\n .field-guide{bottom:75px!important;width:calc(100% - 20px)!important;max-height:31dvh!important;padding:9px 11px!important}\n .field-guide span{font-size:12px!important;line-height:1.35!important}\n .field-guide small{font-size:9px!important}\n .mobilepad{left:8px!important;bottom:8px!important;transform:scale(.78)!important;transform-origin:bottom left!important}\n .mobileact{right:10px!important;bottom:10px!important}\n .mobileact button{width:48px!important;height:48px!important}\n .bottom{display:flex!important}\n}\n@media(max-height:650px) and (min-width:761px){\n .field-guide{bottom:45px!important;max-height:28dvh!important;padding:8px 12px!important}\n .field-guide span{font-size:11px!important}\n #missionPanel .mh-list,#missionPanel .mh-detail{max-height:calc(100dvh - 135px)!important}\n}";document.head.append(professionalUiStyle);
 
 
 /* FINAL NAVIGATION + LAYOUT FIX */
@@ -2291,7 +2381,7 @@ button.start:hover,.case-actions .start:hover,.mh-actions .start:hover{backgroun
  .mobilepad{left:8px!important;bottom:8px!important;transform:scale(.78)!important;transform-origin:bottom left!important}
  .mobileact{right:8px!important;bottom:10px!important}
  .mobileact button{width:48px!important;height:48px!important;min-height:48px!important;padding:0!important}
- .bottom{display:none!important}
+ .bottom{display:flex!important}
 }
 @media(max-height:650px) and (min-width:761px){
  #missionPanel{padding:8px!important}
@@ -2331,95 +2421,13 @@ function safeRenderScene(){
 }
 
 
-/* UNIFIED PLAY CONTROLS — one consistent, visible control dock for keyboard, mouse and touch. */
-const playControls=document.createElement('section');
-playControls.id='playControls';
-playControls.setAttribute('aria-label','Movement and action controls');
-playControls.innerHTML=`
- <div class="pc-group pc-move"><div class="pc-label">MOVE</div><div class="pc-pad">
-  <button type="button" class="pc-key pc-up" data-hold="KeyW" aria-label="Move forward">▲</button>
-  <button type="button" class="pc-key pc-left" data-hold="KeyA" aria-label="Strafe left">◀</button>
-  <button type="button" class="pc-key pc-down" data-hold="KeyS" aria-label="Move backward">▼</button>
-  <button type="button" class="pc-key pc-right" data-hold="KeyD" aria-label="Strafe right">▶</button>
- </div><div class="pc-help">Hold to move</div></div>
- <div class="pc-group pc-look"><div class="pc-label">LOOK</div><div class="pc-row">
-  <button type="button" class="pc-key pc-lookbtn" data-hold="ArrowLeft" aria-label="Turn left">↶</button>
-  <button type="button" class="pc-key pc-lookbtn" data-hold="ArrowRight" aria-label="Turn right">↷</button>
- </div><div class="pc-help">Turn left / right</div></div>
- <div class="pc-group pc-actions"><div class="pc-label">ACTIONS</div>
-  <button type="button" class="pc-action pc-interact" id="pcInteract"><span class="pc-action-icon">E</span><span><b>INTERACT</b><small>Inspect · Collect · Talk</small></span></button>
-  <button type="button" class="pc-action" data-hold="ShiftLeft"><span class="pc-action-icon">⇧</span><span><b>SPRINT</b><small>Hold to run</small></span></button>
-  <div class="pc-row pc-tools"><button type="button" class="pc-tool" id="pcMap">⌖ Map</button><button type="button" class="pc-tool" id="pcCases">☷ Cases</button></div>
- </div>`;
-document.querySelector('.game').append(playControls);
-const playControlStyle=document.createElement('style');
-playControlStyle.textContent=`
- #playControls{position:fixed;z-index:18;left:14px;right:14px;bottom:12px;display:flex;align-items:flex-end;gap:12px;pointer-events:none;font-family:inherit;color:#eaf2ee}
- #playControls *{box-sizing:border-box}
- #playControls .pc-group{pointer-events:auto;min-width:0;padding:10px;background:rgba(9,17,20,.94);border:1px solid #394b46;border-radius:12px;box-shadow:0 8px 25px #0005;backdrop-filter:blur(8px)}
- #playControls .pc-label{font-size:9px;font-weight:850;letter-spacing:.15em;color:#b8d8ca;margin:0 0 8px 2px}
- #playControls .pc-pad{display:grid;grid-template-columns:repeat(3,40px);grid-template-rows:repeat(2,38px);gap:5px}
- #playControls .pc-up{grid-column:2;grid-row:1}
- #playControls .pc-left{grid-column:1;grid-row:2}
- #playControls .pc-down{grid-column:2;grid-row:2}
- #playControls .pc-right{grid-column:3;grid-row:2}
- #playControls button{touch-action:none;user-select:none;-webkit-user-select:none;min-height:36px!important;border:1px solid #43564e!important;border-radius:8px!important;background:#1a2726!important;color:#eef5ef!important;padding:7px 10px!important;font-size:12px!important;font-weight:800!important;letter-spacing:0!important}
- #playControls button:hover{background:#253733!important;border-color:#9ab9a8!important}
- #playControls button.is-held{background:#b8d8ca!important;color:#102019!important;border-color:#d8eee2!important;transform:translateY(1px)!important}
- #playControls .pc-help{font-size:9px;color:#9eafa6;margin:7px 2px 0;white-space:nowrap}
- #playControls .pc-row{display:flex;gap:6px}
- #playControls .pc-lookbtn{width:43px;height:43px;font-size:20px!important}
- #playControls .pc-actions{display:flex;flex-direction:column;gap:7px;min-width:190px}
- #playControls .pc-actions .pc-label{margin-bottom:0}
- #playControls .pc-action{display:flex;align-items:center;gap:10px;text-align:left;width:100%;min-height:43px!important}
- #playControls .pc-action .pc-action-icon{display:grid;place-items:center;flex:0 0 28px;height:28px;border-radius:7px;background:#2a3d35;color:#cde7d8;font-size:12px}
- #playControls .pc-action b{display:block;font-size:10px;letter-spacing:.07em}
- #playControls .pc-action small{display:block;margin-top:3px;font-size:9px;font-weight:500;color:#a9bbb1}
- #playControls .pc-interact{background:#b8d8ca!important;border-color:#b8d8ca!important;color:#102019!important}
- #playControls .pc-interact .pc-action-icon{background:#213b30;color:#e2f4e9}
- #playControls .pc-interact small{color:#315647}
- #playControls .pc-tools{margin-top:1px}
- #playControls .pc-tool{flex:1;font-size:10px!important;min-height:34px!important}
- .bottom{padding-bottom:180px!important}
- .mobilepad,.mobileact{display:none!important}
- @media(max-width:760px){
-  #playControls{left:8px;right:8px;bottom:8px;gap:6px;align-items:stretch}
-  #playControls .pc-group{padding:7px;border-radius:10px}
-  #playControls .pc-label{font-size:8px;margin-bottom:6px}
-  #playControls .pc-pad{grid-template-columns:repeat(3,32px);grid-template-rows:repeat(2,32px);gap:4px}
-  #playControls button{min-height:32px!important;padding:5px!important;font-size:11px!important}
-  #playControls .pc-move{flex:0 0 auto}
-  #playControls .pc-look{flex:0 0 auto}
-  #playControls .pc-lookbtn{width:34px;height:38px;font-size:17px!important}
-  #playControls .pc-actions{flex:1;min-width:0;gap:5px}
-  #playControls .pc-action{gap:6px;min-height:39px!important}
-  #playControls .pc-action .pc-action-icon{flex-basis:23px;height:23px;font-size:10px}
-  #playControls .pc-action b{font-size:9px}
-  #playControls .pc-action small{font-size:8px}
-  #playControls .pc-tools{gap:4px}
-  #playControls .pc-tool{font-size:9px!important;min-height:30px!important}
-  #playControls .pc-help{font-size:8px;white-space:normal;line-height:1.25}
-  .bottom{display:none!important}
-  .field-guide{bottom:176px!important}
-  .hudleft{max-height:34dvh;overflow:auto}
-  .hudright{max-height:35dvh;overflow:auto}
- }
- @media(max-width:390px){
-  #playControls{gap:4px}
-  #playControls .pc-group{padding:5px}
-  #playControls .pc-pad{grid-template-columns:repeat(3,27px);grid-template-rows:repeat(2,29px);gap:3px}
-  #playControls .pc-lookbtn{width:29px;height:34px}
-  #playControls .pc-actions{min-width:0}
-  #playControls .pc-action small{display:none}
-  #playControls .pc-action{min-height:35px!important}
-  #playControls .pc-tool{padding:4px!important}
- }
-`;
-document.head.append(playControlStyle);
+
+/* Bind the persistent HTML controls directly to the game's existing movement state. */
+const playControls=document.getElementById('playControls');
 const pcInteract=document.getElementById('pcInteract');
 pcInteract.addEventListener('click',()=>{if(!started){document.getElementById('briefing').classList.remove('hidden');return}interact()});
-document.getElementById('pcMap').addEventListener('click',()=>{if(typeof openFullMap==='function')openFullMap()});
-document.getElementById('pcCases').addEventListener('click',()=>{if(typeof missionPanel!=='undefined'&&missionPanel)missionPanel.classList.add('open')});
+document.getElementById('pcMap').addEventListener('click',()=>openFullMap());
+document.getElementById('pcCases').addEventListener('click',()=>{if(typeof missionPanel!=='undefined'&&missionPanel)missionPanel.classList.add('open');else document.getElementById('missionHub')?.click()});
 function releaseHeldControl(btn){const code=btn.dataset.hold;if(code)keys[code]=false;btn.classList.remove('is-held')}
 playControls.querySelectorAll('[data-hold]').forEach(btn=>{
  const code=btn.dataset.hold;
@@ -2427,7 +2435,6 @@ playControls.querySelectorAll('[data-hold]').forEach(btn=>{
  ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>btn.addEventListener(ev,()=>releaseHeldControl(btn)));
 });
 addEventListener('blur',()=>playControls.querySelectorAll('[data-hold]').forEach(releaseHeldControl));
-
 })();
 
 </script></body></html>
