@@ -192,94 +192,9 @@ button{letter-spacing:.045em}
 #fullMapPanel .clean-room .state{font-size:8px}
 @media(max-width:700px){.setting-preview{padding:9px;font-size:10px}.setting-preview small{font-size:9px}}
 </style>
-<style id="persistentPlayControlsStyle">
- /* Transparent controls: keep only the original-style glyphs and labels, not the large button cards. */
- #playControls{position:fixed!important;z-index:9999!important;left:14px!important;right:14px!important;bottom:10px!important;display:flex!important;align-items:flex-end!important;gap:14px!important;pointer-events:none!important;font-family:inherit!important;color:inherit!important}
- #playControls *{box-sizing:border-box!important}
- #playControls .pc-group{pointer-events:auto!important;min-width:0!important;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
- #playControls .pc-label{font-size:9px!important;font-weight:800!important;letter-spacing:.13em!important;color:inherit!important;margin:0 0 6px 2px!important;text-shadow:0 1px 3px #000!important}
- #playControls .pc-pad{display:grid!important;grid-template-columns:repeat(3,38px)!important;grid-template-rows:repeat(2,36px)!important;gap:2px!important}
- #playControls .pc-up{grid-column:2!important;grid-row:1!important}
- #playControls .pc-left{grid-column:1!important;grid-row:2!important}
- #playControls .pc-down{grid-column:2!important;grid-row:2!important}
- #playControls .pc-right{grid-column:3!important;grid-row:2!important}
- #playControls button{display:flex!important;align-items:center!important;justify-content:center!important;touch-action:none!important;user-select:none!important;-webkit-user-select:none!important;min-height:34px!important;min-width:32px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:inherit!important;text-shadow:0 1px 5px #000,0 0 2px #000!important;padding:4px!important;font:inherit!important;font-size:23px!important;font-weight:800!important;line-height:1!important;letter-spacing:0!important;cursor:pointer!important;outline-offset:2px!important}
- #playControls button:hover,#playControls button:focus-visible{background:transparent!important;color:#b8d8ca!important;transform:none!important}
- #playControls button.is-held,#playControls button:active{background:transparent!important;color:#b8d8ca!important;border:0!important}
- #playControls .pc-help{font-size:9px!important;color:inherit!important;margin:4px 2px 0!important;white-space:nowrap!important;text-shadow:0 1px 3px #000!important}
- #playControls .pc-row{display:flex!important;gap:4px!important}
- #playControls .pc-lookbtn{width:38px!important;height:38px!important;font-size:25px!important}
- #playControls .pc-actions{display:flex!important;flex-direction:column!important;gap:3px!important;min-width:0!important}
- #playControls .pc-actions .pc-label{margin-bottom:2px!important}
- #playControls .pc-action{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:7px!important;text-align:left!important;width:auto!important;min-height:32px!important;font-size:11px!important}
- #playControls .pc-action .pc-action-icon{display:inline!important;flex:0 0 auto!important;height:auto!important;border-radius:0!important;background:transparent!important;color:inherit!important;font-size:13px!important;font-weight:800!important}
- #playControls .pc-action b{display:block!important;font-size:10px!important;letter-spacing:.04em!important;text-shadow:0 1px 3px #000!important}
- #playControls .pc-action small{display:block!important;margin-top:1px!important;font-size:9px!important;font-weight:500!important;color:inherit!important;text-shadow:0 1px 3px #000!important}
- #playControls .pc-interact{background:transparent!important;border:0!important;color:inherit!important}
- #playControls .pc-interact .pc-action-icon,#playControls .pc-interact small{color:inherit!important}
- #playControls .pc-tools{margin-top:0!important}
- #playControls .pc-tool{flex:0 0 auto!important;font-size:11px!important;min-height:30px!important;padding:4px 7px!important}
- .topbar{z-index:12!important}
- .hudleft,.hudright{z-index:11!important;display:block!important}
- .mapbox,.readout{display:block!important;visibility:visible!important;opacity:1!important}
- .bottom{display:flex!important;visibility:visible!important;opacity:1!important;position:fixed!important;z-index:10!important;left:50%!important;transform:translateX(-50%)!important;bottom:116px!important;max-width:calc(100vw - 24px)!important;width:max-content!important;flex-wrap:wrap!important;justify-content:center!important;gap:8px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:inherit!important;text-shadow:0 1px 3px #000!important;box-shadow:none!important}
- .bottom .controls{display:flex!important;flex-wrap:wrap!important;align-items:center!important;justify-content:center!important;gap:5px!important}
- .bottom .eyebrow{font-size:9px!important;line-height:1.35!important;text-align:center!important}
- .mobilepad,.mobileact{display:none!important}
- @media(max-width:760px){
-  #playControls{left:5px!important;right:5px!important;bottom:5px!important;gap:7px!important;align-items:flex-end!important}
-  #playControls .pc-label{font-size:8px!important;margin-bottom:4px!important}
-  #playControls .pc-pad{grid-template-columns:repeat(3,30px)!important;grid-template-rows:repeat(2,29px)!important;gap:1px!important}
-  #playControls button{min-height:29px!important;min-width:28px!important;padding:2px!important;font-size:20px!important}
-  #playControls .pc-move,#playControls .pc-look{flex:0 0 auto!important}
-  #playControls .pc-lookbtn{width:29px!important;height:31px!important;font-size:21px!important}
-  #playControls .pc-actions{flex:1!important;min-width:0!important;gap:1px!important}
-  #playControls .pc-action{gap:4px!important;min-height:28px!important}
-  #playControls .pc-action .pc-action-icon{font-size:11px!important}
-  #playControls .pc-action b{font-size:8px!important}
-  #playControls .pc-action small{font-size:8px!important}
-  #playControls .pc-tools{gap:4px!important}
-  #playControls .pc-tool{font-size:9px!important;min-height:27px!important;padding:2px 4px!important}
-  #playControls .pc-help{font-size:8px!important;white-space:normal!important;line-height:1.2!important}
-  .bottom{bottom:101px!important;width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important;padding:0!important;gap:3px!important}
-  .bottom .controls{gap:3px!important}
-  .bottom .key{padding:2px 4px!important;min-width:16px!important;background:transparent!important;border:0!important;box-shadow:none!important}
-  .bottom .eyebrow{font-size:8px!important}
-  .hudleft{top:75px!important;left:8px!important;width:min(44vw,190px)!important;max-height:29dvh!important;overflow:auto!important}
-  .hudright{top:75px!important;right:8px!important;width:min(40vw,170px)!important;max-height:28dvh!important;overflow:auto!important}
-  .mapbox{padding:7px!important}
-  .readout{padding:7px!important}
- }
- @media(max-width:390px){
-  #playControls{gap:4px!important}
-  #playControls .pc-pad{grid-template-columns:repeat(3,26px)!important;grid-template-rows:repeat(2,27px)!important}
-  #playControls .pc-lookbtn{width:25px!important;height:28px!important}
-  #playControls .pc-actions{min-width:0!important}
-  #playControls .pc-action small{display:none!important}
-  #playControls .pc-action{min-height:27px!important}
-  .bottom{bottom:96px!important}
- }
-</style>
+
 </head><body><div class="game"><canvas id="view"></canvas><div class="vignette"></div><div class="scan"></div><div class="topbar"><div><div class="brand">NORTHSTAR <span>◈</span> MYSTERY CLUB</div><div class="sub">A FRIENDLY DETECTIVE ADVENTURE</div></div><div class="status"><div>AGENT<strong id="agentName">NOVA-07</strong></div><div>CLUES<strong id="clearance">0/3</strong></div><div>STATUS<strong id="status">ACTIVE</strong></div></div></div><aside class="hudleft"><div class="eyebrow">Current operation / 001</div><div class="missiontitle" id="roomName">NORTHSTAR HQ</div><div class="description" id="roomDesc">A quiet briefing floor. Something important has gone missing.</div><div class="objectives"><div class="eyebrow">Mission objectives</div><div class="obj" id="obj1"><i class="dot"></i><span>Locate the intel fragments <b id="fragCount">0/3</b></span></div><div class="obj" id="obj2"><i class="dot"></i><span>Access the secure terminal</span></div><div class="obj" id="obj3"><i class="dot"></i><span>Recover the missing briefcase</span></div></div></aside><aside class="hudright"><div class="mapbox"><div class="maphead"><span>FACILITY MAP</span><span>● LIVE</span></div><div class="mapgrid" id="mapgrid"></div><div class="maplegend">CYAN: YOU &nbsp; LIME: OBJECTIVE</div></div><div class="readout">PROXIMITY SCAN<strong id="scanText">No nearby signals</strong></div><div class="readout">FIELD KIT<strong id="kitText">Empty · 0 items</strong></div></aside><div class="crosshair"></div><div class="interact" id="interact"><b>[ E ]</b><span id="interactText">INTERACT</span></div><div class="toast" id="toast"><strong>INTEL ACQUIRED</strong><span>Data fragment recovered.</span></div><div class="bottom"><div class="controls"><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span><span class="hint">MOVE</span><span class="key">← →</span><span class="hint">LOOK</span><span class="key">E</span><span class="hint">INTERACT</span><span class="key">SHIFT</span><span class="hint">SPRINT</span></div><div class="eyebrow">CLICK TO WALK · PRESS E TO INSPECT</div></div><div class="mobilepad"><button class="up" data-move="forward">▲</button><button class="left" data-move="left">◀</button><button class="down" data-move="back">▼</button><button class="right" data-move="right">▶</button></div><div class="mobileact"><button id="mobileE">INTERACT<br><b>E</b></button></div><div class="help">POINT WITH CURSOR · CLICK TO MOVE FORWARD</div><div class="modal" id="briefing"><div class="brief"><div class="stamp">// CLASSIFIED BRIEFING · CLEARANCE REQUIRED</div><h1>OPERATION:<br><span>ANYWHERE</span></h1><p>A secure briefcase has vanished from Northstar HQ. Three intel fragments are scattered across the facility. Explore the rooms, investigate suspicious equipment, access the terminal, and recover the case.</p><div class="briefgrid"><div><small>MISSION</small><b>THE MISSING CASE</b></div><div><small>LOCATION</small><b>NORTHSTAR FACILITY</b></div><div><small>PACE</small><b style="color:var(--lime)"TAKE YOUR TIME</b></div></div><p><b style="color:#e6f8f6">CONTROLS</b> &nbsp; WASD to move · Move cursor to aim · click to step forward · E to interact · Shift to sprint. Walk through open doorways to reach every room.</p><button class="start" id="start">START EXPLORING &nbsp; →</button></div></div></div>
 
-<!-- Persistent movement dock: plain HTML so the arrows are visible even if a later script has an error. -->
-<section id="playControls" aria-label="Movement and action controls">
- <div class="pc-group pc-move"><div class="pc-label">MOVE</div><div class="pc-pad">
-  <button type="button" class="pc-key pc-up" data-hold="KeyW" aria-label="Move forward">▲</button>
-  <button type="button" class="pc-key pc-left" data-hold="KeyA" aria-label="Strafe left">◀</button>
-  <button type="button" class="pc-key pc-down" data-hold="KeyS" aria-label="Move backward">▼</button>
-  <button type="button" class="pc-key pc-right" data-hold="KeyD" aria-label="Strafe right">▶</button>
- </div><div class="pc-help">Hold to move</div></div>
- <div class="pc-group pc-look"><div class="pc-label">LOOK</div><div class="pc-row">
-  <button type="button" class="pc-key pc-lookbtn" data-hold="ArrowLeft" aria-label="Turn left">↶</button>
-  <button type="button" class="pc-key pc-lookbtn" data-hold="ArrowRight" aria-label="Turn right">↷</button>
- </div><div class="pc-help">Turn</div></div>
- <div class="pc-group pc-actions"><div class="pc-label">ACTIONS</div>
-  <button type="button" class="pc-action pc-interact" id="pcInteract"><span class="pc-action-icon">E</span><span><b>INTERACT</b><small>Inspect · Collect · Talk</small></span></button>
-  <button type="button" class="pc-action" data-hold="ShiftLeft"><span class="pc-action-icon">⇧</span><span><b>SPRINT</b><small>Hold to run</small></span></button>
-  <div class="pc-row pc-tools"><button type="button" class="pc-tool" id="pcMap">⌖ Map</button><button type="button" class="pc-tool" id="pcCases">☷ Cases</button></div>
- </div>
-</section>
 <script>
 (()=>{'use strict';const canvas=document.getElementById('view'),ctx=canvas.getContext('2d');let W=innerWidth,H=innerHeight,lastFrameDraw=0,lastHudRoom='';function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight}addEventListener('resize',resize);resize();
 // 0 open floor, 1 walls, 2 door, 3 desk/console, 4 intel, 5 terminal, 6 case, 7 locker, 8 plant, 9 bench
@@ -998,7 +913,7 @@ const gadgetToggle=document.createElement('button');gadgetToggle.className='fiel
 const gadgetPanel=document.createElement('div');gadgetPanel.className='field-tools';gadgetPanel.innerHTML='<button id="scannerGadget" type="button"><b>⌖ SCANNER</b><small>Point to next step</small></button><button id="flashlightGadget" type="button" aria-pressed="false"><b>◉ FLASHLIGHT</b><small>Brighten the scene</small></button><button id="notesGadget" type="button"><b>▤ FIELD NOTES</b><small>Review your case</small></button>';
 const gadgetNotes=document.createElement('div');gadgetNotes.className='field-notes';gadgetNotes.setAttribute('aria-live','polite');
 fieldGuide.append(gadgetToggle,gadgetPanel,gadgetNotes);
-gadgetToggle.addEventListener('click',()=>{const open=gadgetPanel.classList.toggle('open');gadgetToggle.textContent=open?'CLOSE FIELD GADGETS ▴':'OPEN FIELD GADGETS ▾';if(!open)gadgetNotes.classList.remove('open')});
+gadgetToggle.addEventListener('click',()=>{const open=gadgetPanel.classList.toggle('open');gadgetToggle.textContent=open?'CLOSE FIELD GADGETS ▴':'OPEN FIELD GADGETS ▾';if(open&&typeof setDockExpanded==='function')setDockExpanded(true);if(!open)gadgetNotes.classList.remove('open')});
 function nextGadgetTarget(){const task=getNextTask();if(task.title.includes('COLLECT EVIDENCE'))return objects.find(o=>['a','b','c'].includes(o.id)&&!kit.includes('INTEL '+o.id.toUpperCase()));if(task.title.startsWith('TALK TO '))return objects.find(o=>o.type===10);if(task.title.includes('CASE FILE'))return objects.find(o=>o.id==='terminal');if(task.title.includes('MISSING ITEM'))return objects.find(o=>o.id==='case');return null}
 let scannerTarget=null,scannerUntil=0;
 document.getElementById('scannerGadget').addEventListener('click',()=>{scannerTarget=nextGadgetTarget();if(!scannerTarget){notify('SCANNER CLEAR','You have completed this mystery.');return}scannerUntil=performance.now()+6500;const dx=scannerTarget.x-px,dy=scannerTarget.y-py,distance=Math.hypot(dx,dy),angle=Math.atan2(dy,dx),directions=['E','SE','S','SW','W','NW','N','NE'],direction=directions[(Math.round(angle/(Math.PI/4))+8)%8];notify('SCANNER PING',scannerTarget.name+' · about '+Math.max(1,Math.round(distance))+' steps '+direction);updatePinpoints()});
@@ -1062,17 +977,17 @@ const dockStep=document.createElement('div');dockStep.className='dock-step';cons
 const dockMovement=document.createElement('div');dockMovement.className='dock-movement';const pad=document.querySelector('.mobilepad'),interactControl=document.querySelector('.mobileact');
 [['up','▲','FORWARD'],['left','◀','TURN LEFT'],['down','▼','BACK'],['right','▶','TURN RIGHT']].forEach(([cls,icon,label])=>{const b=pad.querySelector('.'+cls);b.innerHTML=icon+'<small>'+label+'</small>';b.setAttribute('aria-label',label)});
 dockMovement.append(pad,interactControl);
-const dockActions=document.createElement('div');dockActions.className='dock-actions';dockActions.append(missionHub,fullMapButton,helpButton);
+const dockActions=document.createElement('div');dockActions.className='dock-actions';dockActions.append(missionHub,helpButton);
 dockMain.append(dockStep,dockMovement,dockActions);const dockPanelToggle=document.createElement('button');dockPanelToggle.type='button';dockPanelToggle.className='dock-panel-toggle';dockPanelToggle.setAttribute('aria-expanded','false');dockPanelToggle.setAttribute('aria-controls','dockMainPanel');dockPanelToggle.textContent='SHOW INFO ▴';dockMain.id='dockMainPanel';dockTop.append(dockPanelToggle);cleanDock.classList.add('is-collapsed');
 /* Keep the real movement pad and fullscreen button visible when the info panel is down. */
 pad.setAttribute('aria-label','Quick Move controls');dockTop.insertBefore(pad,dockPanelToggle);
 const fullscreenButton=document.createElement('button');fullscreenButton.type='button';fullscreenButton.className='dock-quick-fullscreen';fullscreenButton.textContent='⛶';fullscreenButton.setAttribute('aria-label','Enter fullscreen');fullscreenButton.title='Enter fullscreen';
 fullscreenButton.addEventListener('click',async()=>{try{if(document.fullscreenElement){await document.exitFullscreen()}else{await document.querySelector('.game').requestFullscreen()}}catch(e){notify('FULLSCREEN UNAVAILABLE','Your browser may not allow fullscreen in this window.')}});
 document.addEventListener('fullscreenchange',()=>{const on=!!document.fullscreenElement;fullscreenButton.textContent=on?'⤢':'⛶';fullscreenButton.setAttribute('aria-label',on?'Exit fullscreen':'Enter fullscreen');fullscreenButton.title=on?'Exit fullscreen':'Enter fullscreen'});
-dockTop.insertBefore(fullscreenButton,dockPanelToggle);dockTop.insertBefore(interactControl,fullscreenButton);
+dockTop.insertBefore(fullscreenButton,dockPanelToggle);dockTop.insertBefore(fullMapButton,dockPanelToggle);dockTop.insertBefore(gadgetToggle,dockPanelToggle);dockTop.insertBefore(interactControl,fullscreenButton);
 const contextActions=document.createElement('div');contextActions.className='context-actions';contextActions.setAttribute('aria-label','Nearby actions');
 contextActions.innerHTML='<button type="button" id="talkAction" disabled title="Talk to the nearby contact">TALK</button><button type="button" id="searchAction" disabled title="Search or use the nearby object">SEARCH</button>';
-interactControl.append(contextActions);
+dockMovement.append(contextActions);
 const talkAction=document.getElementById('talkAction'),searchAction=document.getElementById('searchAction');
 function syncContextActions(o){
  const isContact=!!o&&o.type===10;
@@ -2420,32 +2335,7 @@ function safeRenderScene(){
 
 
 
-/* Bind controls directly to the game state; tap moves briefly, holding moves continuously. */
-const playControls=document.getElementById('playControls');
-const pcInteract=document.getElementById('pcInteract');
-pcInteract.addEventListener('click',()=>{if(!started){document.getElementById('briefing').classList.remove('hidden');return}interact()});
-document.getElementById('pcMap').addEventListener('click',()=>openFullMap());
-document.getElementById('pcCases').addEventListener('click',()=>{missionPanel.classList.add('open')});
-function releaseHeldControl(btn){const code=btn.dataset.hold;if(code)keys[code]=false;btn.classList.remove('is-held')}
-playControls.querySelectorAll('[data-hold]').forEach(btn=>{
- const code=btn.dataset.hold;let pointerActive=false,tapTimer=0;
- btn.addEventListener('pointerdown',e=>{
-  e.preventDefault();pointerActive=true;
-  if(!started){document.getElementById('briefing').classList.remove('hidden');return}
-  keys[code]=true;btn.classList.add('is-held');
-  try{btn.setPointerCapture(e.pointerId)}catch(_){}
- });
- ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>btn.addEventListener(ev,()=>{pointerActive=false;releaseHeldControl(btn)}));
- btn.addEventListener('click',e=>{
-  e.preventDefault();
-  if(!started){document.getElementById('briefing').classList.remove('hidden');return}
-  if(pointerActive)return;
-  keys[code]=true;btn.classList.add('is-held');
-  if(tapTimer)clearTimeout(tapTimer);
-  tapTimer=setTimeout(()=>{keys[code]=false;btn.classList.remove('is-held');tapTimer=0},220);
- });
-});
-addEventListener('blur',()=>playControls.querySelectorAll('[data-hold]').forEach(releaseHeldControl));
+
 })();
 
 </script></body></html>
