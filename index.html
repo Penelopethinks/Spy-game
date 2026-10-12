@@ -2330,6 +2330,104 @@ function safeRenderScene(){
  try{drawAgents()}catch(err){if(sceneOk){ctx.save();const y=H*.76;ctx.fillStyle='#65a99c';ctx.beginPath();ctx.arc(W*.28,y-H*.12,H*.025,0,Math.PI*2);ctx.fill();ctx.fillRect(W*.25,y-H*.09,W*.06,H*.12);ctx.fillStyle='#718fae';ctx.beginPath();ctx.arc(W*.73,y-H*.14,H*.026,0,Math.PI*2);ctx.fill();ctx.fillRect(W*.70,y-H*.11,W*.06,H*.14);ctx.restore()}if(!window.__agentErrorShown){window.__agentErrorShown=true;console.warn('People renderer recovered with visible contacts.',err)}}
 }
 
+
+/* UNIFIED PLAY CONTROLS — one consistent, visible control dock for keyboard, mouse and touch. */
+const playControls=document.createElement('section');
+playControls.id='playControls';
+playControls.setAttribute('aria-label','Movement and action controls');
+playControls.innerHTML=`
+ <div class="pc-group pc-move"><div class="pc-label">MOVE</div><div class="pc-pad">
+  <button type="button" class="pc-key pc-up" data-hold="KeyW" aria-label="Move forward">▲</button>
+  <button type="button" class="pc-key pc-left" data-hold="KeyA" aria-label="Strafe left">◀</button>
+  <button type="button" class="pc-key pc-down" data-hold="KeyS" aria-label="Move backward">▼</button>
+  <button type="button" class="pc-key pc-right" data-hold="KeyD" aria-label="Strafe right">▶</button>
+ </div><div class="pc-help">Hold to move</div></div>
+ <div class="pc-group pc-look"><div class="pc-label">LOOK</div><div class="pc-row">
+  <button type="button" class="pc-key pc-lookbtn" data-hold="ArrowLeft" aria-label="Turn left">↶</button>
+  <button type="button" class="pc-key pc-lookbtn" data-hold="ArrowRight" aria-label="Turn right">↷</button>
+ </div><div class="pc-help">Turn left / right</div></div>
+ <div class="pc-group pc-actions"><div class="pc-label">ACTIONS</div>
+  <button type="button" class="pc-action pc-interact" id="pcInteract"><span class="pc-action-icon">E</span><span><b>INTERACT</b><small>Inspect · Collect · Talk</small></span></button>
+  <button type="button" class="pc-action" data-hold="ShiftLeft"><span class="pc-action-icon">⇧</span><span><b>SPRINT</b><small>Hold to run</small></span></button>
+  <div class="pc-row pc-tools"><button type="button" class="pc-tool" id="pcMap">⌖ Map</button><button type="button" class="pc-tool" id="pcCases">☷ Cases</button></div>
+ </div>`;
+document.querySelector('.game').append(playControls);
+const playControlStyle=document.createElement('style');
+playControlStyle.textContent=`
+ #playControls{position:fixed;z-index:18;left:14px;right:14px;bottom:12px;display:flex;align-items:flex-end;gap:12px;pointer-events:none;font-family:inherit;color:#eaf2ee}
+ #playControls *{box-sizing:border-box}
+ #playControls .pc-group{pointer-events:auto;min-width:0;padding:10px;background:rgba(9,17,20,.94);border:1px solid #394b46;border-radius:12px;box-shadow:0 8px 25px #0005;backdrop-filter:blur(8px)}
+ #playControls .pc-label{font-size:9px;font-weight:850;letter-spacing:.15em;color:#b8d8ca;margin:0 0 8px 2px}
+ #playControls .pc-pad{display:grid;grid-template-columns:repeat(3,40px);grid-template-rows:repeat(2,38px);gap:5px}
+ #playControls .pc-up{grid-column:2;grid-row:1}
+ #playControls .pc-left{grid-column:1;grid-row:2}
+ #playControls .pc-down{grid-column:2;grid-row:2}
+ #playControls .pc-right{grid-column:3;grid-row:2}
+ #playControls button{touch-action:none;user-select:none;-webkit-user-select:none;min-height:36px!important;border:1px solid #43564e!important;border-radius:8px!important;background:#1a2726!important;color:#eef5ef!important;padding:7px 10px!important;font-size:12px!important;font-weight:800!important;letter-spacing:0!important}
+ #playControls button:hover{background:#253733!important;border-color:#9ab9a8!important}
+ #playControls button.is-held{background:#b8d8ca!important;color:#102019!important;border-color:#d8eee2!important;transform:translateY(1px)!important}
+ #playControls .pc-help{font-size:9px;color:#9eafa6;margin:7px 2px 0;white-space:nowrap}
+ #playControls .pc-row{display:flex;gap:6px}
+ #playControls .pc-lookbtn{width:43px;height:43px;font-size:20px!important}
+ #playControls .pc-actions{display:flex;flex-direction:column;gap:7px;min-width:190px}
+ #playControls .pc-actions .pc-label{margin-bottom:0}
+ #playControls .pc-action{display:flex;align-items:center;gap:10px;text-align:left;width:100%;min-height:43px!important}
+ #playControls .pc-action .pc-action-icon{display:grid;place-items:center;flex:0 0 28px;height:28px;border-radius:7px;background:#2a3d35;color:#cde7d8;font-size:12px}
+ #playControls .pc-action b{display:block;font-size:10px;letter-spacing:.07em}
+ #playControls .pc-action small{display:block;margin-top:3px;font-size:9px;font-weight:500;color:#a9bbb1}
+ #playControls .pc-interact{background:#b8d8ca!important;border-color:#b8d8ca!important;color:#102019!important}
+ #playControls .pc-interact .pc-action-icon{background:#213b30;color:#e2f4e9}
+ #playControls .pc-interact small{color:#315647}
+ #playControls .pc-tools{margin-top:1px}
+ #playControls .pc-tool{flex:1;font-size:10px!important;min-height:34px!important}
+ .bottom{padding-bottom:180px!important}
+ .mobilepad,.mobileact{display:none!important}
+ @media(max-width:760px){
+  #playControls{left:8px;right:8px;bottom:8px;gap:6px;align-items:stretch}
+  #playControls .pc-group{padding:7px;border-radius:10px}
+  #playControls .pc-label{font-size:8px;margin-bottom:6px}
+  #playControls .pc-pad{grid-template-columns:repeat(3,32px);grid-template-rows:repeat(2,32px);gap:4px}
+  #playControls button{min-height:32px!important;padding:5px!important;font-size:11px!important}
+  #playControls .pc-move{flex:0 0 auto}
+  #playControls .pc-look{flex:0 0 auto}
+  #playControls .pc-lookbtn{width:34px;height:38px;font-size:17px!important}
+  #playControls .pc-actions{flex:1;min-width:0;gap:5px}
+  #playControls .pc-action{gap:6px;min-height:39px!important}
+  #playControls .pc-action .pc-action-icon{flex-basis:23px;height:23px;font-size:10px}
+  #playControls .pc-action b{font-size:9px}
+  #playControls .pc-action small{font-size:8px}
+  #playControls .pc-tools{gap:4px}
+  #playControls .pc-tool{font-size:9px!important;min-height:30px!important}
+  #playControls .pc-help{font-size:8px;white-space:normal;line-height:1.25}
+  .bottom{display:none!important}
+  .field-guide{bottom:176px!important}
+  .hudleft{max-height:34dvh;overflow:auto}
+  .hudright{max-height:35dvh;overflow:auto}
+ }
+ @media(max-width:390px){
+  #playControls{gap:4px}
+  #playControls .pc-group{padding:5px}
+  #playControls .pc-pad{grid-template-columns:repeat(3,27px);grid-template-rows:repeat(2,29px);gap:3px}
+  #playControls .pc-lookbtn{width:29px;height:34px}
+  #playControls .pc-actions{min-width:0}
+  #playControls .pc-action small{display:none}
+  #playControls .pc-action{min-height:35px!important}
+  #playControls .pc-tool{padding:4px!important}
+ }
+`;
+document.head.append(playControlStyle);
+const pcInteract=document.getElementById('pcInteract');
+pcInteract.addEventListener('click',()=>{if(!started){document.getElementById('briefing').classList.remove('hidden');return}interact()});
+document.getElementById('pcMap').addEventListener('click',()=>{if(typeof openFullMap==='function')openFullMap()});
+document.getElementById('pcCases').addEventListener('click',()=>{if(typeof missionPanel!=='undefined'&&missionPanel)missionPanel.classList.add('open')});
+function releaseHeldControl(btn){const code=btn.dataset.hold;if(code)keys[code]=false;btn.classList.remove('is-held')}
+playControls.querySelectorAll('[data-hold]').forEach(btn=>{
+ const code=btn.dataset.hold;
+ btn.addEventListener('pointerdown',e=>{e.preventDefault();if(!started){document.getElementById('briefing').classList.remove('hidden');return}keys[code]=true;btn.classList.add('is-held');try{btn.setPointerCapture(e.pointerId)}catch(_){}});
+ ['pointerup','pointercancel','lostpointercapture','pointerleave'].forEach(ev=>btn.addEventListener(ev,()=>releaseHeldControl(btn)));
+});
+addEventListener('blur',()=>playControls.querySelectorAll('[data-hold]').forEach(releaseHeldControl));
+
 })();
 
 </script></body></html>
