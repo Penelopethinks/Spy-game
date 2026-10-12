@@ -2359,17 +2359,20 @@ function safeRenderScene(){
 
 
 
-/* SINGLE CONTROL SYSTEM: remove legacy WASD pads and keep only the yellow movement pad. */
+/* SINGLE, RELIABLE CONTROL SYSTEM: one yellow pad, no duplicate WASD/legacy controls. */
 document.querySelectorAll('.controls').forEach(el=>el.remove());
-const yellowPad=document.querySelector('.clean-dock .mobilepad');
+const yellowPad=document.querySelector('.clean-dock .mobilepad')||document.querySelector('.mobilepad');
 document.querySelectorAll('.mobilepad').forEach(el=>{if(el!==yellowPad)el.remove()});
 document.querySelectorAll('.mobileact').forEach(el=>{if(!el.closest('.clean-dock'))el.remove()});
 const singleControlStyle=document.createElement('style');
 singleControlStyle.textContent=`
- .controls,.game>.mobilepad,.game>.mobileact{display:none!important}
- .clean-dock{position:absolute!important;left:50%!important;bottom:10px!important;transform:translateX(-50%)!important;width:min(960px,calc(100% - 24px))!important;max-height:42vh!important;overflow-x:hidden!important;overflow-y:auto!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;gap:9px!important;z-index:40!important;padding:10px!important;background:rgba(10,16,17,.96)!important;border:1px solid rgba(216,194,138,.28)!important;border-radius:12px!important}
- .clean-dock .topbar{position:relative!important;inset:auto!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;flex-wrap:wrap!important;min-width:0!important;padding:0!important;background:transparent!important}
- .clean-dock .dock-movement{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;gap:10px!important;width:100%!important;min-width:0!important;box-sizing:border-box!important;padding:10px!important;border:1px solid rgba(216,194,138,.2)!important;border-radius:9px!important;background:rgba(5,10,11,.48)!important}
+ .controls,.bottom,.game>.mobilepad,.game>.mobileact{display:none!important}
+ .clean-dock{position:absolute!important;left:50%!important;bottom:10px!important;transform:translateX(-50%)!important;width:min(920px,calc(100% - 24px))!important;max-height:44vh!important;overflow-x:hidden!important;overflow-y:auto!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;gap:8px!important;z-index:40!important;padding:10px!important;background:rgba(10,16,17,.97)!important;border:1px solid rgba(216,194,138,.32)!important;border-radius:12px!important}
+ .clean-dock .topbar{position:relative!important;inset:auto!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;flex-wrap:wrap!important;min-width:0!important;padding:0!important;background:transparent!important;pointer-events:auto!important}
+ .clean-dock .topbar .brand{font-size:10px!important;min-width:0!important}.clean-dock .topbar .status{display:flex!important;gap:8px!important;font-size:8px!important}
+ .clean-dock .dock-main{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important;width:100%!important;min-width:0!important}
+ .clean-dock.is-collapsed .dock-main{display:none!important}
+ .clean-dock .dock-movement{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;gap:10px!important;width:100%!important;min-width:0!important;box-sizing:border-box!important;padding:8px!important;border:1px solid rgba(216,194,138,.22)!important;border-radius:9px!important;background:rgba(5,10,11,.48)!important}
  .clean-dock .mobilepad{position:static!important;inset:auto!important;transform:none!important;display:grid!important;grid-template-columns:repeat(3,42px)!important;grid-template-rows:repeat(2,42px)!important;gap:4px!important;flex:0 0 auto!important;pointer-events:auto!important}
  .clean-dock .mobilepad .up{grid-column:2!important;grid-row:1!important}.clean-dock .mobilepad .left{grid-column:1!important;grid-row:2!important}.clean-dock .mobilepad .down{grid-column:2!important;grid-row:2!important}.clean-dock .mobilepad .right{grid-column:3!important;grid-row:2!important}
  .clean-dock .mobilepad button{display:flex!important;align-items:center!important;justify-content:center!important;width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;margin:0!important;padding:0!important;background:#f0c84b!important;border:1px solid #ffdf77!important;border-radius:8px!important;color:#17170e!important;box-shadow:0 2px 0 #98751d!important;font-size:17px!important;line-height:1!important;touch-action:none!important;user-select:none!important;-webkit-user-select:none!important;pointer-events:auto!important}
@@ -2377,8 +2380,6 @@ singleControlStyle.textContent=`
  .clean-dock .mobileact{position:static!important;inset:auto!important;display:flex!important;align-items:center!important;flex:0 0 auto!important;pointer-events:auto!important}
  .clean-dock .context-actions{display:flex!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;gap:6px!important;max-width:100%!important}
  .clean-dock .context-actions button,.clean-dock .mobileact #mobileE{min-height:40px!important;max-width:100%!important;padding:6px 9px!important;box-sizing:border-box!important}
- .clean-dock .dock-main{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:10px!important;width:100%!important;min-width:0!important}
- .clean-dock.is-collapsed .dock-main{display:none!important}
  .clean-dock .dock-actions{display:flex!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;gap:7px!important;width:100%!important;min-width:0!important;padding-top:8px!important;border-top:1px solid rgba(178,194,184,.18)!important;box-sizing:border-box!important}
  .clean-dock .dock-actions>button{position:relative!important;inset:auto!important;transform:none!important;flex:0 1 auto!important;min-width:75px!important;max-width:100%!important;white-space:normal!important;padding:8px 10px!important;font-size:9px!important;line-height:1.3!important;z-index:42!important;pointer-events:auto!important}
  .clean-dock .field-tools,.clean-dock .field-tools.open,.clean-dock .field-notes{position:relative!important;z-index:45!important;pointer-events:auto!important;max-width:100%!important;box-sizing:border-box!important}
@@ -2387,9 +2388,21 @@ singleControlStyle.textContent=`
  #fullMapPanel,#missionPanel,#dossierPanel{z-index:10000!important;pointer-events:auto!important}
  #fullMapPanel.open,#missionPanel.open,#dossierPanel.open{display:block!important}
  #fullMapPanel .upgrade-wrap,#missionPanel .mh-wrap{max-height:100%!important}
- @media(max-width:600px){.clean-dock{width:calc(100% - 12px)!important;bottom:5px!important;max-height:44vh!important;padding:7px!important;gap:6px!important}.clean-dock .dock-movement{gap:6px!important;padding:7px 4px!important}.clean-dock .mobilepad{grid-template-columns:repeat(3,38px)!important;grid-template-rows:repeat(2,38px)!important;gap:3px!important}.clean-dock .mobilepad button{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important}.clean-dock .mobileact #mobileE{min-height:38px!important}.clean-dock .field-tools.open{grid-template-columns:repeat(2,minmax(0,1fr))!important}.clean-dock .dock-actions>button{min-width:65px!important;padding:7px 8px!important;font-size:8px!important}}
+ @media(max-width:700px){.clean-dock{width:calc(100% - 12px)!important;bottom:5px!important;max-height:44vh!important;padding:7px!important;gap:6px!important}.clean-dock .topbar{justify-content:center!important}.clean-dock .topbar .brand,.clean-dock .topbar .status{display:none!important}.clean-dock .dock-movement{gap:6px!important;padding:7px 4px!important}.clean-dock .mobilepad{grid-template-columns:repeat(3,38px)!important;grid-template-rows:repeat(2,38px)!important;gap:3px!important}.clean-dock .mobilepad button{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important}.clean-dock .mobileact #mobileE{min-height:38px!important}.clean-dock .field-tools.open{grid-template-columns:repeat(2,minmax(0,1fr))!important}.clean-dock .dock-actions>button{min-width:65px!important;padding:7px 8px!important;font-size:8px!important}}
 `;
 document.head.append(singleControlStyle);
+function refreshAfterControlMove(){try{drawMap();refreshFullMap();updatePinpoints();updateFieldGuide();updateCleanPlan();}catch(e){}}
+function moveFromYellowButton(code){
+ if(code==='ArrowUp'||code==='ArrowDown'){
+  const step=code==='ArrowUp'?.42:-.42;
+  const nx=px+Math.cos(pa)*step,ny=py+Math.sin(pa)*step;
+  let moved=false;
+  if(!wall(nx,py)){px=nx;moved=true}
+  if(!wall(px,ny)){py=ny;moved=true}
+  if(!moved){const sx=px+Math.cos(pa)*step*.45,sy=py+Math.sin(pa)*step*.45;if(!wall(sx,py))px=sx;if(!wall(px,sy))py=sy}
+ }else{pa+=(code==='ArrowLeft'?-1:1)*.22;aimBase=pa}
+ refreshAfterControlMove();
+}
 if(yellowPad){
  yellowPad.setAttribute('aria-label','Yellow arrow movement controls');
  yellowPad.querySelectorAll('button').forEach(oldButton=>{
@@ -2398,32 +2411,24 @@ if(yellowPad){
   btn.dataset.finalMoveCode=code;
   btn.setAttribute('aria-label',({ArrowUp:'Move forward',ArrowDown:'Move backward',ArrowLeft:'Turn left',ArrowRight:'Turn right'})[code]);
   btn.style.touchAction='none';
-  let pointerUsed=false,tapTimer=0;
+  let pointerActive=false,tapTimer=0;
   const release=()=>{keys[code]=false;btn.classList.remove('is-pressed')};
-  const nudge=()=>{
-   if(code==='ArrowUp'||code==='ArrowDown'){
-    const step=code==='ArrowUp'?.24:-.24,nx=px+Math.cos(pa)*step,ny=py+Math.sin(pa)*step;
-    if(!wall(nx,py))px=nx;if(!wall(px,ny))py=ny;
-   }else pa+=(code==='ArrowLeft'?-1:1)*.16;
-   aimBase=pa;
-   try{drawMap();refreshFullMap();updatePinpoints()}catch(_){}
-  };
   btn.addEventListener('pointerdown',e=>{
-   e.preventDefault();e.stopPropagation();pointerUsed=true;
+   e.preventDefault();e.stopPropagation();pointerActive=true;
    if(!started){document.getElementById('briefing')?.classList.remove('hidden');return}
-   if(tapTimer){clearTimeout(tapTimer);tapTimer=0}
-   keys[code]=true;btn.classList.add('is-pressed');nudge();
+   keys[code]=true;btn.classList.add('is-pressed');moveFromYellowButton(code);
    try{btn.setPointerCapture(e.pointerId)}catch(_){}
   });
-  ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>btn.addEventListener(ev,e=>{
-   e.stopPropagation();if(tapTimer){clearTimeout(tapTimer);tapTimer=0}release();
-   setTimeout(()=>{pointerUsed=false},80);
-  }));
+  const stopHold=e=>{e.stopPropagation();pointerActive=false;release();};
+  ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>btn.addEventListener(ev,stopHold));
   btn.addEventListener('click',e=>{
    e.preventDefault();e.stopPropagation();
-   if(pointerUsed)return;
    if(!started){document.getElementById('briefing')?.classList.remove('hidden');return}
-   nudge();
+   if(pointerActive)return;
+   moveFromYellowButton(code);
+   keys[code]=true;btn.classList.add('is-pressed');
+   if(tapTimer)clearTimeout(tapTimer);
+   tapTimer=setTimeout(()=>{release();tapTimer=0},240);
   });
  });
 }
