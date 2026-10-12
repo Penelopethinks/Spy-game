@@ -563,12 +563,33 @@ const dossierPanel=document.createElement('section');dossierPanel.className='upg
 const briefParagraph=document.querySelector('#briefing .brief p');if(briefParagraph)briefParagraph.textContent='A Northstar briefcase has gone missing, and your job is to solve the mystery. Before entering, review your location, target, investigation plan, and the complete facility map. Explore at your own pace, interview friendly contacts, and follow the clues.';const threatLabel=document.querySelector('#briefing .briefgrid div:last-child b');if(threatLabel){threatLabel.textContent='MYSTERY';threatLabel.style.color='var(--lime)'}const startLabel=document.getElementById('start');if(startLabel)startLabel.innerHTML='START MISSION &nbsp; →';
 function frame(now){if(now-lastFrameDraw<33){requestAnimationFrame(frame);return}let dt=Math.min(.05,(now-last)/1000);last=now;lastFrameDraw=now;if(started){let speed=(keys.ShiftLeft||keys.ShiftRight)?2.65:1.65,move=0,strafe=0;if(keys.KeyW||keys.ArrowUp)move++;if(keys.KeyS||keys.ArrowDown)move--;if(keys.KeyA)strafe--;if(keys.KeyD)strafe++;if(keys.ArrowLeft)pa-=dt*1.8;if(keys.ArrowRight)pa+=dt*1.8;let vx=(Math.cos(pa)*move-Math.sin(pa)*strafe)*speed*dt,vy=(Math.sin(pa)*move+Math.cos(pa)*strafe)*speed*dt;if(!wall(px+vx*1.3,py))px+=vx;if(!wall(px,py+vy*1.3))py+=vy;let o=nearby();document.getElementById('interact').classList.toggle('show',!!o);const bottomInteract=document.getElementById('mobileE');if(bottomInteract){bottomInteract.disabled=!o;bottomInteract.classList.toggle('ready',!!o);bottomInteract.querySelector('small').textContent=o?'READY':'Find an item'}if(o)document.getElementById('interactText').textContent=o.name;document.getElementById('scanText').textContent=o?o.name:'No nearby signals';const roomKey=roomAt()+'|'+(activeMission?.id||1);if(roomKey!==lastHudRoom){lastHudRoom=roomKey;setRoom()}}safeRenderScene();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 addEventListener('keydown',e=>{keys[e.code]=true;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();if(e.code==='KeyE'&&started)interact();if(e.code==='Escape'&&document.pointerLockElement)document.exitPointerLock()});addEventListener('keyup',e=>keys[e.code]=false);canvas.addEventListener('click',()=>{});document.addEventListener('pointerlockchange',()=>mouseLocked=document.pointerLockElement===canvas);document.addEventListener('pointermove',e=>{if(started&&!mouseLocked)pa=aimBase+(e.clientX/W-.5)*Math.PI*2});document.getElementById('start').addEventListener('click',()=>{document.getElementById('briefing').classList.add('hidden');started=true;aimBase=pa;notify('MISSION ACCEPTED','Point with the cursor and click to move forward.');});document.getElementById('mobileE').innerHTML='E<small>INTERACT</small>';document.getElementById('mobileE').setAttribute('aria-label','Interact with nearby object (E)');document.getElementById('mobileE').addEventListener('click',interact);document.querySelectorAll('[data-move]').forEach(b=>{
- const code={forward:'KeyW',back:'KeyS',left:'ArrowLeft',right:'ArrowRight'}[b.dataset.move];
- let tapTimer=0;
- b.addEventListener('pointerdown',e=>{e.preventDefault();if(!started)return;keys[code]=true;try{b.setPointerCapture(e.pointerId)}catch(_){}});
+ const action=b.dataset.move;
+ const code={forward:'KeyW',back:'KeyS',left:'ArrowLeft',right:'ArrowRight'}[action];
+ let tapTimer=0,wasHeld=false,pressAt=0;
+ b.addEventListener('pointerdown',e=>{
+  e.preventDefault();wasHeld=false;pressAt=performance.now();
+  if(!started){document.getElementById('briefing').classList.remove('hidden');return}
+  keys[code]=true;wasHeld=true;
+  try{b.setPointerCapture(e.pointerId)}catch(_){}
+ });
  ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev,()=>{keys[code]=false}));
- // A quick tap also produces a short, visible step/turn after pointerup.
- b.addEventListener('click',e=>{e.preventDefault();if(!started){document.getElementById('briefing').classList.remove('hidden');return}keys[code]=true;if(tapTimer)clearTimeout(tapTimer);tapTimer=setTimeout(()=>{keys[code]=false;tapTimer=0},220)});
+ b.addEventListener('click',e=>{
+  e.preventDefault();
+  if(!started){document.getElementById('briefing').classList.remove('hidden');return}
+  // A short tap always creates a definite movement/turn; holding uses the normal game loop.
+  if(wasHeld&&performance.now()-pressAt>180)return;
+  if(action==='forward'||action==='back'){
+   const step=(action==='forward'?1:-1)*0.42;
+   const nx=px+Math.cos(pa)*step,ny=py+Math.sin(pa)*step;
+   if(!wall(nx,py))px=nx;
+   if(!wall(px,ny))py=ny;
+  }else{
+   pa+=(action==='left'?-1:1)*0.28;
+   aimBase=pa;
+  }
+  keys[code]=false;if(tapTimer)clearTimeout(tapTimer);
+  tapTimer=setTimeout(()=>{keys[code]=false;tapTimer=0},80);
+ });
 });
 // Draw a cinematic preview behind the briefing overlay.
 // Mission archive: 300 individually titled operations with distinct codenames, briefings, and fictional contacts.
