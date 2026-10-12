@@ -1031,7 +1031,7 @@ searchAction.addEventListener('click',()=>{const o=nearby();if(o&&o.type!==10)in
 function setDockExpanded(expanded){cleanDock.classList.toggle('is-collapsed',!expanded);dockPanelToggle.setAttribute('aria-expanded',String(expanded));dockPanelToggle.textContent=expanded?'HIDE INFO ▾':'SHOW INFO ▴';dockPanelToggle.setAttribute('aria-label',expanded?'Hide extra information':'Show extra information');try{localStorage.setItem('northstar-dock-expanded',expanded?'1':'0')}catch(e){}}
 dockPanelToggle.addEventListener('click',()=>setDockExpanded(cleanDock.classList.contains('is-collapsed')));
 try{if(localStorage.getItem('northstar-dock-expanded')==='1')setDockExpanded(true)}catch(e){}
-cleanDock.append(dockTop,dockMain);document.querySelector('.game').append(cleanDock);
+cleanDock.append(dockTop,dockMain);cleanDock.insertBefore(dockMovement,dockMain);cleanDock.append(dockActions);document.querySelector('.game').append(cleanDock);
 const priorDockRoomUpdate=setRoom;setRoom=function(){priorDockRoomUpdate();const place=activeMission?.place||'Northstar HQ';dockSetting.textContent=(activeMission?.title||'Friendly mystery')+' · '+place};
 setRoom();
 
@@ -2396,6 +2396,12 @@ if(finalPad){
 }
 const finalControlStyle=document.createElement('style');
 finalControlStyle.textContent=`
+ .clean-dock.is-collapsed{width:min(760px,calc(100% - 12px))!important;max-width:calc(100% - 12px)!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important}
+ .clean-dock.is-collapsed .dock-movement{display:flex!important;justify-content:center!important;flex-wrap:wrap!important;gap:8px!important;padding:7px!important}
+ .clean-dock.is-collapsed .dock-actions{display:flex!important;justify-content:center!important;flex-wrap:wrap!important;gap:5px!important}
+ .clean-dock.is-collapsed .dock-main{display:none!important}
+ .clean-dock .dock-main{display:block!important}
+ .clean-dock .dock-step{width:100%!important}
  .clean-dock .mobilepad{display:grid!important;grid-template-columns:repeat(3,38px)!important;grid-template-rows:repeat(2,38px)!important;gap:4px!important}
  .clean-dock .mobilepad .up{grid-column:2!important;grid-row:1!important}
  .clean-dock .mobilepad .left{grid-column:1!important;grid-row:2!important}
