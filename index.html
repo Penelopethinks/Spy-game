@@ -2359,60 +2359,76 @@ function safeRenderScene(){
 
 
 
-/* FINAL CONTROL REPAIR: one yellow arrow pad, dependable movement, working mystery start. */
-const finalPad=document.querySelector('.clean-dock .mobilepad')||document.querySelector('.mobilepad');
-const finalControlsStyle=document.createElement('style');
-finalControlsStyle.textContent=`
- .controls{display:none!important}
- .game>.mobilepad{display:none!important}
- .clean-dock .mobilepad{display:grid!important;grid-template-columns:repeat(3,42px)!important;grid-template-rows:repeat(2,42px)!important;gap:4px!important;position:static!important;inset:auto!important;transform:none!important;pointer-events:auto!important;z-index:20!important}
- .clean-dock .mobilepad .up{grid-column:2!important;grid-row:1!important}
- .clean-dock .mobilepad .left{grid-column:1!important;grid-row:2!important}
- .clean-dock .mobilepad .down{grid-column:2!important;grid-row:2!important}
- .clean-dock .mobilepad .right{grid-column:3!important;grid-row:2!important}
- .clean-dock .mobilepad button{display:flex!important;align-items:center!important;justify-content:center!important;width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;background:#f0c84b!important;border:1px solid #ffdf77!important;color:#17170e!important;box-shadow:0 2px 0 #98751d!important;touch-action:none!important;user-select:none!important;-webkit-user-select:none!important;pointer-events:auto!important;position:relative!important;z-index:21!important}
- .clean-dock .mobilepad button.is-pressed{transform:translateY(2px)!important;box-shadow:none!important;background:#ffe17a!important}
- .clean-dock .mobilepad button small{display:none!important}
- .clean-dock .field-tools,.clean-dock .field-tools.open{position:relative!important;z-index:30!important;pointer-events:auto!important}
- .clean-dock .field-tools button{pointer-events:auto!important;touch-action:manipulation}
- #missionPanel{z-index:10000!important}
- #missionPanel .mh-actions,#missionPanel #mhStart{position:relative!important;z-index:10002!important;pointer-events:auto!important}
- #fullMapPanel{z-index:10000!important}
- .upgrade-button{z-index:10001!important;pointer-events:auto!important}
- @media(max-width:390px){.clean-dock .mobilepad{grid-template-columns:repeat(3,36px)!important;grid-template-rows:repeat(2,36px)!important}.clean-dock .mobilepad button{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important}}
+/* SINGLE CONTROL SYSTEM: remove legacy WASD pads and keep only the yellow movement pad. */
+document.querySelectorAll('.controls').forEach(el=>el.remove());
+const yellowPad=document.querySelector('.clean-dock .mobilepad');
+document.querySelectorAll('.mobilepad').forEach(el=>{if(el!==yellowPad)el.remove()});
+document.querySelectorAll('.mobileact').forEach(el=>{if(!el.closest('.clean-dock'))el.remove()});
+const singleControlStyle=document.createElement('style');
+singleControlStyle.textContent=`
+ .controls,.game>.mobilepad,.game>.mobileact{display:none!important}
+ .clean-dock{position:absolute!important;left:50%!important;bottom:10px!important;transform:translateX(-50%)!important;width:min(960px,calc(100% - 24px))!important;max-height:42vh!important;overflow-x:hidden!important;overflow-y:auto!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;gap:9px!important;z-index:40!important;padding:10px!important;background:rgba(10,16,17,.96)!important;border:1px solid rgba(216,194,138,.28)!important;border-radius:12px!important}
+ .clean-dock .topbar{position:relative!important;inset:auto!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;flex-wrap:wrap!important;min-width:0!important;padding:0!important;background:transparent!important}
+ .clean-dock .dock-movement{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;gap:10px!important;width:100%!important;min-width:0!important;box-sizing:border-box!important;padding:10px!important;border:1px solid rgba(216,194,138,.2)!important;border-radius:9px!important;background:rgba(5,10,11,.48)!important}
+ .clean-dock .mobilepad{position:static!important;inset:auto!important;transform:none!important;display:grid!important;grid-template-columns:repeat(3,42px)!important;grid-template-rows:repeat(2,42px)!important;gap:4px!important;flex:0 0 auto!important;pointer-events:auto!important}
+ .clean-dock .mobilepad .up{grid-column:2!important;grid-row:1!important}.clean-dock .mobilepad .left{grid-column:1!important;grid-row:2!important}.clean-dock .mobilepad .down{grid-column:2!important;grid-row:2!important}.clean-dock .mobilepad .right{grid-column:3!important;grid-row:2!important}
+ .clean-dock .mobilepad button{display:flex!important;align-items:center!important;justify-content:center!important;width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;margin:0!important;padding:0!important;background:#f0c84b!important;border:1px solid #ffdf77!important;border-radius:8px!important;color:#17170e!important;box-shadow:0 2px 0 #98751d!important;font-size:17px!important;line-height:1!important;touch-action:none!important;user-select:none!important;-webkit-user-select:none!important;pointer-events:auto!important}
+ .clean-dock .mobilepad button small{display:none!important}.clean-dock .mobilepad button.is-pressed{transform:translateY(2px)!important;box-shadow:none!important;background:#ffe17a!important}
+ .clean-dock .mobileact{position:static!important;inset:auto!important;display:flex!important;align-items:center!important;flex:0 0 auto!important;pointer-events:auto!important}
+ .clean-dock .context-actions{display:flex!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;gap:6px!important;max-width:100%!important}
+ .clean-dock .context-actions button,.clean-dock .mobileact #mobileE{min-height:40px!important;max-width:100%!important;padding:6px 9px!important;box-sizing:border-box!important}
+ .clean-dock .dock-main{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:10px!important;width:100%!important;min-width:0!important}
+ .clean-dock.is-collapsed .dock-main{display:none!important}
+ .clean-dock .dock-actions{display:flex!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;gap:7px!important;width:100%!important;min-width:0!important;padding-top:8px!important;border-top:1px solid rgba(178,194,184,.18)!important;box-sizing:border-box!important}
+ .clean-dock .dock-actions>button{position:relative!important;inset:auto!important;transform:none!important;flex:0 1 auto!important;min-width:75px!important;max-width:100%!important;white-space:normal!important;padding:8px 10px!important;font-size:9px!important;line-height:1.3!important;z-index:42!important;pointer-events:auto!important}
+ .clean-dock .field-tools,.clean-dock .field-tools.open,.clean-dock .field-notes{position:relative!important;z-index:45!important;pointer-events:auto!important;max-width:100%!important;box-sizing:border-box!important}
+ .clean-dock .field-tools.open{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
+ .clean-dock .field-tools button{min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important;pointer-events:auto!important;touch-action:manipulation!important}
+ #fullMapPanel,#missionPanel,#dossierPanel{z-index:10000!important;pointer-events:auto!important}
+ #fullMapPanel.open,#missionPanel.open,#dossierPanel.open{display:block!important}
+ #fullMapPanel .upgrade-wrap,#missionPanel .mh-wrap{max-height:100%!important}
+ @media(max-width:600px){.clean-dock{width:calc(100% - 12px)!important;bottom:5px!important;max-height:44vh!important;padding:7px!important;gap:6px!important}.clean-dock .dock-movement{gap:6px!important;padding:7px 4px!important}.clean-dock .mobilepad{grid-template-columns:repeat(3,38px)!important;grid-template-rows:repeat(2,38px)!important;gap:3px!important}.clean-dock .mobilepad button{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important}.clean-dock .mobileact #mobileE{min-height:38px!important}.clean-dock .field-tools.open{grid-template-columns:repeat(2,minmax(0,1fr))!important}.clean-dock .dock-actions>button{min-width:65px!important;padding:7px 8px!important;font-size:8px!important}}
 `;
-document.head.append(finalControlsStyle);
-if(finalPad){
- finalPad.setAttribute('aria-label','Yellow arrow movement controls');
- finalPad.querySelectorAll('button').forEach(btn=>{
+document.head.append(singleControlStyle);
+if(yellowPad){
+ yellowPad.setAttribute('aria-label','Yellow arrow movement controls');
+ yellowPad.querySelectorAll('button').forEach(oldButton=>{
+  const btn=oldButton.cloneNode(true);oldButton.replaceWith(btn);
   const code=btn.classList.contains('up')?'ArrowUp':btn.classList.contains('down')?'ArrowDown':btn.classList.contains('left')?'ArrowLeft':'ArrowRight';
   btn.dataset.finalMoveCode=code;
-  btn.setAttribute('aria-label',({ArrowUp:'Move forward',ArrowDown:'Move backward',ArrowLeft:'Move left',ArrowRight:'Move right'})[code]);
+  btn.setAttribute('aria-label',({ArrowUp:'Move forward',ArrowDown:'Move backward',ArrowLeft:'Turn left',ArrowRight:'Turn right'})[code]);
   btn.style.touchAction='none';
-  let timer=0;
+  let pointerUsed=false,tapTimer=0;
   const release=()=>{keys[code]=false;btn.classList.remove('is-pressed')};
-  /* Capture and replace older duplicate handlers on these same buttons. */
+  const nudge=()=>{
+   if(code==='ArrowUp'||code==='ArrowDown'){
+    const step=code==='ArrowUp'?.24:-.24,nx=px+Math.cos(pa)*step,ny=py+Math.sin(pa)*step;
+    if(!wall(nx,py))px=nx;if(!wall(px,ny))py=ny;
+   }else pa+=(code==='ArrowLeft'?-1:1)*.16;
+   aimBase=pa;
+   try{drawMap();refreshFullMap();updatePinpoints()}catch(_){}
+  };
   btn.addEventListener('pointerdown',e=>{
-   e.preventDefault();e.stopImmediatePropagation();
+   e.preventDefault();e.stopPropagation();pointerUsed=true;
    if(!started){document.getElementById('briefing')?.classList.remove('hidden');return}
-   if(timer){clearTimeout(timer);timer=0}
-   keys[code]=true;btn.classList.add('is-pressed');
+   if(tapTimer){clearTimeout(tapTimer);tapTimer=0}
+   keys[code]=true;btn.classList.add('is-pressed');nudge();
    try{btn.setPointerCapture(e.pointerId)}catch(_){}
-  },true);
-  for(const ev of ['pointerup','pointercancel','lostpointercapture']){
-   btn.addEventListener(ev,e=>{e.stopImmediatePropagation();if(timer){clearTimeout(timer);timer=0}release()},true);
-  }
+  });
+  ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>btn.addEventListener(ev,e=>{
+   e.stopPropagation();if(tapTimer){clearTimeout(tapTimer);tapTimer=0}release();
+   setTimeout(()=>{pointerUsed=false},80);
+  }));
   btn.addEventListener('click',e=>{
-   e.preventDefault();e.stopImmediatePropagation();
+   e.preventDefault();e.stopPropagation();
+   if(pointerUsed)return;
    if(!started){document.getElementById('briefing')?.classList.remove('hidden');return}
-   keys[code]=true;btn.classList.add('is-pressed');
-   if(timer)clearTimeout(timer);
-   timer=setTimeout(()=>{release();timer=0},260);
-  },true);
+   nudge();
+  });
  });
 }
-addEventListener('blur',()=>finalPad?.querySelectorAll('button').forEach(btn=>{const code=btn.dataset.finalMoveCode;if(code)keys[code]=false;btn.classList.remove('is-pressed')}));
-/* Use one authoritative launch path for every generated mystery's START button. */
+addEventListener('blur',()=>yellowPad?.querySelectorAll('button').forEach(btn=>{const code=btn.dataset.finalMoveCode;if(code)keys[code]=false;btn.classList.remove('is-pressed')}));
+/* One reliable launch path for the selected mystery. */
 document.addEventListener('click',function(e){
  const button=e.target&&e.target.closest?e.target.closest('#mhStart'):null;
  if(!button)return;
@@ -2430,53 +2446,14 @@ document.addEventListener('click',function(e){
  try{setRoom();updateObjectives();updateKit();drawMap();refreshFullMap();updateFieldGuide();updateCleanPlan();refreshLiveNavigation();saveMissionProgress()}catch(err){console.error('Post-launch refresh failed',err)}
  notify('MYSTERY STARTED',mission.title+' · '+mission.place+' — use the yellow arrows to move.');
 },true);
-/* Make the mission archive and gadget/map controls sit above decoration, never over each other. */
-if(typeof missionHub!=='undefined'){missionHub.style.zIndex='10001';missionHub.style.pointerEvents='auto'}
-document.querySelectorAll('.clean-dock .field-tools button,.clean-dock .field-tools-toggle,.clean-dock #missionHub,.clean-dock .upgrade-button').forEach(el=>{el.style.pointerEvents='auto';el.style.position='relative';el.style.zIndex='31'});
-if(typeof fullMapButton!=='undefined')fullMapButton.onclick=()=>{try{refreshFullMap();fullMapPanel.classList.add('open')}catch(err){console.error(err);notify('MAP UNAVAILABLE','The facility map could not refresh.')}};
-
-
-
-/* FINAL LAYOUT + CONTROL OVERRIDE: one yellow pad and clearly separated sections. */
-const singleControlStyle=document.createElement('style');
-singleControlStyle.textContent=`
- .controls,.game>.mobilepad,.game>.mobileact{display:none!important}
- .clean-dock{width:min(980px,calc(100% - 20px))!important;max-height:44vh!important;overflow-y:auto!important;overflow-x:hidden!important;gap:8px!important;padding:9px!important;box-sizing:border-box!important}
- .clean-dock .topbar{min-width:0!important;flex-wrap:wrap!important;justify-content:space-between!important;gap:7px!important}
- .clean-dock .dock-movement{display:flex!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;gap:9px!important;width:100%!important;min-width:0!important;padding:9px!important;box-sizing:border-box!important;background:rgba(8,15,16,.78)!important;border:1px solid rgba(216,194,138,.26)!important;border-radius:10px!important}
- .clean-dock .mobilepad{display:grid!important;grid-template-columns:repeat(3,42px)!important;grid-template-rows:repeat(2,42px)!important;gap:4px!important;position:static!important;inset:auto!important;transform:none!important;flex:0 0 auto!important;min-width:0!important}
- .clean-dock .mobilepad .up{grid-column:2!important;grid-row:1!important}.clean-dock .mobilepad .left{grid-column:1!important;grid-row:2!important}.clean-dock .mobilepad .down{grid-column:2!important;grid-row:2!important}.clean-dock .mobilepad .right{grid-column:3!important;grid-row:2!important}
- .clean-dock .mobilepad button{display:flex!important;align-items:center!important;justify-content:center!important;width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;padding:0!important;margin:0!important;background:#f0c84b!important;border:1px solid #ffdf77!important;border-radius:8px!important;color:#17170e!important;box-shadow:0 2px 0 #98751d!important;font-size:17px!important;line-height:1!important;touch-action:none!important;user-select:none!important;-webkit-user-select:none!important;pointer-events:auto!important}
- .clean-dock .mobilepad button small{display:none!important}.clean-dock .mobilepad button.is-pressed{transform:translateY(2px)!important;box-shadow:none!important;background:#ffe17a!important}
- .clean-dock .mobileact{display:flex!important;align-items:center!important;position:static!important;inset:auto!important;flex:0 0 auto!important;pointer-events:auto!important}.clean-dock .mobileact #mobileE{width:82px!important;height:42px!important;min-width:82px!important;padding:5px!important;border-radius:8px!important;font-size:8px!important;line-height:1.2!important}
- .clean-dock .context-actions{display:flex!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;gap:5px!important;max-width:100%!important}.clean-dock .context-actions button{width:auto!important;min-width:62px!important;height:38px!important;padding:5px 8px!important;border-radius:8px!important;font-size:8px!important;box-sizing:border-box!important}
- .clean-dock .dock-main{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important;width:100%!important;min-width:0!important}.clean-dock.is-collapsed .dock-main{display:none!important}.clean-dock .dock-step{min-width:0!important;width:100%!important;box-sizing:border-box!important}
- .clean-dock .field-tools.open{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}.clean-dock .field-tools button{min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important}
- .clean-dock .dock-actions{display:flex!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;gap:6px!important;width:100%!important;min-width:0!important;padding-top:8px!important;border-top:1px solid rgba(178,194,184,.18)!important;box-sizing:border-box!important}
- .clean-dock .dock-actions>button{position:static!important;inset:auto!important;transform:none!important;flex:0 1 auto!important;min-width:68px!important;max-width:100%!important;white-space:normal!important;padding:8px 10px!important;font-size:8px!important;line-height:1.25!important}
- #fullMapPanel{z-index:10000!important;pointer-events:auto!important}#fullMapPanel .upgrade-wrap{padding-bottom:18px}#missionPanel{z-index:10000!important}#missionPanel .mh-actions,#missionPanel #mhStart{position:relative!important;z-index:10002!important;pointer-events:auto!important}.upgrade-button{z-index:10001!important;pointer-events:auto!important}
- @media(max-width:520px){.clean-dock{width:calc(100% - 12px)!important;bottom:5px!important;max-height:47vh!important;padding:7px!important;gap:6px!important}.clean-dock .dock-movement{gap:6px!important;padding:7px 4px!important}.clean-dock .mobilepad{grid-template-columns:repeat(3,38px)!important;grid-template-rows:repeat(2,38px)!important;gap:3px!important}.clean-dock .mobilepad button{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important}.clean-dock .mobileact #mobileE{width:70px!important;min-width:70px!important;height:38px!important}.clean-dock .context-actions{gap:3px!important}.clean-dock .context-actions button{min-width:54px!important;height:34px!important;padding:4px 6px!important;font-size:7px!important}.clean-dock .dock-actions>button{min-width:58px!important;padding:7px 7px!important;font-size:7px!important}}
-`;
-document.head.append(singleControlStyle);
-
-/* Remove stale handlers from the yellow arrows, then bind only the working movement controls. */
-const repairPad=document.querySelector('.clean-dock .mobilepad');
-if(repairPad){
- repairPad.setAttribute('aria-label','Yellow arrow movement controls');
- repairPad.querySelectorAll('button').forEach(oldButton=>{
-  const btn=oldButton.cloneNode(true);oldButton.replaceWith(btn);
-  const code=btn.classList.contains('up')?'ArrowUp':btn.classList.contains('down')?'ArrowDown':btn.classList.contains('left')?'ArrowLeft':'ArrowRight';
-  btn.dataset.finalMoveCode=code;btn.setAttribute('aria-label',({ArrowUp:'Move forward',ArrowDown:'Move backward',ArrowLeft:'Turn left',ArrowRight:'Turn right'})[code]);btn.style.touchAction='none';
-  let tapTimer=0;const release=()=>{keys[code]=false;btn.classList.remove('is-pressed')};
-  btn.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();if(!started){document.getElementById('briefing')?.classList.remove('hidden');return}if(tapTimer){clearTimeout(tapTimer);tapTimer=0}keys[code]=true;btn.classList.add('is-pressed');try{btn.setPointerCapture(e.pointerId)}catch(_){}});
-  ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>btn.addEventListener(ev,e=>{e.stopPropagation();if(tapTimer){clearTimeout(tapTimer);tapTimer=0}release()}));
-  btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(!started){document.getElementById('briefing')?.classList.remove('hidden');return}keys[code]=true;btn.classList.add('is-pressed');if(tapTimer)clearTimeout(tapTimer);tapTimer=setTimeout(()=>{release();tapTimer=0},240)});
- });
+/* Map opens above the dock and remains usable even if a refresh fails. */
+if(typeof fullMapButton!=='undefined'){
+ fullMapButton.onclick=()=>{fullMapPanel.classList.add('open');try{refreshFullMap()}catch(err){console.error(err);notify('MAP PARTLY UNAVAILABLE','The map opened, but some details could not refresh.')}};
 }
-addEventListener('blur',()=>repairPad?.querySelectorAll('button').forEach(btn=>{const code=btn.dataset.finalMoveCode;if(code)keys[code]=false;btn.classList.remove('is-pressed')}));
+document.querySelectorAll('.clean-dock .field-tools-toggle,.clean-dock .field-tools button,.clean-dock #missionHub,.clean-dock .upgrade-button,.clean-dock .dock-panel-toggle').forEach(el=>{
+ el.style.pointerEvents='auto';el.style.position='relative';el.style.zIndex='45';
+});
 
-/* Let the facility map open even when refreshing a tile fails. */
-if(typeof fullMapButton!=='undefined')fullMapButton.onclick=()=>{fullMapPanel.classList.add('open');try{refreshFullMap()}catch(err){console.error(err);notify('MAP PARTLY UNAVAILABLE','The map opened, but some details could not refresh.')}};
 })();
 
 </script></body></html>
