@@ -562,31 +562,40 @@ const dossierPanel=document.createElement('section');dossierPanel.className='upg
 // Make the opening screen's promise and tone match the actual friendly detective game.
 const briefParagraph=document.querySelector('#briefing .brief p');if(briefParagraph)briefParagraph.textContent='A Northstar briefcase has gone missing, and your job is to solve the mystery. Before entering, review your location, target, investigation plan, and the complete facility map. Explore at your own pace, interview friendly contacts, and follow the clues.';const threatLabel=document.querySelector('#briefing .briefgrid div:last-child b');if(threatLabel){threatLabel.textContent='MYSTERY';threatLabel.style.color='var(--lime)'}const startLabel=document.getElementById('start');if(startLabel)startLabel.innerHTML='START MISSION &nbsp; →';
 function frame(now){if(now-lastFrameDraw<33){requestAnimationFrame(frame);return}let dt=Math.min(.05,(now-last)/1000);last=now;lastFrameDraw=now;if(started){let speed=(keys.ShiftLeft||keys.ShiftRight)?2.65:1.65,move=0,strafe=0;if(keys.ArrowUp)move++;if(keys.ArrowDown)move--;if(keys.ArrowLeft)pa-=dt*1.8;if(keys.ArrowRight)pa+=dt*1.8;const magnitude=Math.abs(move)||1;move/=magnitude;let vx=Math.cos(pa)*move*speed*dt,vy=Math.sin(pa)*move*speed*dt;if(!wall(px+vx*1.3,py))px+=vx;if(!wall(px,py+vy*1.3))py+=vy;let o=nearby();document.getElementById('interact').classList.toggle('show',!!o);const bottomInteract=document.getElementById('mobileE');if(bottomInteract){bottomInteract.disabled=!o;bottomInteract.classList.toggle('ready',!!o);bottomInteract.querySelector('small').textContent=o?'READY':'Find an item'}if(o)document.getElementById('interactText').textContent=o.name;document.getElementById('scanText').textContent=o?o.name:'No nearby signals';const roomKey=roomAt()+'|'+(activeMission?.id||1);if(roomKey!==lastHudRoom){lastHudRoom=roomKey;setRoom()}}safeRenderScene();requestAnimationFrame(frame)}requestAnimationFrame(frame);
-addEventListener('keydown',e=>{keys[e.code]=true;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();if(e.code==='KeyE'&&started)interact();if(e.code==='Escape'&&document.pointerLockElement)document.exitPointerLock()});addEventListener('keyup',e=>keys[e.code]=false);canvas.addEventListener('click',()=>{});document.addEventListener('pointerlockchange',()=>mouseLocked=document.pointerLockElement===canvas);document.addEventListener('pointermove',e=>{if(started&&!mouseLocked)pa=aimBase+(e.clientX/W-.5)*Math.PI*2});document.getElementById('start').addEventListener('click',()=>{document.getElementById('briefing').classList.add('hidden');started=true;aimBase=pa;notify('MISSION ACCEPTED','Point with the cursor and click to move forward.');});document.getElementById('mobileE').innerHTML='E<small>INTERACT</small>';document.getElementById('mobileE').setAttribute('aria-label','Interact with nearby object (E)');document.getElementById('mobileE').addEventListener('click',interact);document.querySelectorAll('[data-move]').forEach(b=>{
- const action=b.dataset.move;
+addEventListener('keydown',e=>{keys[e.code]=true;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();if(e.code==='KeyE'&&started)interact();if(e.code==='Escape'&&document.pointerLockElement)document.exitPointerLock()});addEventListener('keyup',e=>keys[e.code]=false);canvas.addEventListener('click',()=>{});document.addEventListener('pointerlockchange',()=>mouseLocked=document.pointerLockElement===canvas);document.addEventListener('pointermove',e=>{if(started&&!mouseLocked)pa=aimBase+(e.clientX/W-.5)*Math.PI*2});document.getElementById('start').addEventListener('click',()=>{document.getElementById('briefing').classList.add('hidden');started=true;aimBase=pa;notify('MISSION ACCEPTED','Point with the cursor and click to move forward.');});document.getElementById('mobileE').innerHTML='E<small>INTERACT</small>';document.getElementById('mobileE').setAttribute('aria-label','Interact with nearby object (E)');document.getElementById('mobileE').addEventListener('click',interact);// One yellow control pad: pointer holds move continuously, taps always move once.
+document.querySelector('.bottom .controls')?.remove();
+function stepPlayer(amount){
+ const nx=px+Math.cos(pa)*amount,ny=py+Math.sin(pa)*amount;
+ if(!wall(nx,py))px=nx;
+ if(!wall(px,ny))py=ny;
+}
+function turnPlayer(amount){pa+=amount;aimBase=pa}
+document.querySelectorAll('.mobilepad [data-move]').forEach(btn=>{
+ const action=btn.dataset.move;
  const code={forward:'ArrowUp',back:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'}[action];
- b.setAttribute('aria-label',({forward:'Move forward',back:'Move backward',left:'Turn left',right:'Turn right'})[action]);
- b.addEventListener('pointerdown',e=>{
+ btn.setAttribute('aria-label',({forward:'Move forward',back:'Move backward',left:'Turn left',right:'Turn right'})[action]);
+ let movedOnPointerDown=false;
+ const performTap=()=>{
+  if(action==='forward')stepPlayer(.34);
+  else if(action==='back')stepPlayer(-.34);
+  else turnPlayer(action==='left'?-0.22:0.22);
+ };
+ btn.addEventListener('pointerdown',e=>{
   e.preventDefault();
   if(!started){document.getElementById('briefing').classList.remove('hidden');return}
+  movedOnPointerDown=true;
   keys[code]=true;
-  // Make a tap respond immediately; holding continues through the animation loop.
-  if(action==='forward'||action==='back'){
-   const step=(action==='forward'?1:-1)*0.34;
-   const nx=px+Math.cos(pa)*step,ny=py+Math.sin(pa)*step;
-   if(!wall(nx,py))px=nx;
-   if(!wall(px,ny))py=ny;
-  }else{
-   pa+=(action==='left'?-1:1)*0.22;
-   aimBase=pa;
-  }
-  b.classList.add('is-held');
-  try{b.setPointerCapture(e.pointerId)}catch(_){}
+  performTap();
+  btn.classList.add('is-held');
+  try{btn.setPointerCapture(e.pointerId)}catch(_){}
  });
- ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev,()=>{keys[code]=false;b.classList.remove('is-held')}));
- b.addEventListener('click',e=>{
+ const release=()=>{keys[code]=false;btn.classList.remove('is-held')};
+ ['pointerup','pointercancel','lostpointercapture'].forEach(type=>btn.addEventListener(type,release));
+ btn.addEventListener('click',e=>{
   e.preventDefault();
-  if(!started)document.getElementById('briefing').classList.remove('hidden');
+  if(!started){document.getElementById('briefing').classList.remove('hidden');movedOnPointerDown=false;return}
+  if(!movedOnPointerDown)performTap();
+  movedOnPointerDown=false;
  });
 });
 // Draw a cinematic preview behind the briefing overlay.
@@ -944,7 +953,22 @@ function nextGadgetTarget(){const task=getNextTask();if(task.title.includes('COL
 let scannerTarget=null,scannerUntil=0;
 document.getElementById('scannerGadget').addEventListener('click',()=>{scannerTarget=nextGadgetTarget();if(!scannerTarget){notify('SCANNER CLEAR','You have completed this mystery.');return}scannerUntil=performance.now()+6500;const dx=scannerTarget.x-px,dy=scannerTarget.y-py,distance=Math.hypot(dx,dy),angle=Math.atan2(dy,dx),directions=['E','SE','S','SW','W','NW','N','NE'],direction=directions[(Math.round(angle/(Math.PI/4))+8)%8];notify('SCANNER PING',scannerTarget.name+' · about '+Math.max(1,Math.round(distance))+' steps '+direction);updatePinpoints()});
 const baseUpdatePinpointsForScanner=updatePinpoints;
-updatePinpoints=function(){baseUpdatePinpointsForScanner();if(!scannerTarget||performance.now()>scannerUntil){scannerTarget=null;return}const dx=scannerTarget.x-px,dy=scannerTarget.y-py,d=Math.hypot(dx,dy),a=Math.atan2(dy,dx)-pa;while(a<-Math.PI)a+=Math.PI*2;while(a>Math.PI)a-=Math.PI*2;const x=Math.max(90,Math.min(W-90,W/2+Math.tan(Math.max(-1.25,Math.min(1.25,a)))/Math.tan(Math.PI/5.7)*(W/2))),beacon=document.createElement('div');beacon.className='scanner-beacon';beacon.style.cssText='position:absolute;left:'+x+'px;top:calc(22% + 34px);transform:translateX(-50%);padding:7px 10px;background:rgba(12,22,22,.95);border:1px solid #d8c28a;border-radius:7px;color:#f1dfb4;font-size:9px;font-weight:800;letter-spacing:.08em;text-align:center;box-shadow:0 0 18px #d8c28a55;white-space:nowrap';beacon.textContent='SCANNER  '+scannerTarget.name+'  ·  '+Math.round(d)+' STEPS';pinLayer.append(beacon)};
+let scannerBeacon=null;
+updatePinpoints=function(){
+ baseUpdatePinpointsForScanner();
+ if(!scannerTarget||performance.now()>scannerUntil){
+  scannerTarget=null;
+  if(scannerBeacon){scannerBeacon.remove();scannerBeacon=null}
+  return;
+ }
+ const dx=scannerTarget.x-px,dy=scannerTarget.y-py,d=Math.hypot(dx,dy),a=Math.atan2(dy,dx)-pa;
+ while(a<-Math.PI)a+=Math.PI*2;
+ while(a>Math.PI)a-=Math.PI*2;
+ const x=Math.max(90,Math.min(W-90,W/2+Math.tan(Math.max(-1.25,Math.min(1.25,a)))/Math.tan(Math.PI/5.7)*(W/2)));
+ if(!scannerBeacon){scannerBeacon=document.createElement('div');scannerBeacon.className='scanner-beacon';pinLayer.append(scannerBeacon)}
+ scannerBeacon.style.cssText='position:absolute;left:'+x+'px;top:calc(22% + 34px);transform:translateX(-50%);padding:7px 10px;background:rgba(12,22,22,.95);border:1px solid #d8c28a;border-radius:7px;color:#f1dfb4;font-size:9px;font-weight:800;letter-spacing:.08em;text-align:center;box-shadow:0 0 18px #d8c28a55;white-space:nowrap';
+ scannerBeacon.textContent='SCANNER  '+scannerTarget.name+'  ·  '+Math.round(d)+' STEPS';
+};
 document.getElementById('flashlightGadget').addEventListener('click',e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',String(on));e.currentTarget.querySelector('small').textContent=on?'On · click to switch off':'Brighten the scene';canvas.style.filter=on?'brightness(1.24) contrast(1.04) saturate(1.04)':'';notify(on?'FLASHLIGHT ON':'FLASHLIGHT OFF',on?'The scene is brighter.':'The scene returned to normal lighting.')});
 document.getElementById('notesGadget').addEventListener('click',()=>{const open=gadgetNotes.classList.toggle('open');if(open){gadgetNotes.innerHTML='';const title=document.createElement('b');title.textContent=activeMission.title+' · FIELD NOTES';const brief=document.createElement('p');brief.textContent=activeMission.brief;const clue=document.createElement('p');clue.textContent='Clue to look for: '+activeMission.clue;const contact=document.createElement('p');contact.textContent='Contact: '+activeMission.contact+' · '+activeMission.contactNote;gadgetNotes.append(title,brief,clue,contact)}});
 
@@ -2463,3 +2487,37 @@ document.querySelectorAll('.clean-dock .field-tools-toggle,.clean-dock .field-to
 })();
 
 </script></body></html>
+/* Final layout pass: one yellow directional pad, separated controls, no duplicate hints. */
+const controlCleanupStyle=document.createElement('style');
+controlCleanupStyle.textContent=`
+ .bottom .controls{display:none!important}
+ .clean-dock{z-index:20!important;gap:8px!important;isolation:isolate}
+ .clean-dock .topbar{order:0;flex-wrap:wrap;min-width:0}
+ .clean-dock .dock-movement{order:1;display:flex!important;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:8px;background:#101817;border:1px solid rgba(178,194,184,.18);border-radius:10px;padding:8px}
+ .clean-dock .mobilepad{display:grid!important;grid-template-columns:repeat(3,42px)!important;grid-template-rows:repeat(2,40px)!important;gap:4px!important;flex:0 0 auto}
+ .clean-dock .mobilepad .up{grid-column:2!important;grid-row:1!important}
+ .clean-dock .mobilepad .left{grid-column:1!important;grid-row:2!important}
+ .clean-dock .mobilepad .down{grid-column:2!important;grid-row:2!important}
+ .clean-dock .mobilepad .right{grid-column:3!important;grid-row:2!important}
+ .clean-dock .mobilepad button{width:42px!important;min-width:42px!important;height:40px!important;touch-action:manipulation!important}
+ .clean-dock .mobileact{display:flex!important;align-items:center;gap:5px;position:static!important}
+ .clean-dock .context-actions{display:flex;flex-wrap:wrap;gap:5px}
+ .clean-dock .dock-main{order:2;min-width:0}
+ .clean-dock .dock-actions{order:3;display:flex;flex-wrap:wrap;align-items:center;gap:6px;max-width:100%}
+ .clean-dock .field-tools.open{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #fullMapPanel{z-index:50!important}
+ #missionPanel{z-index:51!important}
+ .upgrade-panel.open{pointer-events:auto}
+ .field-tools,.field-notes{position:relative;z-index:22}
+ @media(max-width:700px){
+  .clean-dock{width:calc(100% - 12px)!important;max-height:58vh!important;overflow-y:auto!important;bottom:6px!important;padding:7px!important;gap:6px!important}
+  .clean-dock .dock-movement{justify-content:center}
+  .clean-dock .mobilepad{grid-template-columns:repeat(3,38px)!important;grid-template-rows:repeat(2,36px)!important}
+  .clean-dock .mobilepad button{width:38px!important;min-width:38px!important;height:36px!important}
+  .clean-dock .mobilepad button small{display:none!important}
+  .clean-dock .mobileact button{width:68px!important;height:42px!important}
+  .clean-dock .context-actions button{width:48px!important;min-width:48px!important;height:38px!important}
+  .clean-dock .dock-actions{justify-content:center}
+ }
+`;
+document.head.append(controlCleanupStyle);
