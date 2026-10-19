@@ -2423,23 +2423,22 @@ if(yellowPad){
   btn.dataset.finalMoveCode=code;
   btn.setAttribute('aria-label',({ArrowUp:'Move forward',ArrowDown:'Move backward',ArrowLeft:'Turn left',ArrowRight:'Turn right'})[code]);
   btn.style.touchAction='none';
-  let held=false;
+  let held=false,suppressClick=false;
   const release=()=>{held=false;keys[code]=false;btn.classList.remove('is-pressed')};
   btn.addEventListener('pointerdown',e=>{
    e.preventDefault();e.stopPropagation();
    if(!started){document.getElementById('briefing')?.classList.remove('hidden');return}
-   held=true;keys[code]=true;btn.classList.add('is-pressed');
+   held=true;suppressClick=true;keys[code]=true;btn.classList.add('is-pressed');
    moveFromYellowButton(code);
    try{btn.setPointerCapture(e.pointerId)}catch(_){}
   });
   ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>btn.addEventListener(ev,e=>{e.stopPropagation();release()}));
-  btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(!held&&started)moveFromYellowButton(code)});
+  btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(suppressClick){suppressClick=false;return}if(!held&&started)moveFromYellowButton(code)});
   btn.addEventListener('contextmenu',e=>e.preventDefault());
  });
 }
 addEventListener('blur',()=>yellowPad?.querySelectorAll('button').forEach(btn=>{const code=btn.dataset.finalMoveCode;if(code)keys[code]=false;btn.classList.remove('is-pressed')}));
 /* Make the map and field tools work from their single visible dock controls. */
-gadgetToggle.addEventListener('click',()=>{setDockExpanded(true);gadgetPanel.classList.add('open');gadgetToggle.textContent='GADGETS ▴'});
 fullMapButton.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setDockExpanded(true);fullMapPanel.classList.add('open');try{refreshFullMap()}catch(err){console.error('Facility map refresh failed',err);notify('MAP OPENED','The map is visible, but some live details could not refresh.')}});
 /* One reliable launch path for the selected mystery. */
 document.addEventListener('click',function(e){
